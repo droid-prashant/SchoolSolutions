@@ -1,0 +1,48 @@
+<!-- <button pButton type="button" label="View Result" (click)="previewResult()"></button> -->
+<h2 class="mb-4">Generate Result</h2>
+<div class="classDropdown">
+    <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+        placeholder="Select Class"></p-dropdown>
+</div>
+<div class="card">
+    <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
+        [rowsPerPageOptions]="[5, 10, 20]">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Gender</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
+            <tr>
+                <td>{{ rowIndex + 1 }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.classRoom }}</td>
+                <td>{{ student.section }}</td>
+                <td>{{ student.gender }}</td>
+                <td>{{ student.address }}</td>
+                <td><i pTooltip="view result" class="pi pi-eye" (click)="previewResult(student)"></i></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog header="Report Preview" [(visible)]="showResult" [draggable]="false" [closable]="true" [dismissableMask]="true"
+    [style]="{ width: '250mm', maxWidth: '100%', maxHeight:'100%', overflow: 'auto' }"
+    [contentStyle]="{ padding: '0', overflow: 'auto', background: '#fff' }" [baseZIndex]="10000">
+    <div id="print-section">
+        <app-result-preview></app-result-preview>
+    </div>
+    <ng-template pTemplate="header">
+        <div class="header-wrapper">
+            <i pTooltip="Print Result" class="pi pi-print clickable-icon header-print" printSectionId="print-section"
+                [useExistingCss]="true" ngxPrint>
+            </i>
+        </div>
+    </ng-template>
+</p-dialog>

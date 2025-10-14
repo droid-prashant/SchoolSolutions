@@ -1,0 +1,87 @@
+<p-toast></p-toast>
+<h2 class="mb-4">Exam Marks Entry</h2>
+<form [formGroup]="studentMarks" class="p-fluid">
+    <div class="formgrid grid">
+        <div class="field col-3">
+            <label>Class</label>
+            <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id"
+                (onChange)="onClassRoomChange($event)" placeholder="Select Class"></p-dropdown>
+        </div>
+    </div>
+
+    <!-- Subject Marks Entry Modal -->
+    <!-- Start -->
+    <div class="card flex justify-content-center subject-marks-form">
+        <p-dialog header="Subject Marks Entry" [modal]="true" [(visible)]="isMarksEntryVisible">
+            <div class="field col-3">
+                <label>Exam Terminal</label>
+                <p-dropdown [options]="examTerminals" optionLabel="terminalName" optionValue="terminalName"
+                    formControlName="examType" (onChange)="onExamTerminalChange()"
+                    placeholder="Select Terminal"></p-dropdown>
+            </div>
+            <!-- table -->
+            <div formArrayName="studentMarksLists" class="Markscard">
+                <p-table [value]="courses">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="width:25%">Id</th>
+                            <th style="width:25%">Subject Name</th>
+                            <th style="width:25%">Theory Marks</th>
+                            <th style="width:25%">Practical Marks</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-course let-rowIndex="rowIndex">
+                        <tr [formGroup]="getFormGroup(rowIndex)">
+                            <td>{{ rowIndex + 1 }}</td>
+                            <td>{{course.courseName}} {{course.courseType}}</td>
+                            <td>
+                                <input pInputText type="number" formControlName="obtainedTheoryMarks"
+                                    class="p-inputtext p-component input-number" placeholder="Enter Theory Marks"
+                                    [min]="0" [max]="100" />
+                            </td>
+                            <td>
+                                <input pInputText type="number" formControlName="obtainedPracticalMarks"
+                                    class="p-inputtext p-component input-number" placeholder="Enter Practical Marks"
+                                    [min]="0" [max]="100" />
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+            <!---->
+            <button pButton pRipple label="Submit" class="p-button-success" (click)="saveStudentMarks()">
+            </button>
+        </p-dialog>
+    </div>
+    <!-- End -->
+</form>
+<p-toast></p-toast>
+<div class="card">
+    <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
+        [rowsPerPageOptions]="[5, 10, 20]">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width:25%">Id</th>
+                <th style="width:25%">Name</th>
+                <th style="width:25%">Class</th>
+                <th style="width:25%">Section</th>
+                <th style="width:25%">Gender</th>
+                <th style="width:25%">Address</th>
+                <th style="width:25%">Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
+            <tr>
+                <td>{{ rowIndex + 1 }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.classRoom }}</td>
+                <td>{{ student.section }}</td>
+                <td>{{ student.gender }}</td>
+                <td>{{ student.address }}</td>
+                <td>
+                    <i class="pi pi-pencil pointer-icon" (click)="showDialog(student)"></i>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

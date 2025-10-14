@@ -1,0 +1,33 @@
+.speeddial-linear-demo {
+    display: flex;
+    justify-content: baseline;
+    height: 0.9rem;
+}
+
+.card {
+    width: 100%;
+}
+
+.Markscard {
+    width: 65rem;
+}
+
+::ng-deep .p-speeddial-button.p-button.p-button-icon-only {
+    color: black;
+    background-color: #ffffff;
+    border: none;
+    width: 2rem;
+    height: 2rem;
+}
+
+.pointer-icon {
+    cursor: pointer;
+}
+
+.subject-marks-form {
+    width: 100%;
+}
+
+.input-number {
+    width: max;
+}

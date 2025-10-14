@@ -1,0 +1,39 @@
+::ng-deep .classDropdown .p-dropdown .p-dropdown-label{
+    width: 12rem;
+}
+
+
+::ng-deep .p-dialog {
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+::ng-deep .report-container {
+  width: 210mm;
+  height: 297mm;
+  background: white;
+  margin: 0 auto;
+  overflow: auto;
+}
+
+.clickable-icon {
+  cursor: pointer;
+}
+
+.header-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.header-print {
+  position: absolute;
+  right: 3rem; /* place before the close icon */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+}
+
+.header-print:hover {
+  color: #1976d2;
+}

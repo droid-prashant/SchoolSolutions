@@ -1,0 +1,17 @@
+.speeddial-linear-demo{
+    display:flex;
+    justify-content: baseline;
+    height:0.9rem;
+}
+
+.card{
+    width: 100%;
+}
+
+::ng-deep .p-speeddial-button.p-button.p-button-icon-only {
+    color: black;
+    background-color: #ffffff;
+    border: none;
+    width: 2rem;
+    height: 2rem;
+}

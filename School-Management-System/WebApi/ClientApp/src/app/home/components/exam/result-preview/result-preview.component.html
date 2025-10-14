@@ -1,0 +1,114 @@
+  <div class="a4-page">
+    <div class="content-container">
+      <div class="header">
+        <div class="reg-info">
+          <div>Regd No: 30440/2061-62</div>
+          <div>Pan. 301779326</div>
+          <div>School Code : 176</div>
+        </div>
+        <div class="school-header">
+          <div class="logo-column">
+            <img src="assets/Om Pushpanjali logo.jpg" alt="School Logo" class="school-logo" />
+          </div>
+          <div class="info-column">
+            <div class="school-name">
+              <h1>{{student.schoolName}}</h1>
+            </div>
+            <div class="alias-name">
+              <h2>{{student.alias}}</h2>
+            </div>
+            <p class="address">{{student.address}}</p>
+            <p class="province">{{student.province}}</p>
+          </div>
+        </div>
+        <div class="statement-container">
+          <div class="statement">{{student.statement}}</div>
+        </div>
+      </div>
+
+      <div class="student-info">
+        <p>The grade secured by : <b>{{student.name}}</b></p>
+        <p>
+          <span>Father : {{student.father}}</span>
+          <span class="tab-space-parent"></span>
+          <span>Mother : {{student.mother}}</span>
+        </p>
+        <p>
+          <span>Date of birth : {{student.dob}}</span>
+          <span class="tab-space"></span>
+          <span>Roll No. : {{student.rollNo}}</span>
+          <span class="tab-space"></span>
+          <span>Class : {{student.class}}</span>
+          <span class="tab-space"></span>
+          <span>Ward No. : {{student.wardNo}}</span>
+        </p>
+      </div>
+
+      <table class="marks-table">
+        <thead>
+          <tr>
+            <th rowspan="2">S.N.</th>
+            <th rowspan="2">Subjects</th>
+            <th rowspan="2">Credit Hour</th>
+            <th colspan="2">Obtained Grade</th>
+            <th rowspan="2">Final Grade</th>
+            <th rowspan="2">Grade Point</th>
+            <th rowspan="2">Remarks</th>
+          </tr>
+          <tr>
+            <th>Theory</th>
+            <th>Practical</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sub of student.subjects">
+            <td>{{sub.sn}}</td>
+            <td class="subject-name">{{sub.name}}</td>
+            <td>{{sub.credit}}</td>
+            <td>{{sub.th}}</td>
+            <td>{{sub.pr}}</td>
+            <td>{{sub.final}}</td>
+            <td>{{sub.gp}}</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td colspan="8" class="gpa">
+              Grade Point Average (GPA) : {{student.gpa}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <div class="notes">
+          <div class="left-note">
+            <p>Note:</p>
+            <p>a. One credit hour = 32 clock hours</p>
+            <p>b. TH = Theory, PR = Practical</p>
+            <p>c. * = Absent</p>
+            <p>d. Below 1.6 GPA indicates failure</p>
+          </div>
+
+          <div class="right-note">
+            <p>Attendance : {{student.attendance}}</p>
+          </div>
+        </div>
+        <div class="notes">
+        </div>
+        <div class="signatures">
+          <div>
+            <p>..............................................</p>
+            <p>Prepared by</p>
+          </div>
+          <div>
+            <p>..............................................</p>
+            <p>Issue Date : {{student.issueDate}}</p>
+          </div>
+          <div>
+            <p>..............................................</p>
+            <p>Head Teacher</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

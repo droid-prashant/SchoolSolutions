@@ -1,0 +1,58 @@
+<p-toast></p-toast>
+<p-button severity="success" label="New" icon="pi pi-plus" class="mr-2" pTooltip="Add New Row" (click)="addNewRow()" />
+<div class="card">
+    <form [formGroup]="classCourseForm">
+        <p-table [value]="classCourses" [paginator]="true" [rows]="10" [tableStyle]="{ 'min-width': '50rem' }"
+            [rowsPerPageOptions]="[10, 20, 30]">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Id</th>
+                    <th>Class</th>
+                    <th>Course</th>
+                    <th>Theory Credit Hour</th>
+                    <th>Practical Credit Hour</th>
+                    <th>Theory Full Marks</th>
+                    <th>Practical Full Marks</th>
+                    <th>Action</th>
+                </tr>
+                <tr *ngIf="isNewRow || isUpdateRow">
+                    <td></td>
+                    <td><p-dropdown formControlName="classRoomId" [options]="classRooms" optionLabel="name"
+                            optionValue="id" appendTo="body" placeholder="Select a Class" /></td>
+                    <td><p-dropdown formControlName="courseId" [options]="courses" optionLabel="name" optionValue="id"
+                            appendTo="body" placeholder="Select a Course" /></td>
+                    <td><input type="number" formControlName="theoryCreditHour" pInputText
+                            placeholder="Theory Credit Hour" />
+                    </td>
+                    <td><input type="number" formControlName="practicalCreditHour" pInputText
+                            placeholder="Practical Credit Hour" /></td>
+                    <td><input type="number" formControlName="theoryFullMarks" pInputText
+                            placeholder="Theory Full Marks" />
+                    </td>
+                    <td><input type="number" formControlName="practicalFullMarks" pInputText
+                            placeholder="Practical Full Marks" /></td>
+                    <button pButton pRipple type="button" icon="pi pi-check" (click)="onRowSubmit()"
+                        class="p-button-rounded p-button-text p-button-success mr-2">
+                    </button>
+                    <button pButton pRipple type="button" icon="pi pi-times" (click)="onRowCancel()"
+                        class="p-button-rounded p-button-text p-button-danger">
+                    </button>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-classCourse let-rowIndex="rowIndex">
+                <tr>
+                    <td>{{ rowIndex + 1 }}</td>
+                    <td>{{ classCourse.className }}</td>
+                    <td>{{ classCourse.courseName }}</td>
+                    <td>{{ classCourse.theoryCreditHour }}</td>
+                    <td>{{ classCourse.practicalCreditHour }}</td>
+                    <td>{{ classCourse.theoryFullMarks }}</td>
+                    <td>{{ classCourse.practicalFullMarks }}</td>
+                    <td> <button pButton pRipple type="button" icon="pi pi-pencil"
+                            (click)="onRowEdit(classCourse)" class="p-button-rounded p-button-text">
+                        </button></td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </form>
+</div>
