@@ -35,8 +35,8 @@
 <p-dialog header="Report Preview" [(visible)]="showResult" [draggable]="false" [closable]="true" [dismissableMask]="true"
     [style]="{ width: '250mm', maxWidth: '100%', maxHeight:'100%', overflow: 'auto' }"
     [contentStyle]="{ padding: '0', overflow: 'auto', background: '#fff' }" [baseZIndex]="10000">
-    <div id="print-section">
-        <app-result-preview></app-result-preview>
+    <div id="print-section" *ngIf="showResult">
+        <app-result-preview [resultObj]="result"></app-result-preview>
     </div>
     <ng-template pTemplate="header">
         <div class="header-wrapper">

@@ -48,6 +48,20 @@ export class HomeComponent implements OnInit {
         ]
       },
       {
+        label: 'Class Management',
+        icon: PrimeIcons.LIST,
+        items: [
+          { label: 'Manage Class', icon: PrimeIcons.BARS, routerLink: ['/home/class/manage-class'] }
+        ]
+      },
+      {
+        label: 'Course Management',
+        icon: PrimeIcons.BOOK,
+        items: [
+          { label: 'Manage Courses', icon: PrimeIcons.BOOKMARK, routerLink: ['/home/course/manage-course'] },
+        ]
+      },
+      {
         label: 'Student Section',
         icon: PrimeIcons.USER,
         items: [
@@ -62,20 +76,6 @@ export class HomeComponent implements OnInit {
         items: [
           { label: 'All Teachers', icon: PrimeIcons.USERS, routerLink: ['/home/teachers'] },
           { label: 'Add Teacher', icon: PrimeIcons.PLUS, routerLink: ['/home/teachers/add'] }
-        ]
-      },
-      {
-        label: 'Course Management',
-        icon: PrimeIcons.BOOK,
-        items: [
-          { label: 'Manage Courses', icon: PrimeIcons.BOOKMARK, routerLink: ['/home/course/manage-course'] },
-        ]
-      },
-      {
-        label: 'Class Management',
-        icon: PrimeIcons.LIST,
-        items: [
-          { label: 'Manage Class', icon: PrimeIcons.BARS, routerLink: ['/home/class/manage-class'] }
         ]
       },
       {

@@ -1,4 +1,5 @@
-﻿using Application.Students.Dtos;
+﻿using Application.Exams.ViewModels;
+using Application.Students.Dtos;
 using Application.Students.Interfaces;
 using Application.Students.ViewModels;
 using Application.SubjectMarks.Dtos;
@@ -13,23 +14,17 @@ namespace WebApi.Controllers
     {
         private readonly IExamService _examService;
         public ExamController(IExamService examService)
-        {        //[HttpGet]
-        //[Route("GetResult")]
-        //public async Task<List<StudentViewModel>> Get(CancellationToken cancellationToken)
-        //{
-        //    var result = await _studentService.GetStudentAsync(cancellationToken);
-        //    return result;
-        //}
-
-        //[HttpGet()]
-        //[Route("GetResultByStudentId")]
-        //public async Task<List<StudentViewModel>> GetStudentByClassId([FromQuery] string classId, CancellationToken cancellationToken)
-        //{
-        //    var classRoomId = Guid.Parse(classId);
-        //    var result = await _studentService.GetStudentByClassIdAsync(classRoomId, cancellationToken);
-        //    return result;
-        //}
+        {
             _examService = examService;
+        }
+
+        [HttpGet()]
+        [Route("GetResult")]
+        public async Task<ResultViewModel> GetResult([FromQuery] string studentId, CancellationToken cancellationToken)
+        {
+            var studentIdGuid = Guid.Parse(studentId);
+            var result = await _examService.GetResult(studentIdGuid, cancellationToken);
+            return result;
         }
 
         [HttpPost]

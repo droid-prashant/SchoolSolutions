@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { ResultViewModel } from '../shared/viewModels/result.viewModel';
 
 @Component({
   selector: 'app-result-preview',
@@ -6,15 +7,18 @@ import { Component } from '@angular/core';
   templateUrl: './result-preview.component.html',
   styleUrl: './result-preview.component.scss'
 })
-export class ResultPreviewComponent {
- students = Array.from({ length: 50 }, (_, i) => ({
+export class ResultPreviewComponent implements OnInit {
+
+  @Input('resultObj') result!: ResultViewModel;
+
+  students = Array.from({ length: 50 }, (_, i) => ({
     name: `Student ${i + 1}`,
     course: ['Math', 'Science', 'English', 'Computer'][i % 4],
     marks: Math.floor(Math.random() * 41) + 60 // random marks 60–100
   }));
 
 
-student = {
+  student = {
     schoolName: 'OM PUSHPANJALI ENGLISH SCHOOL',
     alias: '(Jubie International English Academy)',
     address: 'Dodhara Chandani Municipality-7, Kanchanpur',
@@ -43,4 +47,11 @@ student = {
     attendance: '249/254',
     issueDate: '2081/12/28'
   };
+
+  constructor(){
+
+  }
+  ngOnInit(): void {
+   console.log(this.result)
+  }
 }

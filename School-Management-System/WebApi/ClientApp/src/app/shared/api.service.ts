@@ -14,6 +14,7 @@ import { ClassSectionDto } from '../home/components/class-room/shared/models/dto
 import { SectionDto } from '../home/components/master-entry/model/dtos/section.dto';
 import { ClassCreditCourseViewModel } from '../home/components/course/shared/models/classCourse.viewModel';
 import { ClassCourseDto } from '../home/components/course/shared/models/classCourse.dto';
+import { ResultViewModel } from '../home/components/exam/shared/viewModels/result.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -75,5 +76,8 @@ export class ApiService {
   }
   postStudentMarks(studentmarks: SubjectMarkDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Exam/AddMarks", studentmarks);
+  }
+ getResult(studentId: string): Observable<ResultViewModel> {
+    return this._httpClient.get<ResultViewModel>(this.baseUrl + `api/Exam/GetResult?studentId=${studentId}`);
   }
 }

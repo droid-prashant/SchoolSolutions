@@ -48,8 +48,8 @@ export class ExamMarksEntryComponent implements OnInit {
     let fb = this._formBuilder;
     this.studentMarks = fb.group({
       studentId: ['', Validators.required],
-      examType: [''],
-      studentMarksLists: fb.array([])
+      examType: ['', Validators.required],
+      studentMarksLists: fb.array([], Validators.required)
     });
   }
 
@@ -147,6 +147,9 @@ export class ExamMarksEntryComponent implements OnInit {
   }
 
   saveStudentMarks() {
+    if(this.studentMarks.invalid){
+      return;
+    }
     let studentMarks: SubjectMarkDto = this.studentMarks.value;
     this._apiService.postStudentMarks(studentMarks).subscribe(
       {

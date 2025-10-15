@@ -18,6 +18,7 @@ namespace Domain
         public string GradePractical{ get; set; }
         public double GradePointPractical { get; set; }
         public string FinalGrade { get; set; }
+        public double FinalGradePoint { get; set; }
         public Guid StudentId { get; set; }
         public Student Student { get; set; }
         public Guid ClassCourseId { get; set; }

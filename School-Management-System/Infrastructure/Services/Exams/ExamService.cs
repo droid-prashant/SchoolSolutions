@@ -5,9 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using Application.Common.Interfaces;
+using Application.Exams.ViewModels;
 using Application.SubjectMarks.Dtos;
 using Application.SubjectMarks.Interfaces;
 using Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.SubjectMarks
 {
@@ -61,7 +63,8 @@ namespace Infrastructure.Services.SubjectMarks
                         GradePointTheory = theoryGradeAndPoint.GradePoint,
                         GradePractical = gradePractical,
                         GradePointPractical = practicalGradeAndPoint.GradePoint,
-                        FinalGrade = finalGrade
+                        FinalGrade = finalGrade,
+                        FinalGradePoint = finalGradePoint
                     };
                     await _context.SubjectMarks.AddAsync(subjectMark);
                 }
@@ -148,6 +151,33 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 0 => ("E", 0.8),  // Fail
                 _ => ("N/A", 0.0)  // Invalid safeguard
             };
+        }
+
+        public async Task<ResultViewModel> GetResult(Guid studentId, CancellationToken cancellationToken)
+        {
+            var result = await _context.ExamResults.Where(x => x.StudentId == studentId)
+                                                   .Select(x => new ResultViewModel
+                                                   {
+                                                       ExamType = x.ExamType,
+                                                       TotalCredit = x.TotalCredit,
+                                                       GPA = x.GPA,
+                                                       StudentName = x.Student.FirstName + ' ' + x.Student.LastName,
+                                                       FatherName = x.Student.FatherName,
+                                                       MotherName = x.Student.MotherName,
+                                                       ClassRoom = x.Student.ClassSection.ClassRoom.Name,
+                                                       Section = x.Student.ClassSection.Section.Name,
+                                                       StudentMarks = x.SubjectMarks.Where(x => x.ClassCourseId == x.ClassCourseId)
+                                                                                    .Select(s => new StudentMarksViewModel
+                                                                                    {
+                                                                                        CourseName = s.ClassCourse.Course.Name,
+                                                                                        CreditHour = s.ClassCourse.TheoryCreditHour + s.ClassCourse.PracticalCreditHour,
+                                                                                        FinalGrade = s.FinalGrade,
+                                                                                        FinalGradePoint = s.FinalGradePoint,
+                                                                                        GradePractical = s.GradePractical,
+                                                                                        GradeTheory = s.GradeTheory
+                                                                                    }).ToList()
+                                                   }).FirstOrDefaultAsync();
+            return result;
         }
     }
 }
