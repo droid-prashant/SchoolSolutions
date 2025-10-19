@@ -89,6 +89,15 @@ export class HomeComponent implements OnInit {
         ]
       },
       {
+        label: 'Certificates',
+        icon: PrimeIcons.CREDIT_CARD,
+        items: [
+          { label: 'Certificate', icon: PrimeIcons.ID_CARD, routerLink: ['/home/certificate/certificate'] },
+          { label: 'Character Certificate', icon: PrimeIcons.USERS, routerLink: ['/home/certificate/character-certificate'] },
+          { label: 'Transfer Certificate', icon: PrimeIcons.USERS, routerLink: ['/home/certificate/transfer-certificate'] }
+        ]
+      },
+      {
         label: 'Attendance',
         icon: PrimeIcons.CHECK_SQUARE,
         items: [

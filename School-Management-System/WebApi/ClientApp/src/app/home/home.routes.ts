@@ -13,7 +13,8 @@ const routes: Routes = [
                 { path: "student", loadChildren:()=>import('./components/student/student.module').then(m=>m.StudentModule)},
                 { path: "class", loadChildren:()=>import('./components/class-room/class.module').then(m=>m.ClassModule)},
                 { path: "course", loadChildren:()=>import('./components/course/course.module').then(m=>m.CourseModule)},
-                { path: "exam", loadChildren:()=>import('./components/exam/exam.module').then(m=>m.ExamModule)}
+                { path: "exam", loadChildren:()=>import('./components/exam/exam.module').then(m=>m.ExamModule)},
+                { path: "certificate", loadChildren:()=>import('./components/certificate/certificate.module').then(m=>m.CertificateModule)}
             ]
     }
 ]
