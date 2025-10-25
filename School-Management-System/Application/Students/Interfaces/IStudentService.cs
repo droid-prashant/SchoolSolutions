@@ -13,5 +13,6 @@ namespace Application.Students.Interfaces
         Task AddStudentAsync(StudentDto addStudent, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRommId, CancellationToken cancellationToken);
+        Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, CancellationToken cancellationToken);
     }
 }

@@ -15,6 +15,11 @@ import { SectionDto } from '../home/components/master-entry/model/dtos/section.d
 import { ClassCreditCourseViewModel } from '../home/components/course/shared/models/classCourse.viewModel';
 import { ClassCourseDto } from '../home/components/course/shared/models/classCourse.dto';
 import { ResultViewModel } from '../home/components/exam/shared/viewModels/result.viewModel';
+import { FeeTypeDto } from '../home/components/master-entry/model/dtos/feeType.dto';
+import { FeeTypeViewModel } from '../home/components/master-entry/model/viewModels/feeType.viewModel';
+import { FeeStructureDto } from '../home/components/fees/model/feeStructure.dto';
+import { FeeStructureViewModel } from '../home/components/fees/model/feeStructure.viewModel';
+import { StudentFeeSummaryViewModel } from '../home/components/fees/model/studentFeeSummary.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +39,13 @@ export class ApiService {
     return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassId?classId=${classId}`);
   }
 
+  getStudentsByClassSectionId(classSectionId: string): Observable<StudentViewModel[]> {
+    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}`);
+  }
+
+  addClass(classRoom: SectionDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/ClassSection/AddClass", classRoom);
+  }
   addSection(section: SectionDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/ClassSection/AddSection", section);
   }
@@ -70,14 +82,43 @@ export class ApiService {
     return this._httpClient.post<void>(this.baseUrl + "api/Course/UpdateClassCourse", classCourseDto);
   }
 
-
   getClassCourseByClassId(classId: string): Observable<ClassCreditCourseViewModel[]> {
     return this._httpClient.get<ClassCreditCourseViewModel[]>(this.baseUrl + `api/Course/GetClassCourseByClassId?classId=${classId}`);
   }
+
   postStudentMarks(studentmarks: SubjectMarkDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Exam/AddMarks", studentmarks);
   }
- getResult(studentId: string): Observable<ResultViewModel> {
+
+  getResult(studentId: string): Observable<ResultViewModel> {
     return this._httpClient.get<ResultViewModel>(this.baseUrl + `api/Exam/GetResult?studentId=${studentId}`);
+  }
+
+  postFeeType(feeTypeData: FeeTypeDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeType", feeTypeData);
+  }
+
+  getFeeType(): Observable<FeeTypeViewModel[]> {
+    return this._httpClient.get<FeeTypeViewModel[]>(this.baseUrl + "api/Fees/GetFeeType");
+  }
+
+  postFeeStructure(feeStructure: FeeStructureDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeStructure", feeStructure);
+  }
+
+  ensureMissingMonthlyFees(studentId: string): Observable<void> {
+    return this._httpClient.get<void>(this.baseUrl + `api/Fees/EnsureMissingMonthlyFees?studentId=${studentId}`);
+  }
+
+  putFeeStructure(feeStructure: FeeStructureDto, feeStructureId: string): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Fees/UpdateFeeStructure?feeStructureId=${feeStructureId}`, feeStructure);
+  }
+
+  getFeeStructure(classId: string): Observable<FeeStructureViewModel[]> {
+    return this._httpClient.get<FeeStructureViewModel[]>(this.baseUrl + `api/Fees/GetFeeStructure?classId=${classId}`);
+  }
+
+  getStudentFeeSummary(studentId: string, classSectionId: string): Observable<StudentFeeSummaryViewModel> {
+    return this._httpClient.get<StudentFeeSummaryViewModel>(this.baseUrl + `api/Fees/GetStudentFeeSummary?studentId=${studentId}&classSectionId=${classSectionId}`);
   }
 }

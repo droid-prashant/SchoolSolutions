@@ -1,0 +1,87 @@
+<p-toast></p-toast>
+<p-card header="Student Fees">
+  <div class="flex align-items-center gap-3 mb-3">
+    <div class="classDropdown col-3">
+      <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id"
+                  (onChange)="onClassRoomChange($event)" placeholder="Select Class"></p-dropdown>
+    </div>
+
+    <div class="classDropdown col-3">
+      <p-dropdown [options]="sections" optionLabel="name" optionValue="classSectionId"
+                  (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected"
+                  placeholder="Select Section"></p-dropdown>
+    </div>
+
+    <div class="classDropdown col-3">
+      <p-dropdown [options]="students" optionLabel="name" optionValue="id" [filter]="true" filterBy="name"
+                  (onChange)="onStudentChange($event)" [disabled]="!isClassSectionSelected"
+                  placeholder="Select Student"></p-dropdown>
+    </div>
+  </div>
+
+  <!-- Fee Summary Section -->
+  <div *ngIf="isFeeSummaryFetched">
+    <p-divider></p-divider>
+
+    <p-card subheader="Fee Summary" class="p-mb-3">
+      <div class="p-grid p-align-center p-mb-2">
+        <div class="p-col-12 p-md-4">
+          <strong>Student Name:</strong> {{ studentFeeSummary.studentName }}
+        </div>
+        <div class="p-col-12 p-md-4">
+          <strong>Class:</strong> {{ studentFeeSummary.className }}
+        </div>
+        <div class="p-col-12 p-md-4">
+          <strong>Section:</strong> {{ studentFeeSummary.sectionName }}
+        </div>
+      </div>
+
+      <div class="p-grid p-mb-2">
+        <div class="p-col-12 p-md-4">
+          <strong>Total Fees:</strong> {{ studentFeeSummary.totalFees | currency:'NPR':'symbol' }}
+        </div>
+        <div class="p-col-12 p-md-4">
+          <strong>Total Paid:</strong> {{ studentFeeSummary.totalPaid | currency:'NPR':'symbol' }}
+        </div>
+        <div class="p-col-12 p-md-4">
+          <strong>Total Pending:</strong> {{ studentFeeSummary.totalPending | currency:'NPR':'symbol' }}
+        </div>
+      </div>
+
+      <!-- Fee Details Table -->
+      <p-table [value]="studentFeeSummary.feeDetails" [paginator]="true" [rows]="5" [responsiveLayout]="'scroll'">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Class</th>
+            <th>Fee Type</th>
+            <th>Month</th>
+            <th>Total Amount</th>
+            <th>Paid Amount</th>
+            <th>Pending Amount</th>
+            <th>Status</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-fee>
+          <tr>
+            <td>{{ fee.className }}</td>
+            <td>{{ fee.feeType }}</td>
+            <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
+            <td>{{ fee.totalAmount | currency:'NPR':'symbol' }}</td>
+            <td>{{ fee.paidAmount | currency:'NPR':'symbol' }}</td>
+            <td>{{ fee.pendingAmount | currency:'NPR':'symbol' }}</td>
+            <td>
+              <p-tag [value]="fee.isPaid ? 'Paid' : 'Pending'" 
+                     [severity]="fee.isPaid ? 'success' : 'warning'">
+              </p-tag>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+
+    <!-- Divider for Payment Section -->
+    <p-divider></p-divider>
+    <p> <!-- Payment section will go here later --> </p>
+  </div>
+</p-card>

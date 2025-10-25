@@ -50,15 +50,30 @@
       <input rows="3" pInputText formControlName="address" />
     </div>
 
-    <div class="field col-3">
-      <label>Class Room</label>
-      <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-         placeholder="Select Class"></p-dropdown>
+    <div class="field col-6">
+      <label>Date Of Birth</label>
+      <p-calendar formControlName="dob" />
     </div>
 
-    <div class="field col-3">
+    <div class="field col-6">
+      <label>Municipality</label>
+      <input rows="3" pInputText formControlName="municipality" />
+    </div>
+
+    <div class="field col-6">
+      <label>Ward No</label>
+      <input rows="3" pInputText formControlName="wardNo" />
+    </div>
+
+    <div class="field col-6">
+      <label>Class Room</label>
+      <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+        placeholder="Select Class"></p-dropdown>
+    </div>
+
+    <div class="field col-6">
       <label>Section</label>
-      <p-dropdown [options]="sections" optionLabel="name" optionValue="sectionId"  (onChange)="onSectionChange($event)"
+      <p-dropdown [options]="sections" optionLabel="name" optionValue="sectionId" (onChange)="onSectionChange($event)"
         placeholder="Select Section"></p-dropdown>
     </div>
 

@@ -1,0 +1,51 @@
+<h2 class="mb-4">Add Fee Type</h2>
+<form [formGroup]="feeTypeForm" (ngSubmit)="addFeeType()" class="p-fluid">
+    <div class="formgrid grid">
+
+        <div class="field col-6">
+            <label class="form-label">Fee Type</label>
+            <input type="text" pInputText formControlName="name" />
+        </div>
+
+
+        <div class="field col-6">
+            <label class="form-label d-block mb-2">Recurring</label>
+            <div class="switch-container">
+                <p-inputSwitch formControlName="isRecurring"></p-inputSwitch>
+            </div>
+        </div>
+
+        <div class="field col-6">
+            <label class="form-label">Frequency</label>
+            <input type="text" pInputText formControlName="frequency" />
+        </div>
+
+        <div class="col-12 text-right mt-2">
+            <button type="submit" pButton label="Register" class="p-button-success" [disabled]="feeTypeForm.invalid">
+            </button>
+        </div>
+
+    </div>
+</form>
+<div class="card">
+    <p-table [value]="feeTypes" dataKey="id" editMode="row" [tableStyle]="{'min-width': '50rem'}">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Recurring</th>
+                <th>Frequency</th>
+                <th>Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-editing="editing" let-ri="rowIndex">
+            <tr [pEditableRow]="row">
+                <td>{{ rowIndex + 1 }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{row.isRecurring }}</td>
+                <td>{{row.frequency}}</td>
+                <td><i pTooltip="edit" class="pi pi-pencil" (click)="editFeeType(row)"></i></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

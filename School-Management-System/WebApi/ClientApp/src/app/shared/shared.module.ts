@@ -20,6 +20,8 @@ import { DialogModule } from 'primeng/dialog';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TagModule } from 'primeng/tag';
 import { NgxPrintModule } from 'ngx-print';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { DividerModule } from 'primeng/divider';
 
 @NgModule({
     declarations:[],
@@ -44,7 +46,9 @@ import { NgxPrintModule } from 'ngx-print';
         DialogModule,
         MultiSelectModule,
         TagModule,
-        NgxPrintModule
+        NgxPrintModule,
+        InputSwitchModule,
+        DividerModule
     ],
     exports:[
         CommonModule,
@@ -67,7 +71,9 @@ import { NgxPrintModule } from 'ngx-print';
         DialogModule,
         MultiSelectModule,
         TagModule,
-        NgxPrintModule
+        NgxPrintModule,
+        InputSwitchModule,
+        DividerModule
     ]
 })
 export class SharedModule{}

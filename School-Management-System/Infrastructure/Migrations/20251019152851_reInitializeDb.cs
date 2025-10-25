@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class reInitializeDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,11 +20,31 @@ namespace Infrastructure.Migrations
                     RoomNumber = table.Column<string>(type: "text", nullable: false),
                     AcademicYear = table.Column<string>(type: "text", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ClassRooms", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FeeTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    IsRecurring = table.Column<bool>(type: "boolean", nullable: false),
+                    Frequency = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeeTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,7 +74,9 @@ namespace Infrastructure.Migrations
                     FatherName = table.Column<string>(type: "text", nullable: false),
                     MotherName = table.Column<string>(type: "text", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,7 +91,9 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     ClassRoomId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,6 +103,37 @@ namespace Infrastructure.Migrations
                         column: x => x.ClassRoomId,
                         principalTable: "ClassRooms",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FeeStructures",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FeeTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeeStructures", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FeeStructures_ClassRooms_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "ClassRooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FeeStructures_FeeTypes_FeeTypeId",
+                        column: x => x.FeeTypeId,
+                        principalTable: "FeeTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -120,7 +173,9 @@ namespace Infrastructure.Migrations
                     TheoryFullMarks = table.Column<decimal>(type: "numeric", nullable: false),
                     PracticalFullMarks = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -151,11 +206,16 @@ namespace Infrastructure.Migrations
                     MotherName = table.Column<string>(type: "text", nullable: false),
                     Gender = table.Column<int>(type: "integer", nullable: false),
                     Age = table.Column<int>(type: "integer", nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Municipality = table.Column<string>(type: "text", nullable: false),
+                    WardNo = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     ContactNumber = table.Column<string>(type: "text", nullable: false),
                     ClassSectionId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,7 +236,9 @@ namespace Infrastructure.Migrations
                     TeacherId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClassSectionId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -217,6 +279,38 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentFees",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FeeStructureId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FeeMonth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    IsPaid = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentFees", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentFees_FeeStructures_FeeStructureId",
+                        column: x => x.FeeStructureId,
+                        principalTable: "FeeStructures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentFees_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SubjectMarks",
                 columns: table => new
                 {
@@ -230,11 +324,14 @@ namespace Infrastructure.Migrations
                     GradePractical = table.Column<string>(type: "text", nullable: false),
                     GradePointPractical = table.Column<double>(type: "double precision", nullable: false),
                     FinalGrade = table.Column<string>(type: "text", nullable: false),
+                    FinalGradePoint = table.Column<double>(type: "double precision", nullable: false),
                     StudentId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClassCourseId = table.Column<Guid>(type: "uuid", nullable: false),
                     ExamResultId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -259,31 +356,55 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "ClassRooms",
-                columns: new[] { "Id", "AcademicYear", "CreatedDate", "ModifiedDate", "Name", "RoomNumber" },
-                values: new object[,]
+            migrationBuilder.CreateTable(
+                name: "FeeAdjustments",
+                columns: table => new
                 {
-                    { new Guid("10000000-0000-0000-0000-000000000001"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "One", "1" },
-                    { new Guid("10000000-0000-0000-0000-000000000002"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Two", "2" },
-                    { new Guid("10000000-0000-0000-0000-000000000003"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Three", "3" },
-                    { new Guid("10000000-0000-0000-0000-000000000004"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Four", "4" },
-                    { new Guid("10000000-0000-0000-0000-000000000005"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Five", "5" },
-                    { new Guid("10000000-0000-0000-0000-000000000006"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Six", "6" },
-                    { new Guid("10000000-0000-0000-0000-000000000007"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Seven", "7" },
-                    { new Guid("10000000-0000-0000-0000-000000000008"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Eight", "8" },
-                    { new Guid("10000000-0000-0000-0000-000000000009"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Nine", "9" },
-                    { new Guid("10000000-0000-0000-0000-000000000010"), "2024/2025", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Ten", "10" }
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentFeeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DiscountAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    FineAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Reason = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeeAdjustments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FeeAdjustments_StudentFees_StudentFeeId",
+                        column: x => x.StudentFeeId,
+                        principalTable: "StudentFees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Sections",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
                 {
-                    { new Guid("5de70202-810b-40e8-b632-715df1674d47"), "C" },
-                    { new Guid("b782c5ef-0813-4934-a1d3-a5dfa021bf4c"), "B" },
-                    { new Guid("eef99712-d3e2-488d-b6ef-12335ec0ebdf"), "A" }
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentFeeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "numeric", nullable: false),
+                    Method = table.Column<string>(type: "text", nullable: false),
+                    Remarks = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_StudentFees_StudentFeeId",
+                        column: x => x.StudentFeeId,
+                        principalTable: "StudentFees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -314,6 +435,36 @@ namespace Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ExamResults_StudentId",
                 table: "ExamResults",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeeAdjustments_StudentFeeId",
+                table: "FeeAdjustments",
+                column: "StudentFeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeeStructures_ClassId",
+                table: "FeeStructures",
+                column: "ClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeeStructures_FeeTypeId",
+                table: "FeeStructures",
+                column: "FeeTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_StudentFeeId",
+                table: "Payments",
+                column: "StudentFeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentFees_FeeStructureId",
+                table: "StudentFees",
+                column: "FeeStructureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentFees_StudentId",
+                table: "StudentFees",
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
@@ -351,10 +502,19 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "FeeAdjustments");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
+
+            migrationBuilder.DropTable(
                 name: "SubjectMarks");
 
             migrationBuilder.DropTable(
                 name: "TeacherClassSection");
+
+            migrationBuilder.DropTable(
+                name: "StudentFees");
 
             migrationBuilder.DropTable(
                 name: "ClassCourses");
@@ -366,10 +526,16 @@ namespace Infrastructure.Migrations
                 name: "Teachers");
 
             migrationBuilder.DropTable(
+                name: "FeeStructures");
+
+            migrationBuilder.DropTable(
                 name: "Courses");
 
             migrationBuilder.DropTable(
                 name: "Students");
+
+            migrationBuilder.DropTable(
+                name: "FeeTypes");
 
             migrationBuilder.DropTable(
                 name: "ClassSections");

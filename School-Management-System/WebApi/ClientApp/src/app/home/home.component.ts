@@ -44,7 +44,8 @@ export class HomeComponent implements OnInit {
         items: [
           { label: 'Class Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-class'] },
           { label: 'Section Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-section'] },
-          { label: 'Course Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-course'] }
+          { label: 'Course Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-course'] },
+          { label: 'Fee Type Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/fee-type'] }
         ]
       },
       {
@@ -93,8 +94,6 @@ export class HomeComponent implements OnInit {
         icon: PrimeIcons.CREDIT_CARD,
         items: [
           { label: 'Certificate', icon: PrimeIcons.ID_CARD, routerLink: ['/home/certificate/certificate'] },
-          { label: 'Character Certificate', icon: PrimeIcons.USERS, routerLink: ['/home/certificate/character-certificate'] },
-          { label: 'Transfer Certificate', icon: PrimeIcons.USERS, routerLink: ['/home/certificate/transfer-certificate'] }
         ]
       },
       {
@@ -109,7 +108,8 @@ export class HomeComponent implements OnInit {
         label: 'Fees',
         icon: PrimeIcons.MONEY_BILL,
         items: [
-          { label: 'Fee Collection', icon: PrimeIcons.CREDIT_CARD, routerLink: ['/fees/collection'] },
+          { label: 'Manage Fee Type', icon: PrimeIcons.CREDIT_CARD, routerLink: ['/home/fees/manage-fees'] },
+          { label: 'Fee Payment', icon: PrimeIcons.MONEY_BILL, routerLink: ['/home/fees/fee-payment'] },
           { label: 'Fee Reports', icon: PrimeIcons.FILE, routerLink: ['/fees/reports'] }
         ]
       },

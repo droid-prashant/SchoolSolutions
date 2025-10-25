@@ -15,9 +15,13 @@ namespace Infrastructure.Persistance.Configuration
         {
             builder.HasMany(x => x.ExamResults)
                    .WithOne(x => x.Student)
-                   .HasForeignKey(x=>x.StudentId);
+                   .HasForeignKey(x => x.StudentId);
 
             builder.HasMany(x => x.SubjectMarks)
+                   .WithOne(x => x.Student)
+                   .HasForeignKey(x => x.StudentId);
+
+            builder.HasMany(x => x.StudentFees)
                    .WithOne(x => x.Student)
                    .HasForeignKey(x => x.StudentId);
         }

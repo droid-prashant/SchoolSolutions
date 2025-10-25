@@ -24,6 +24,11 @@ namespace Infrastructure.Persistance
         public DbSet<SubjectMark> SubjectMarks => Set<SubjectMark>();
 
         public DbSet<ExamResult> ExamResults => Set<ExamResult>();
+        public DbSet<FeeType> FeeTypes => Set<FeeType>();
+        public DbSet<FeeStructure> FeeStructures => Set<FeeStructure>();
+        public DbSet<StudentFee> StudentFees => Set<StudentFee>();
+        public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<FeeAdjustment> FeeAdjustments => Set<FeeAdjustment>();
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             foreach(var entry in ChangeTracker.Entries<AuditableEntry>())

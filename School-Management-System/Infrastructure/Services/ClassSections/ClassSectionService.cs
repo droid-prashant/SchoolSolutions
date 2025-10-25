@@ -57,7 +57,7 @@ namespace Infrastructure.Services.ClassSections
                     Name = x.Section.Name,
                     ClassSectionId = x.Id.ToString()
                 }).ToList()
-            }).ToListAsync();
+            }).OrderBy(x => x.Id).ToListAsync();
             return result;
         }
 
@@ -68,7 +68,7 @@ namespace Infrastructure.Services.ClassSections
             {
                 SectionId = x.Id.ToString(),
                 Name = x.Name
-              
+
             }).ToListAsync();
             return result;
         }
@@ -109,6 +109,18 @@ namespace Infrastructure.Services.ClassSections
             _context.Sections.Add(sectionObj);
             _context.SaveChangesAsync(cancellationToken);
             return Task.CompletedTask;
+        }
+
+        public async Task AddClass(ClassRoomDto classRoomDto, CancellationToken cancellationToken)
+        {
+            var classRoom = new ClassRoom
+            {
+                Name = classRoomDto.Name,
+                AcademicYear = DateTime.UtcNow.Year.ToString(),
+                RoomNumber = classRoomDto.RoomNumber
+            };
+            await _context.ClassRooms.AddAsync(classRoom);
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

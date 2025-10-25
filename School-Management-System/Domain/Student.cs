@@ -21,5 +21,6 @@ namespace Domain
         public Guid ClassSectionId { get; set; }
         public ICollection<SubjectMark> SubjectMarks { get; set; }
         public ICollection<ExamResult> ExamResults { get; set; }
+        public ICollection<StudentFee> StudentFees { get; set; }
     }
 }

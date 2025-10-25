@@ -32,6 +32,14 @@ namespace WebApi.Controllers
             return result;
         }
 
+        [HttpGet()]
+        [Route("GetStudentByClassSectionId")]
+        public async Task<List<StudentViewModel>> GetStudentByClassSectionId([FromQuery] string classSectionId, CancellationToken cancellationToken)
+        {
+            var result = await _studentService.GetStudentByClassSectionId(classSectionId, cancellationToken);
+            return result;
+        }
+
         [HttpPost]
         [Route("AddStudent")]
         public async Task Post([FromBody] StudentDto addStudent, CancellationToken cancellationToken)

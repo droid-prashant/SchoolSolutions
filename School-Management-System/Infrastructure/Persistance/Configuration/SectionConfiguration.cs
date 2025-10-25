@@ -19,21 +19,6 @@ namespace Infrastructure.Persistance.Configuration
                    .WithOne(x => x.Section)
                    .HasForeignKey(x => x.SectionId);
 
-            builder.HasData(new Section
-            {
-                Id = Guid.NewGuid(),
-                Name = "A"
-            },
-            new Section
-            {
-                Id = Guid.NewGuid(),
-                Name = "B"
-            },
-            new Section
-            {
-                Id = Guid.NewGuid(),
-                Name = "C"
-            });
         }
     }
 }

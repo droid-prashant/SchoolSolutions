@@ -5,10 +5,7 @@ import { TransferCertificateComponent } from './transfer-certificate/transfer-ce
 import { CertificateComponent } from './certificate.component';
 
 const routes: Routes = [
-    {path:'certificate', component:CertificateComponent},
-    {path:'character-certificate', component:CharacterCertificateComponent},
-    {path:'transfer-certificate', component:TransferCertificateComponent},
-]
+    {path:'certificate', component:CertificateComponent}]
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],

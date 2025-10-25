@@ -1,0 +1,46 @@
+🧱 Table Structure
+1️⃣ Student (Permanent)
+public class Student
+{
+    public Guid Id { get; set; }
+    public string AdmissionNo { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public DateTime DateOfBirth { get; set; }
+    public string Address { get; set; } = string.Empty;
+    public string ContactNumber { get; set; } = string.Empty;
+
+    // Navigation
+    public ICollection<StudentEnrollment> Enrollments { get; set; } = new List<StudentEnrollment>();
+}
+
+
+2️⃣ StudentEnrollment (Yearly record)
+public class StudentEnrollment
+{
+    public Guid Id { get; set; }
+    public Guid StudentId { get; set; }
+    public Student Student { get; set; }
+
+    public Guid ClassSectionId { get; set; }
+    public ClassSection ClassSection { get; set; }
+
+    public Guid AcademicYearId { get; set; }
+    public AcademicYear AcademicYear { get; set; }
+
+    public DateTime EnrollmentDate { get; set; }
+    public bool IsPromoted { get; set; }
+
+    // Fees, Exams, Results, etc. linked to this
+    public ICollection<StudentFee> StudentFees { get; set; } = new List<StudentFee>();
+}
+
+3️⃣ AcademicYear
+public class AcademicYear
+{
+    public Guid Id { get; set; }
+    public string YearName { get; set; } = string.Empty; // e.g. "2024/2025"
+    public bool IsActive { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+}

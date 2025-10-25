@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ApiService } from '../../../../shared/api.service';
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
+import { ClassRoomDto } from '../model/dtos/classRoom.dto';
 
 @Component({
   selector: 'app-class-entry',
@@ -14,7 +15,7 @@ export class ClassEntryComponent implements OnInit {
 
   classList: ClassRoomViewModel[] = [];
   constructor(private _formBuilder: FormBuilder,
-    private _apiService: ApiService
+    private _apiService: ApiService,
   ) {
     let fb = _formBuilder;
     this.classForm = fb.group({
@@ -27,7 +28,21 @@ export class ClassEntryComponent implements OnInit {
     this.listClass();
   }
 
-  addClass() { }
+  addClass() {
+    if (!this.classForm.valid) {
+      return;
+    }
+    const classFormValue: ClassRoomDto = this.classForm.value;
+    this._apiService.addClass(classFormValue).subscribe({
+      next: (response) => {
+        this.listClass();
+        this.classForm.reset();
+      },
+      error: (err) => {
+
+      }
+    });
+  }
 
   listClass() {
     this._apiService.getClassRooms().subscribe({
@@ -42,6 +57,6 @@ export class ClassEntryComponent implements OnInit {
   }
 
   EditClass(selectedClass: ClassRoomViewModel) {
-    
+
   }
 }

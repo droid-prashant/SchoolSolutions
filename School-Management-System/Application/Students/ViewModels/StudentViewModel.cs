@@ -16,6 +16,7 @@ namespace Application.Students.ViewModels
         public string FatherName { get; set; }
         public string MotherName { get; set; }
         public string DateOfBirth { get; set; }
+        public string Municipality { get; set; }
         public int WardNo { get; set; }
         public string Address { get; set; }
         public string ClassRoom { get; set; }

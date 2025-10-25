@@ -1,0 +1,55 @@
+<p-toast></p-toast>
+<div class="classDropdown">
+    <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+        placeholder="Select Class"></p-dropdown>
+
+    <p-button severity="success" label="New" icon="pi pi-plus" class="mr-2 ml-5" pTooltip="Add New Row"
+        (click)="addNewRow()" [disabled]="!isClassSelected" />
+    <div class="card">
+        <form [formGroup]="feeStructureForm">
+            <p-table [value]="feeStrucures" [paginator]="true" [rows]="10" [tableStyle]="{ 'min-width': '50rem' }"
+                [rowsPerPageOptions]="[10, 20, 30]">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Id</th>
+                        <th>Fees Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr *ngIf="isNewRow || isUpdateRow">
+                        <td></td>
+                        <td>
+                            <p-dropdown formControlName="feeTypeId" [options]="feeTypes" optionLabel="name"
+                                optionValue="id" appendTo="body" placeholder="Select Fee Type" />
+                        </td>
+                        <td>
+                            <input type="number" formControlName="amount" pInputText placeholder="Amount" />
+                        </td>
+                        <td>
+                            <input type="text" formControlName="description" pInputText placeholder="Description" />
+                        </td>
+                        <td>
+                            <button pButton pRipple type="button" icon="pi pi-check" (click)="onRowSubmit()"
+                                class="p-button-rounded p-button-text p-button-success mr-2">
+                            </button>
+                            <button pButton pRipple type="button" icon="pi pi-times" (click)="onRowCancel()"
+                                class="p-button-rounded p-button-text p-button-danger">
+                            </button>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-feeStructure let-rowIndex="rowIndex">
+                    <tr>
+                        <td>{{ rowIndex + 1 }}</td>
+                        <td>{{ feeStructure.feeType }}</td>
+                        <td>{{ feeStructure.amount }}</td>
+                        <td>{{ feeStructure.description }}</td>
+                        <td> <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEdit(feeStructure)"
+                                class="p-button-rounded p-button-text">
+                            </button></td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </form>
+    </div>

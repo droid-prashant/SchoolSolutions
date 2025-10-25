@@ -33,6 +33,13 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
+        [Route("AddClass")]
+        public async Task AddClass([FromBody] ClassRoomDto classRoomDto, CancellationToken cancellationToken)
+        {
+            await _classSectionService.AddClass(classRoomDto, cancellationToken);
+        }
+
+        [HttpPost]
         [Route("AddSection")]
         public async Task AddSection([FromBody] SectionDto section, CancellationToken cancellationToken)
         {

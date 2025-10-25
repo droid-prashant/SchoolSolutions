@@ -2,11 +2,13 @@
 using Application.ClassSections.Interfaces;
 using Application.Common.Interfaces;
 using Application.Courses.Interfaces;
+using Application.Fees.Interfaces;
 using Application.Students.Interfaces;
 using Application.SubjectMarks.Interfaces;
 using Infrastructure.Persistance;
 using Infrastructure.Services.ClassSections;
 using Infrastructure.Services.Courses;
+using Infrastructure.Services.Fees;
 using Infrastructure.Services.Students;
 using Infrastructure.Services.SubjectMarks;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,7 @@ namespace Infrastructure
             services.AddScoped<IClassSectionService, ClassSectionService>();
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IExamService, ExamService>();
+            services.AddScoped<IFeeService, FeeService>();
             return services;
         }
     }

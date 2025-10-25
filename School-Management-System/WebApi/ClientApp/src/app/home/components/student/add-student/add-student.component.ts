@@ -33,6 +33,9 @@ export class AddStudentComponent implements OnInit {
       gender: [null, Validators.required],
       age: [null, [Validators.required, Validators.min(1)]],
       address: ['', Validators.required],
+      dob: ['', Validators.required],
+      municipality: ['', Validators.required],
+      wardNo: ['', Validators.required],
       contactNumber: ['', Validators.required],
       classSectionId: [null, Validators.required]
     });
