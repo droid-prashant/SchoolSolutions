@@ -8,7 +8,7 @@ namespace Application.Fees.Dtos
 {
     public class StudentFeeSummaryViewModel
     {
-        public Guid StudentId { get; set; }
+        public Guid StudentEnrollmentId { get; set; }
         public string StudentName { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
         public string SectionName { get; set; } = string.Empty;

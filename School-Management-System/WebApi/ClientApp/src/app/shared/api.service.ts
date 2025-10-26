@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StudentDto } from '../home/components/student/shared/models/dtos/student.dto';
 import { StudentViewModel } from '../home/components/student/shared/models/viewModels/student.viewModel';
-import { ClassSectionViewModel } from '../home/components/class-room/shared/models/viewModels/classSectionviewModel';
 import { CourseDto } from '../home/components/course/shared/models/course.dto';
 import { CourseViewModel } from '../home/components/course/shared/models/course.viewModel';
 import { SubjectMarkDto } from '../home/components/exam/shared/models/examMarksEntry.dto';
@@ -20,6 +19,7 @@ import { FeeTypeViewModel } from '../home/components/master-entry/model/viewMode
 import { FeeStructureDto } from '../home/components/fees/model/feeStructure.dto';
 import { FeeStructureViewModel } from '../home/components/fees/model/feeStructure.viewModel';
 import { StudentFeeSummaryViewModel } from '../home/components/fees/model/studentFeeSummary.viewModel';
+import { ClassRoomDto } from '../home/components/master-entry/model/dtos/classRoom.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -43,11 +43,20 @@ export class ApiService {
     return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}`);
   }
 
-  addClass(classRoom: SectionDto): Observable<void> {
+  addClass(classRoom: ClassRoomDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/ClassSection/AddClass", classRoom);
   }
+
+  updateClass(classRoom: ClassRoomDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + "api/ClassSection/UpdateClass", classRoom);
+  }
+
   addSection(section: SectionDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/ClassSection/AddSection", section);
+  }
+
+  updateSection(section: SectionDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + "api/ClassSection/UpdateSection", section);
   }
 
   getSections(): Observable<SectionViewModel[]> {
@@ -64,6 +73,10 @@ export class ApiService {
 
   postCourse(course: CourseDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Course/AddCourse", course);
+  }
+
+  updateCourse(course: CourseDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + "api/Course/UpdateCourse", course);
   }
 
   getCourses(): Observable<CourseViewModel[]> {
@@ -96,6 +109,10 @@ export class ApiService {
 
   postFeeType(feeTypeData: FeeTypeDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeType", feeTypeData);
+  }
+
+  updateFeeType(feeTypeData: FeeTypeDto, feeTypeId: string): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Fees/UpdateFeeType?feeTypeId=${feeTypeId}`, feeTypeData);
   }
 
   getFeeType(): Observable<FeeTypeViewModel[]> {

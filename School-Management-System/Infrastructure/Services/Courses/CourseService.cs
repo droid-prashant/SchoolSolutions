@@ -23,14 +23,30 @@ namespace Infrastructure.Services.Courses
         }
         public async Task AddCourse(CourseDto courseDto, CancellationToken cancellationToken)
         {
-            var course = new Course
+            bool checkExistingCourse = await _context.Courses.AnyAsync(x => x.Name == courseDto.Name);
+            if (!checkExistingCourse)
             {
-                Name = courseDto.Name,
-            };
-            _context.Courses.Add(course);
-            await _context.SaveChangesAsync(cancellationToken);
+                var course = new Course
+                {
+                    Name = courseDto.Name,
+                };
+                _context.Courses.Add(course);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                throw new Exception("Course already exist");
+            }
         }
-
+        public async Task UpdateCourse(CourseDto courseDto, CancellationToken cancellationToken)
+        {
+            var existingCourse = await _context.Courses.FirstOrDefaultAsync(x => x.Id == Guid.Parse(courseDto.Id));
+            if (existingCourse != null)
+            {
+                existingCourse.Name = courseDto.Name;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
         public async Task<List<CourseViewModel>> GetCourse(CancellationToken cancellationToken)
         {
             var courseList = await _context.Courses.Select(x => new CourseViewModel
@@ -41,7 +57,6 @@ namespace Infrastructure.Services.Courses
 
             return courseList;
         }
-
         public async Task<List<ClassCreditCourseViewModel>> GetAllClassCourse(CancellationToken cancellationToken)
         {
             var courseList = await _context.ClassCourses.Select(x => new ClassCreditCourseViewModel
@@ -59,7 +74,6 @@ namespace Infrastructure.Services.Courses
 
             return courseList;
         }
-
         public async Task<List<ClassCreditCourseViewModel>> GetClassCourseByClassId(Guid classRoomId, CancellationToken cancellationToken)
         {
             var courseList = await _context.ClassCourses.Where(x => x.ClassRoomId == classRoomId)
@@ -78,7 +92,6 @@ namespace Infrastructure.Services.Courses
 
             return courseList;
         }
-
         public async Task AddClassCourse(ClassCourseDto classCourseDto, CancellationToken cancellationToken)
         {
             var classCourse = new ClassCourse

@@ -10,7 +10,7 @@ namespace Domain
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string RoomNumber { get; set; }
+        public int OrderNumber { get; set; }
         public string AcademicYear { get; set; }
         public ICollection<ClassSection> ClassSections { get; set; }
         public ICollection<ClassCourse> ClassCourses { get; set; }

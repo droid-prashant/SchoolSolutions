@@ -77,17 +77,17 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetStudentFeeSummary")]
-        public async Task<StudentFeeSummaryViewModel> GetStudentFeeSummary([FromQuery] string studentId, [FromQuery] string classSectionId, CancellationToken cancellationToken)
+        public async Task<StudentFeeSummaryViewModel> GetStudentFeeSummary([FromQuery] string studentEnrollmentIdGuid, [FromQuery] string classSectionId, CancellationToken cancellationToken)
         {
-            var result = await _feesService.GetStudentFeeSummary(studentId, classSectionId, cancellationToken);
+            var result = await _feesService.GetStudentFeeSummary(studentEnrollmentIdGuid, classSectionId, cancellationToken);
             return result;
         }
 
         [HttpGet]
         [Route("EnsureMissingMonthlyFees")]
-        public async Task EnsureMissingMonthlyFeesAsync([FromQuery] string studentId, CancellationToken cancellationToken)
+        public async Task EnsureMissingMonthlyFeesAsync([FromQuery] string studentEnrollmentIdGuid, CancellationToken cancellationToken)
         {
-            await _feesService.EnsureMissingMonthlyFeesAsync(studentId, cancellationToken);
+            await _feesService.EnsureMissingMonthlyFeesAsync(studentEnrollmentIdGuid, cancellationToken);
         }
 
         [HttpDelete("{id}")]

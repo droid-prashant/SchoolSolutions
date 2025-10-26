@@ -10,8 +10,8 @@ namespace Domain
     {
         public Guid Id { get; set; }
 
-        public Guid StudentId { get; set; }
-        public Student Student { get; set; } = null!;
+        public Guid StudentEnrollmentId { get; set; }
+        public StudentEnrollment StudentEnrollment { get; set; } = null!;
 
         public Guid FeeStructureId { get; set; }
         public FeeStructure FeeStructure { get; set; } = null!;

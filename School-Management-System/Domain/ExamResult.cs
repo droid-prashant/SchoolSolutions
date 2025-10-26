@@ -9,8 +9,8 @@ namespace Domain
     public class ExamResult
     {
         public Guid Id { get; set; }
-        public Guid StudentId { get; set; }
-        public Student Student { get; set; }
+        public Guid StudentEnrollmentId { get; set; }
+        public StudentEnrollment StudentEnrollment { get; set; }
         public string ExamType { get; set; }
         public double TotalCredit { get; set; }
         public double GPA { get; set; }

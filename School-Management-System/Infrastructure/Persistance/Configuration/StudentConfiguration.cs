@@ -13,17 +13,10 @@ namespace Infrastructure.Persistance.Configuration
     {
         public void Configure(EntityTypeBuilder<Student> builder)
         {
-            builder.HasMany(x => x.ExamResults)
+            builder.HasMany(x => x.StudentEnrollments)
                    .WithOne(x => x.Student)
                    .HasForeignKey(x => x.StudentId);
 
-            builder.HasMany(x => x.SubjectMarks)
-                   .WithOne(x => x.Student)
-                   .HasForeignKey(x => x.StudentId);
-
-            builder.HasMany(x => x.StudentFees)
-                   .WithOne(x => x.Student)
-                   .HasForeignKey(x => x.StudentId);
         }
     }
 }

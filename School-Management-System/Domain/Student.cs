@@ -10,6 +10,8 @@ namespace Domain
         public string GrandFatherName { get; set; } 
         public string FatherName { get; set; } 
         public string MotherName { get; set; }
+        public string ParentContactNumber { get; set; }
+        public string ParentEmail { get; set; }
         public int Gender { get; set; }
         public int Age { get; set; }
         public DateTime DateOfBirth { get; set; }
@@ -17,10 +19,6 @@ namespace Domain
         public int WardNo { get; set; }
         public string Address { get; set; }
         public string ContactNumber { get; set; }
-        public ClassSection ClassSection { get; set; }
-        public Guid ClassSectionId { get; set; }
-        public ICollection<SubjectMark> SubjectMarks { get; set; }
-        public ICollection<ExamResult> ExamResults { get; set; }
-        public ICollection<StudentFee> StudentFees { get; set; }
+        public ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
     }
 }

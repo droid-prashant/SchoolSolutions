@@ -5,13 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Domain;
+using Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistance
 {
-    public class ApplicationDbContext:DbContext, IApplicationDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDbContext
+
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): base(options) { }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<Teacher> Teachers => Set<Teacher>();
         public DbSet<Student> Students => Set<Student>();
         public DbSet<Course> Courses => Set<Course>();
@@ -29,9 +32,14 @@ namespace Infrastructure.Persistance
         public DbSet<StudentFee> StudentFees => Set<StudentFee>();
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<FeeAdjustment> FeeAdjustments => Set<FeeAdjustment>();
+
+        public DbSet<AcademicYear> AcademicYears => Set<AcademicYear>();
+
+        public DbSet<StudentEnrollment> StudentEnrollments => Set<StudentEnrollment>();
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            foreach(var entry in ChangeTracker.Entries<AuditableEntry>())
+            foreach (var entry in ChangeTracker.Entries<AuditableEntry>())
             {
                 switch (entry.State)
                 {

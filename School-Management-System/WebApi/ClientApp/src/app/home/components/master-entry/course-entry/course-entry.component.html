@@ -1,6 +1,6 @@
+<p-toast></p-toast>
 <h2 class="mb-4">Register Course</h2>
-
-<form [formGroup]="courseForm" (ngSubmit)="addCourse()" class="p-fluid">
+<form [formGroup]="courseForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
         <div class="field col-6">
@@ -8,8 +8,8 @@
             <input type="text" pInputText formControlName="name" />
         </div>
         <div class="col-12 text-right mt-2">
-            <button type="submit" pButton label="Register" class="p-button-success"
-                [disabled]="courseForm.invalid"></button>
+            <button type="submit" pButton [label]="submitButtonLabel" class="p-button-success"
+                [disabled]="courseForm.invalid || isSubmitted"></button>
         </div>
     </div>
 </form>

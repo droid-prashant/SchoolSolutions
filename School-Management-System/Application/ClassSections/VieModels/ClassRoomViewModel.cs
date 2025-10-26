@@ -10,8 +10,9 @@ namespace Application.ClassSections.VieModels
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string RoomNumber { get; set; }
+        public int OrderNumber { get; set; }
         public string AcademicYear { get; set; }
+        public DateTime CreatedOn { get; set; }
         public List<ClassSectionViewModel> ClassSections { get; set; }
         public List<SectionViewModel> Sections { get; set; }
     }

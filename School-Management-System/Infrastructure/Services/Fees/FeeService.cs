@@ -64,7 +64,7 @@ namespace Infrastructure.Services.Fees
 
         public async Task UpdateFeeType(FeeTypeDto feeTypeDto, string feeTypeId, CancellationToken cancellationToken)
         {
-            var existingFeeType = _dbContext.FeeTypes.Where(x => x.Id == Guid.Parse(feeTypeId)).FirstOrDefault();
+            var existingFeeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == Guid.Parse(feeTypeId));
             if (existingFeeType != null)
             {
                 existingFeeType.Name = feeTypeDto.Name;
@@ -103,21 +103,22 @@ namespace Infrastructure.Services.Fees
             }
         }
 
-        public async Task<StudentFeeSummaryViewModel> GetStudentFeeSummary(string studentId, string classSectionId, CancellationToken cancellationToken)
+        public async Task<StudentFeeSummaryViewModel> GetStudentFeeSummary(string studentEnrollmentIdGuid, string classSectionId, CancellationToken cancellationToken)
         {
-            var student = await _dbContext.Students.Include(s => s.ClassSection)
-                                                   .ThenInclude(cs => cs.ClassRoom)
-                                                   .Include(x => x.ClassSection.Section)
-                                                   .FirstOrDefaultAsync(s => s.Id == Guid.Parse(studentId) && s.ClassSectionId == Guid.Parse(classSectionId), cancellationToken);
+            var studentEnrollment = await _dbContext.StudentEnrollments.Include(s => s.Student)
+                                                             .Include(s => s.ClassSection)
+                                                             .ThenInclude(cs => cs.ClassRoom)
+                                                             .Include(x => x.ClassSection.Section)
+                                                             .FirstOrDefaultAsync(s => s.Id == Guid.Parse(studentEnrollmentIdGuid) && s.ClassSectionId == Guid.Parse(classSectionId), cancellationToken);
 
-            if (student == null)
+            if (studentEnrollment == null)
                 return null;
 
 
             var studentFees = await _dbContext.StudentFees.Include(sf => sf.FeeStructure)
                                                           .ThenInclude(fs => fs.FeeType)
                                                           .Include(sf => sf.Payments)
-                                                          .Where(sf => sf.StudentId == student.Id)
+                                                          .Where(sf => sf.StudentEnrollmentId == studentEnrollment.Id)
                                                           .ToListAsync(cancellationToken);
 
             var feeDetails = studentFees.GroupBy(f => new
@@ -140,10 +141,10 @@ namespace Infrastructure.Services.Fees
 
             return new StudentFeeSummaryViewModel
             {
-                StudentId = student.Id,
-                StudentName = $"{student.FirstName} {student.LastName}",
-                ClassName = student.ClassSection.ClassRoom.Name,
-                SectionName = student.ClassSection.Section.Name,
+                StudentEnrollmentId = studentEnrollment.Id,
+                StudentName = $"{studentEnrollment.Student.FirstName} {studentEnrollment.Student.LastName}",
+                ClassName = studentEnrollment.ClassSection.ClassRoom.Name,
+                SectionName = studentEnrollment.ClassSection.Section.Name,
                 TotalFees = feeDetails.Sum(f => f.TotalAmount),
                 TotalPaid = feeDetails.Sum(f => f.PaidAmount),
                 TotalPending = feeDetails.Sum(f => f.PendingAmount),
@@ -151,52 +152,47 @@ namespace Infrastructure.Services.Fees
             };
         }
 
-        public async Task EnsureMissingMonthlyFeesAsync(string studentId, CancellationToken cancellationToken)
+        public async Task EnsureMissingMonthlyFeesAsync(string studentEnrollmentIdGuid, CancellationToken cancellationToken)
         {
             try
             {
-                var student = await _dbContext.Students
-      .Include(s => s.ClassSection)
-      .FirstOrDefaultAsync(s => s.Id == Guid.Parse(studentId), cancellationToken);
+                var studentEnrollment = await _dbContext.StudentEnrollments
+                                                        .Include(s => s.ClassSection)
+                                                        .FirstOrDefaultAsync(s => s.Id == Guid.Parse(studentEnrollmentIdGuid), cancellationToken);
 
-                if (student == null) return;
+                if (studentEnrollment == null) return;
 
                 var recurringFees = await _dbContext.FeeStructures
-                    .Where(f => f.ClassId == student.ClassSection.ClassId && f.FeeType.IsRecurring)
+                    .Where(f => f.ClassId == studentEnrollment.ClassSection.ClassId && f.FeeType.IsRecurring)
                     .ToListAsync(cancellationToken);
 
-                // Normalize both to UTC
-                var firstMonth = DateTime.SpecifyKind(
-                    new DateTime(student.CreatedDate.Year, student.CreatedDate.Month, 1),
-                    DateTimeKind.Utc);
 
-                var currentMonth = DateTime.SpecifyKind(
-                    new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1),
-                    DateTimeKind.Utc);
+                var firstMonth = DateTime.SpecifyKind(new DateTime(studentEnrollment.CreatedDate.Year, studentEnrollment.CreatedDate.Month, 1), DateTimeKind.Utc);
+
+                var currentMonth = DateTime.SpecifyKind(new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1), DateTimeKind.Utc);
 
                 foreach (var fee in recurringFees)
                 {
                     var existingMonths = await _dbContext.StudentFees
-                        .Where(sf => sf.StudentId == student.Id && sf.FeeStructureId == fee.Id && sf.FeeMonth.HasValue)
-                        .Select(sf => sf.FeeMonth.Value.Month + sf.FeeMonth.Value.Year * 100)
-                        .ToListAsync(cancellationToken);
+                                                         .Where(sf => sf.StudentEnrollmentId == studentEnrollment.Id && sf.FeeStructureId == fee.Id && sf.FeeMonth.HasValue)
+                                                         .Select(sf => sf.FeeMonth.Value.Month + sf.FeeMonth.Value.Year * 100)
+                                                         .ToListAsync(cancellationToken);
 
                     for (var month = firstMonth; month <= currentMonth; month = month.AddMonths(1))
                     {
-                        // Ensure this month is UTC too
                         var monthUtc = DateTime.SpecifyKind(month, DateTimeKind.Utc);
-
                         var monthKey = monthUtc.Month + monthUtc.Year * 100;
+
                         if (!existingMonths.Contains(monthKey))
                         {
                             _dbContext.StudentFees.Add(new StudentFee
                             {
-                                StudentId = student.Id,
+                                StudentEnrollmentId = studentEnrollment.Id,
                                 FeeStructureId = fee.Id,
                                 Amount = fee.Amount,
-                                FeeMonth = monthUtc, // ✅ store as UTC
+                                FeeMonth = monthUtc,
                                 IsPaid = false,
-                                CreatedDate = DateTime.UtcNow // already UTC
+                                CreatedDate = DateTime.UtcNow
                             });
                         }
                     }

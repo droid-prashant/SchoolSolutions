@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,15 +50,17 @@ namespace Infrastructure.Services.ClassSections
             {
                 Id = x.Id,
                 Name = x.Name,
-                RoomNumber = x.RoomNumber,
+                OrderNumber = x.OrderNumber,
                 AcademicYear = x.AcademicYear,
+                CreatedOn = x.CreatedDate,
                 Sections = x.ClassSections.Where(c => c.ClassId == x.Id).Select(x => new SectionViewModel
                 {
                     SectionId = x.SectionId.ToString(),
                     Name = x.Section.Name,
                     ClassSectionId = x.Id.ToString()
                 }).ToList()
-            }).OrderBy(x => x.Id).ToListAsync();
+            }).OrderBy(x => x.OrderNumber)
+              .ToListAsync();
             return result;
         }
 
@@ -69,7 +72,8 @@ namespace Infrastructure.Services.ClassSections
                 SectionId = x.Id.ToString(),
                 Name = x.Name
 
-            }).ToListAsync();
+            }).OrderBy(x => x.Name)
+              .ToListAsync();
             return result;
         }
 
@@ -95,32 +99,71 @@ namespace Infrastructure.Services.ClassSections
                                                             {
                                                                 Id = x.Id,
                                                                 ClassRoomName = x.ClassRoom.Name,
-                                                                Section = x.Section.Name
-                                                            }).FirstOrDefaultAsync();
-            return null;
+                                                                Section = x.Section.Name,
+                                                                OrderNumber = x.ClassRoom.OrderNumber
+                                                            }).OrderBy(x => x.OrderNumber)
+                                                              .FirstOrDefaultAsync(cancellationToken);
+            return result;
         }
 
-        public Task AddSection(SectionDto section, CancellationToken cancellationToken)
+        public async Task AddSection(SectionDto section, CancellationToken cancellationToken)
         {
-            var sectionObj = new Section
+            bool checkSectionExist = await _context.Sections.AnyAsync(x => x.Name == section.Name);
+            if (!checkSectionExist)
             {
-                Name = section.Name,
-            };
-            _context.Sections.Add(sectionObj);
-            _context.SaveChangesAsync(cancellationToken);
-            return Task.CompletedTask;
+                var sectionObj = new Section
+                {
+                    Name = section.Name,
+                };
+                await _context.Sections.AddAsync(sectionObj);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                throw new Exception("Section Already Exist");
+            }
         }
 
         public async Task AddClass(ClassRoomDto classRoomDto, CancellationToken cancellationToken)
         {
-            var classRoom = new ClassRoom
+            bool checkClassExist = await _context.ClassRooms.AnyAsync(x => x.Name == classRoomDto.Name);
+            if (!checkClassExist)
             {
-                Name = classRoomDto.Name,
-                AcademicYear = DateTime.UtcNow.Year.ToString(),
-                RoomNumber = classRoomDto.RoomNumber
-            };
-            await _context.ClassRooms.AddAsync(classRoom);
-            await _context.SaveChangesAsync(cancellationToken);
+                var classRoom = new ClassRoom
+                {
+                    Name = classRoomDto.Name,
+                    AcademicYear = DateTime.UtcNow.Year.ToString(),
+                    OrderNumber = classRoomDto.OrderNumber
+                };
+                await _context.ClassRooms.AddAsync(classRoom);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                throw new Exception("Class name already exist");
+            }
+        }
+
+        public async Task UpdateClass(ClassRoomDto classRoomDto, CancellationToken cancellationToken)
+        {
+            var existingClass = await _context.ClassRooms.FirstOrDefaultAsync(x => x.Id == Guid.Parse(classRoomDto.Id));
+            if (existingClass != null)
+            {
+                existingClass.Name = classRoomDto.Name;
+                existingClass.OrderNumber = classRoomDto.OrderNumber;
+
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        public async Task UpdateSection(SectionDto section, CancellationToken cancellationToken)
+        {
+            var existingSection = await _context.Sections.FirstOrDefaultAsync(x => x.Id == Guid.Parse(section.SectionId));
+            if (existingSection != null)
+            {
+                existingSection.Name = section.Name;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
         }
     }
 }

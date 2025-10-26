@@ -1,5 +1,6 @@
+<p-toast></p-toast>
 <h2 class="mb-4">Add Section</h2>
-<form [formGroup]="sectionForm" (ngSubmit)="addSection()" class="p-fluid">
+<form [formGroup]="sectionForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
         <div class="field col-6">
@@ -7,7 +8,7 @@
             <input type="text" pInputText formControlName="name" />
         </div>
         <div class="col-12 text-right mt-2">
-            <button type="submit" pButton label="Register" class="p-button-success"
+            <button type="submit" pButton [label]="submitButtonLable" class="p-button-success"
                 [disabled]="sectionForm.invalid"></button>
         </div>
     </div>

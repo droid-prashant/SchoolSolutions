@@ -29,7 +29,7 @@ namespace Infrastructure.Services.SubjectMarks
             {
                 var studentResult = new ExamResult
                 {
-                    StudentId = Guid.Parse(subjectMarkDto.StudentId),
+                    StudentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId),
                     ExamType = subjectMarkDto.ExamType,
                     GPA = gpaAndTotalCreaditHour.GPA,
                     TotalCredit = gpaAndTotalCreaditHour.TotalCreditHour
@@ -52,7 +52,7 @@ namespace Infrastructure.Services.SubjectMarks
 
                     var subjectMark = new SubjectMark
                     {
-                        StudentId = Guid.Parse(subjectMarkDto.StudentId),
+                        StudentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId),
                         ClassCourseId = Guid.Parse(subjectMarkObj.ClassCourseId),
                         ExamResultId = studentResult.Id,
                         FullTheoryMarks = subjectMarkObj.TheoryFullMarks,
@@ -153,19 +153,19 @@ namespace Infrastructure.Services.SubjectMarks
             };
         }
 
-        public async Task<ResultViewModel> GetResult(Guid studentId, CancellationToken cancellationToken)
+        public async Task<ResultViewModel> GetResult(Guid studentEnrollmentId, CancellationToken cancellationToken)
         {
-            var result = await _context.ExamResults.Where(x => x.StudentId == studentId)
+            var result = await _context.ExamResults.Where(x => x.StudentEnrollmentId == studentEnrollmentId)
                                                    .Select(x => new ResultViewModel
                                                    {
                                                        ExamType = x.ExamType,
                                                        TotalCredit = x.TotalCredit,
                                                        GPA = x.GPA,
-                                                       StudentName = x.Student.FirstName + ' ' + x.Student.LastName,
-                                                       FatherName = x.Student.FatherName,
-                                                       MotherName = x.Student.MotherName,
-                                                       ClassRoom = x.Student.ClassSection.ClassRoom.Name,
-                                                       Section = x.Student.ClassSection.Section.Name,
+                                                       StudentName = x.StudentEnrollment.Student.FirstName + ' ' + x.StudentEnrollment.Student.LastName,
+                                                       FatherName = x.StudentEnrollment.Student.FatherName,
+                                                       MotherName = x.StudentEnrollment.Student.MotherName,
+                                                       ClassRoom = x.StudentEnrollment.ClassSection.ClassRoom.Name,
+                                                       Section = x.StudentEnrollment.ClassSection.Section.Name,
                                                        StudentMarks = x.SubjectMarks.Where(x => x.ClassCourseId == x.ClassCourseId)
                                                                                     .Select(s => new StudentMarksViewModel
                                                                                     {

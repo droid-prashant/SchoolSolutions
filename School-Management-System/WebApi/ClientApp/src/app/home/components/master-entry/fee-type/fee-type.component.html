@@ -1,5 +1,5 @@
 <h2 class="mb-4">Add Fee Type</h2>
-<form [formGroup]="feeTypeForm" (ngSubmit)="addFeeType()" class="p-fluid">
+<form [formGroup]="feeTypeForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
         <div class="field col-6">
@@ -21,7 +21,7 @@
         </div>
 
         <div class="col-12 text-right mt-2">
-            <button type="submit" pButton label="Register" class="p-button-success" [disabled]="feeTypeForm.invalid">
+            <button type="submit" pButton [label]="submitButtonLabel" class="p-button-success" [disabled]="feeTypeForm.invalid || isSubmitted">
             </button>
         </div>
 

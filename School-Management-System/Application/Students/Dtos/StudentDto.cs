@@ -15,6 +15,8 @@ namespace Application.Students.Dtos
         public string MotherName { get; set; }
         public int Gender { get; set; }
         public int Age { get; set; }
+        public string ParentContactNumber { get; set; }
+        public string ParentEmail { get; set; }
         public DateTime Dob { get; set; }
         public string Municipality { get; set; }
         public int WardNo { get; set; }

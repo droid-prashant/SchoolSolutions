@@ -21,21 +21,20 @@ namespace Infrastructure.Services.Students
         {
             _context = context;
         }
-
-        private async Task MapStudentFeesAsync(Student student, CancellationToken cancellationToken)
+        private async Task MapStudentFeesAsync(StudentEnrollment studentEnrollment, CancellationToken cancellationToken)
         {
-            var selectedClass = await _context.ClassSections.FirstOrDefaultAsync(x => x.Id == student.ClassSectionId);
-            if (selectedClass == null)
-            {
-                return ;
-            }
+            //var selectedClass = await _context.ClassSections.FirstOrDefaultAsync(x => x.Id == student.ClassSectionId);
+            //if (selectedClass == null)
+            //{
+            //    return ;
+            //}
             var admissionFee = await _context.FeeTypes.FirstOrDefaultAsync(x => x.Name == "Admission Fee");
             if (admissionFee == null)
             {
                 return;
             }
             var classFees = await _context.FeeStructures
-                .Where(f => f.ClassId == selectedClass.ClassId && f.FeeType.Id == admissionFee.Id)
+                .Where(f => f.ClassId == studentEnrollment.ClassSection.ClassId && f.FeeType.Id == admissionFee.Id)
                 .ToListAsync(cancellationToken);
 
             if (!classFees.Any())
@@ -43,7 +42,7 @@ namespace Infrastructure.Services.Students
 
             var studentFees = classFees.Select(fee => new StudentFee
             {
-                StudentId = student.Id,
+                StudentEnrollmentId = studentEnrollment.Id,
                 FeeStructureId = fee.Id,
                 Amount = fee.Amount,
                 IsPaid = false,
@@ -52,6 +51,20 @@ namespace Infrastructure.Services.Students
 
             await _context.StudentFees.AddRangeAsync(studentFees, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+        }
+        private async Task StudentEnrollent(Student student, string classSectionId, CancellationToken cancellationToken)
+        {
+            var academicYearId = new Guid();
+            var studentEnrollment = new StudentEnrollment
+            {
+                StudentId = student.Id,
+                AcademicYearId = academicYearId,
+                ClassSectionId = Guid.Parse(classSectionId),
+                CreatedDate = DateTime.UtcNow,
+                IsPromoted = true
+            };
+            await _context.StudentEnrollments.AddAsync(studentEnrollment);
+            await MapStudentFeesAsync(studentEnrollment, cancellationToken);
         }
         public async Task AddStudentAsync(StudentDto addStudent, CancellationToken cancellationToken)
         {
@@ -69,15 +82,16 @@ namespace Infrastructure.Services.Students
                     Age = addStudent.Age,
                     DateOfBirth = addStudent.Dob,
                     Municipality = addStudent.Municipality,
+                    ParentContactNumber = addStudent.ParentContactNumber,
+                    ParentEmail = addStudent.ParentEmail,
                     WardNo = addStudent.WardNo,
                     Address = addStudent.Address,
                     ContactNumber = addStudent.ContactNumber,
-                    ClassSectionId = Guid.Parse(addStudent.ClassSectionId),
                     CreatedDate = DateTime.UtcNow
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
-                await MapStudentFeesAsync(student, cancellationToken);
+                await StudentEnrollent(student, addStudent.ClassSectionId, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception ex)
@@ -87,61 +101,59 @@ namespace Infrastructure.Services.Students
             }
 
         }
-
         public async Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken)
         {
-            var students = await _context.Students.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).Select(x => new StudentViewModel
+            var students = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).Select(x => new StudentViewModel
             {
                 Id = x.Id,
-                Name = x.FirstName + " " + x.LastName,
-                Address = x.Address,
-                Age = x.Age,
+                Name = x.Student.FirstName + " " + x.Student.LastName,
+                Address = x.Student.Address,
+                Age = x.Student.Age,
                 ClassRoom = x.ClassSection.ClassRoom.Name,
                 Section = x.ClassSection.Section.Name,
-                Gender = x.Gender == 1 ? "Male" : "Female",
-                Municipality = x.Municipality,
-                WardNo = x.WardNo,
-                DateOfBirth = x.DateOfBirth.ToString("yyyy-MM-dd")
+                Gender = x.Student.Gender == 1 ? "Male" : "Female",
+                Municipality = x.Student.Municipality,
+                WardNo = x.Student.WardNo,
+                DateOfBirth = x.Student.DateOfBirth.ToString("yyyy-MM-dd")
 
-            })
-                .ToListAsync(cancellationToken);
+            }).OrderBy(x => x.Name)
+              .ToListAsync(cancellationToken);
             return students;
         }
         public async Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRooomId, CancellationToken cancellationToken)
         {
-            var students = await _context.Students.Include(x => x.ClassSection)
+            var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                    .ThenInclude(x => x.ClassRoom)
                                                   .Where(x => x.ClassSection.ClassId == classRooomId)
                                                   .Select(x => new StudentViewModel
                                                   {
                                                       Id = x.Id,
-                                                      Name = x.FirstName + " " + x.LastName,
-                                                      Address = x.Address,
-                                                      Age = x.Age,
+                                                      Name = x.Student.FirstName + " " + x.Student.LastName,
+                                                      Address = x.Student.Address,
+                                                      Age = x.Student.Age,
                                                       ClassRoom = x.ClassSection.ClassRoom.Name,
                                                       Section = x.ClassSection.Section.Name,
-                                                      Gender = x.Gender == 1 ? "Male" : "Female"
-                                                  })
-                .ToListAsync(cancellationToken);
+                                                      Gender = x.Student.Gender == 1 ? "Male" : "Female"
+                                                  }).OrderBy(x => x.Name)
+                                                    .ToListAsync(cancellationToken);
             return students;
         }
-
         public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, CancellationToken cancellationToken)
         {
-            var students = await _context.Students.Include(x => x.ClassSection)
+            var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                   .ThenInclude(x => x.ClassRoom)
                                                  .Where(x => x.ClassSection.Id == Guid.Parse(classSectionId))
                                                  .Select(x => new StudentViewModel
                                                  {
                                                      Id = x.Id,
-                                                     Name = x.FirstName + " " + x.LastName,
-                                                     Address = x.Address,
-                                                     Age = x.Age,
+                                                     Name = x.Student.FirstName + " " + x.Student.LastName,
+                                                     Address = x.Student.Address,
+                                                     Age = x.Student.Age,
                                                      ClassRoom = x.ClassSection.ClassRoom.Name,
                                                      Section = x.ClassSection.Section.Name,
-                                                     Gender = x.Gender == 1 ? "Male" : "Female"
-                                                 })
-               .ToListAsync(cancellationToken);
+                                                     Gender = x.Student.Gender == 1 ? "Male" : "Female"
+                                                 }).OrderBy(x => x.Name)
+                                                   .ToListAsync(cancellationToken);
             return students;
         }
     }

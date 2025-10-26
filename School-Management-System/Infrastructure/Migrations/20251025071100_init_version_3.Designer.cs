@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251019152851_reInitializeDb")]
-    partial class reInitializeDb
+    [Migration("20251025071100_init_version_3")]
+    partial class init_version_3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,42 @@ namespace Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Domain.AcademicYear", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("YearName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AcademicYears");
+                });
 
             modelBuilder.Entity("Domain.ClassCourse", b =>
                 {
@@ -96,9 +132,8 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RoomNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("OrderNumber")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -171,7 +206,7 @@ namespace Infrastructure.Migrations
                     b.Property<double>("GPA")
                         .HasColumnType("double precision");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("StudentEnrollmentId")
                         .HasColumnType("uuid");
 
                     b.Property<double>("TotalCredit")
@@ -179,7 +214,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentEnrollmentId");
 
                     b.ToTable("ExamResults");
                 });
@@ -364,7 +399,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("ClassSectionId")
+                    b.Property<Guid?>("ClassSectionId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ContactNumber")
@@ -423,6 +458,50 @@ namespace Infrastructure.Migrations
                     b.ToTable("Students");
                 });
 
+            modelBuilder.Entity("Domain.StudentEnrollment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AcademicYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassSectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EnrollmentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsPromoted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AcademicYearId");
+
+                    b.HasIndex("ClassSectionId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("StudentEnrollments");
+                });
+
             modelBuilder.Entity("Domain.StudentFee", b =>
                 {
                     b.Property<Guid>("Id")
@@ -453,14 +532,14 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("StudentEnrollmentId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("FeeStructureId");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentEnrollmentId");
 
                     b.ToTable("StudentFees");
                 });
@@ -522,7 +601,7 @@ namespace Infrastructure.Migrations
                     b.Property<double>("ObtainedTheoryMarks")
                         .HasColumnType("double precision");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("StudentEnrollmentId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -531,7 +610,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ExamResultId");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentEnrollmentId");
 
                     b.ToTable("SubjectMarks");
                 });
@@ -673,13 +752,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
-                    b.HasOne("Domain.Student", "Student")
+                    b.HasOne("Domain.StudentEnrollment", "StudentEnrollment")
                         .WithMany("ExamResults")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("StudentEnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Student");
+                    b.Navigation("StudentEnrollment");
                 });
 
             modelBuilder.Entity("Domain.FeeAdjustment", b =>
@@ -725,13 +804,36 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Student", b =>
                 {
-                    b.HasOne("Domain.ClassSection", "ClassSection")
+                    b.HasOne("Domain.ClassSection", null)
                         .WithMany("Students")
+                        .HasForeignKey("ClassSectionId");
+                });
+
+            modelBuilder.Entity("Domain.StudentEnrollment", b =>
+                {
+                    b.HasOne("Domain.AcademicYear", "AcademicYear")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("AcademicYearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.ClassSection", "ClassSection")
+                        .WithMany("StudentEnrollments")
                         .HasForeignKey("ClassSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Student", "Student")
+                        .WithMany("StudentEnrollments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AcademicYear");
+
                     b.Navigation("ClassSection");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.StudentFee", b =>
@@ -742,15 +844,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Student", "Student")
+                    b.HasOne("Domain.StudentEnrollment", "StudentEnrollment")
                         .WithMany("StudentFees")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("StudentEnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("FeeStructure");
 
-                    b.Navigation("Student");
+                    b.Navigation("StudentEnrollment");
                 });
 
             modelBuilder.Entity("Domain.SubjectMark", b =>
@@ -767,9 +869,9 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Student", "Student")
+                    b.HasOne("Domain.StudentEnrollment", "StudentEnrollment")
                         .WithMany("SubjectMarks")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("StudentEnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -777,7 +879,7 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("ExamResult");
 
-                    b.Navigation("Student");
+                    b.Navigation("StudentEnrollment");
                 });
 
             modelBuilder.Entity("Domain.TeacherClassSection", b =>
@@ -799,6 +901,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Domain.AcademicYear", b =>
+                {
+                    b.Navigation("Enrollments");
+                });
+
             modelBuilder.Entity("Domain.ClassCourse", b =>
                 {
                     b.Navigation("SubjectMarks");
@@ -817,6 +924,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.ClassSection", b =>
                 {
+                    b.Navigation("StudentEnrollments");
+
                     b.Navigation("Students");
 
                     b.Navigation("TeacherClassSections");
@@ -848,6 +957,11 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Domain.Student", b =>
+                {
+                    b.Navigation("StudentEnrollments");
+                });
+
+            modelBuilder.Entity("Domain.StudentEnrollment", b =>
                 {
                     b.Navigation("ExamResults");
 

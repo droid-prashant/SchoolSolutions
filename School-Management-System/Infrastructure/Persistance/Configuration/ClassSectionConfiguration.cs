@@ -14,7 +14,7 @@ namespace Infrastructure.Persistance.Configuration
         public void Configure(EntityTypeBuilder<ClassSection> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.HasMany(x => x.Students)
+            builder.HasMany(x => x.StudentEnrollments)
                    .WithOne(x => x.ClassSection)
                    .HasForeignKey(x => x.ClassSectionId);
 

@@ -8,6 +8,7 @@ namespace Application.ClassSections.Dtos
 {
     public class SectionDto
     {
+        public string? SectionId { get; set; }
         public string Name { get; set; }
     }
 }

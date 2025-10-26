@@ -15,9 +15,9 @@ namespace Infrastructure.Persistance.Configuration
         public void Configure(EntityTypeBuilder<SubjectMark> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.HasOne(x => x.Student)
+            builder.HasOne(x => x.StudentEnrollment)
                    .WithMany(x => x.SubjectMarks)
-                   .HasForeignKey(x => x.StudentId);
+                   .HasForeignKey(x => x.StudentEnrollmentId);
 
             builder.HasOne(x => x.ClassCourse)
                    .WithMany(x=>x.SubjectMarks)

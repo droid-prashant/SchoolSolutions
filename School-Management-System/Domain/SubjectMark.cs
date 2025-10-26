@@ -19,8 +19,8 @@ namespace Domain
         public double GradePointPractical { get; set; }
         public string FinalGrade { get; set; }
         public double FinalGradePoint { get; set; }
-        public Guid StudentId { get; set; }
-        public Student Student { get; set; }
+        public Guid StudentEnrollmentId { get; set; }
+        public StudentEnrollment StudentEnrollment { get; set; }
         public Guid ClassCourseId { get; set; }
         public ClassCourse ClassCourse { get; set; }
         public Guid ExamResultId { get; set; }

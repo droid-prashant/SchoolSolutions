@@ -14,7 +14,9 @@ namespace Application.ClassSections.Interfaces
         Task<List<SectionViewModel>> GetAllSections(CancellationToken cancellationToken);
         Task CreateClassSection(ClassSectionDto classSectionDto, CancellationToken cancellationToken);
         Task AddSection(SectionDto section, CancellationToken cancellationToken);
+        Task UpdateSection(SectionDto section, CancellationToken cancellationToken);
         Task AddClass(ClassRoomDto classRoomDto, CancellationToken cancellationToken);
+        Task UpdateClass(ClassRoomDto classRoomDto, CancellationToken cancellationToken);
         Task<List<ClassSectionViewModel>> GetAllClassSections(CancellationToken cancellationToken);
         Task<ClassSectionViewModel> GetClassSectionDetails(Guid classSectionId, CancellationToken cancellationToken);
     }

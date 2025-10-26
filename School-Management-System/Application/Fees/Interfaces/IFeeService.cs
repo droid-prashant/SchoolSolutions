@@ -12,10 +12,10 @@ namespace Application.Fees.Interfaces
     {
         Task<List<FeeTypeViewModel>> GetFeeType(CancellationToken cancellationToken);
         Task<List<FeeStructureViewModel>> GetFeeStructure(string classId, CancellationToken cancellationToken);
-        Task<StudentFeeSummaryViewModel> GetStudentFeeSummary(string studentId, string classSectionId, CancellationToken cancellationToken);
+        Task<StudentFeeSummaryViewModel> GetStudentFeeSummary(string studentEnrollmentId, string classSectionId, CancellationToken cancellationToken);
         Task AddFeeType(FeeTypeDto feeTypeDto, CancellationToken cancellationToken);
         Task AddFeeStructure(FeeStructureDto feeStructureDto, CancellationToken cancellationToken);
-        Task EnsureMissingMonthlyFeesAsync(string studentId, CancellationToken cancellationToken);
+        Task EnsureMissingMonthlyFeesAsync(string studentEnrollmentIdGuid, CancellationToken cancellationToken);
         Task UpdateFeeType(FeeTypeDto feeTypeDto, string feeTypeId, CancellationToken cancellationToken);
         Task UpdateFeeSctucture(FeeStructureDto feeStructureDto, string feeStructureId, CancellationToken cancellationToken);
         Task PayStudentFeeAsync(Guid studentFeeId, decimal amount, string paymentMode, CancellationToken cancellationToken);

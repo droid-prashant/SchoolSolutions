@@ -12,5 +12,6 @@ namespace Application.ClassSections.VieModels
         public Guid SectionId { get; set; }
         public string ClassRoomName { get; set; }
         public string Section { get; set; }
+        public int OrderNumber { get; set; }
     }
 }

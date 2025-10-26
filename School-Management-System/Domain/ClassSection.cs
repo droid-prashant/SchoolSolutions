@@ -13,7 +13,8 @@ namespace Domain
         public ClassRoom ClassRoom { get; set; }
         public Guid SectionId { get; set; }
         public Section Section { get; set; }
-        public ICollection<Student> Students { get; set; }
-        public ICollection<TeacherClassSection> TeacherClassSections { get; set; }
+        public ICollection<Student> Students { get; set; } = new List<Student>();
+        public ICollection<TeacherClassSection> TeacherClassSections { get; set; } = new List<TeacherClassSection>();
+        public ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
     }
 }

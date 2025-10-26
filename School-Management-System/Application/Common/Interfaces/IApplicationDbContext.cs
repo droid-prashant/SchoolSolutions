@@ -11,6 +11,8 @@ namespace Application.Common.Interfaces
 {
     public interface IApplicationDbContext
     {
+        DbSet<AcademicYear> AcademicYears { get; }
+        DbSet<StudentEnrollment> StudentEnrollments { get; }
         DbSet<Teacher> Teachers { get; }
         DbSet<Student> Students { get; }
         DbSet<Course> Courses { get; }

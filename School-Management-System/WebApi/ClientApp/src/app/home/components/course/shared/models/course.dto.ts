@@ -1,4 +1,5 @@
 export interface CourseDto {
+  id: string;
   name: string;
   theoryCreditHour: string;
   practicalCreditHour: string;

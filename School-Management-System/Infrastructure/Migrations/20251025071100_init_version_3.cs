@@ -6,18 +6,37 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class reInitializeDb : Migration
+    public partial class init_version_3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AcademicYears",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    YearName = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AcademicYears", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "ClassRooms",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    RoomNumber = table.Column<string>(type: "text", nullable: false),
+                    OrderNumber = table.Column<int>(type: "integer", nullable: false),
                     AcademicYear = table.Column<string>(type: "text", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -211,7 +230,7 @@ namespace Infrastructure.Migrations
                     WardNo = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     ContactNumber = table.Column<string>(type: "text", nullable: false),
-                    ClassSectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassSectionId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -224,8 +243,7 @@ namespace Infrastructure.Migrations
                         name: "FK_Students_ClassSections_ClassSectionId",
                         column: x => x.ClassSectionId,
                         principalTable: "ClassSections",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -258,11 +276,49 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExamResults",
+                name: "StudentEnrollments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassSectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AcademicYearId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EnrollmentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsPromoted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentEnrollments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentEnrollments_AcademicYears_AcademicYearId",
+                        column: x => x.AcademicYearId,
+                        principalTable: "AcademicYears",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentEnrollments_ClassSections_ClassSectionId",
+                        column: x => x.ClassSectionId,
+                        principalTable: "ClassSections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentEnrollments_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExamResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentEnrollmentId = table.Column<Guid>(type: "uuid", nullable: false),
                     ExamType = table.Column<string>(type: "text", nullable: false),
                     TotalCredit = table.Column<double>(type: "double precision", nullable: false),
                     GPA = table.Column<double>(type: "double precision", nullable: false)
@@ -271,9 +327,9 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ExamResults", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ExamResults_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
+                        name: "FK_ExamResults_StudentEnrollments_StudentEnrollmentId",
+                        column: x => x.StudentEnrollmentId,
+                        principalTable: "StudentEnrollments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -283,7 +339,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentEnrollmentId = table.Column<Guid>(type: "uuid", nullable: false),
                     FeeStructureId = table.Column<Guid>(type: "uuid", nullable: false),
                     FeeMonth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
@@ -303,9 +359,9 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StudentFees_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
+                        name: "FK_StudentFees_StudentEnrollments_StudentEnrollmentId",
+                        column: x => x.StudentEnrollmentId,
+                        principalTable: "StudentEnrollments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -325,7 +381,7 @@ namespace Infrastructure.Migrations
                     GradePointPractical = table.Column<double>(type: "double precision", nullable: false),
                     FinalGrade = table.Column<string>(type: "text", nullable: false),
                     FinalGradePoint = table.Column<double>(type: "double precision", nullable: false),
-                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentEnrollmentId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClassCourseId = table.Column<Guid>(type: "uuid", nullable: false),
                     ExamResultId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -349,9 +405,9 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SubjectMarks_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
+                        name: "FK_SubjectMarks_StudentEnrollments_StudentEnrollmentId",
+                        column: x => x.StudentEnrollmentId,
+                        principalTable: "StudentEnrollments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -433,9 +489,9 @@ namespace Infrastructure.Migrations
                 column: "ClassRoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExamResults_StudentId",
+                name: "IX_ExamResults_StudentEnrollmentId",
                 table: "ExamResults",
-                column: "StudentId");
+                column: "StudentEnrollmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FeeAdjustments_StudentFeeId",
@@ -458,14 +514,29 @@ namespace Infrastructure.Migrations
                 column: "StudentFeeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudentEnrollments_AcademicYearId",
+                table: "StudentEnrollments",
+                column: "AcademicYearId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentEnrollments_ClassSectionId",
+                table: "StudentEnrollments",
+                column: "ClassSectionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentEnrollments_StudentId",
+                table: "StudentEnrollments",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentFees_FeeStructureId",
                 table: "StudentFees",
                 column: "FeeStructureId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentFees_StudentId",
+                name: "IX_StudentFees_StudentEnrollmentId",
                 table: "StudentFees",
-                column: "StudentId");
+                column: "StudentEnrollmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassSectionId",
@@ -483,9 +554,9 @@ namespace Infrastructure.Migrations
                 column: "ExamResultId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SubjectMarks_StudentId",
+                name: "IX_SubjectMarks_StudentEnrollmentId",
                 table: "SubjectMarks",
-                column: "StudentId");
+                column: "StudentEnrollmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TeacherClassSection_ClassSectionId",
@@ -532,10 +603,16 @@ namespace Infrastructure.Migrations
                 name: "Courses");
 
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "StudentEnrollments");
 
             migrationBuilder.DropTable(
                 name: "FeeTypes");
+
+            migrationBuilder.DropTable(
+                name: "AcademicYears");
+
+            migrationBuilder.DropTable(
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "ClassSections");

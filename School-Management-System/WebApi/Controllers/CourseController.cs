@@ -56,9 +56,16 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddCourse")]
-        public async Task Post([FromBody] CourseDto courseDto, CancellationToken cancellationToken)
+        public async Task AddCourse([FromBody] CourseDto courseDto, CancellationToken cancellationToken)
         {
             await _courseService.AddCourse(courseDto, cancellationToken);
+        }
+
+        [HttpPut]
+        [Route("UpdateCourse")]
+        public async Task UpdateCourse([FromBody] CourseDto courseDto, CancellationToken cancellationToken)
+        {
+            await _courseService.UpdateCourse(courseDto, cancellationToken);
         }
 
         [HttpPut("{id}")]

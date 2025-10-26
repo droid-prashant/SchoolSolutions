@@ -11,6 +11,6 @@ namespace Application.SubjectMarks.Interfaces
     public interface IExamService
     {
         Task AddSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken);
-        Task<ResultViewModel> GetResult(Guid studentId, CancellationToken cancellationToken);
+        Task<ResultViewModel> GetResult(Guid studentEnrollmentId, CancellationToken cancellationToken);
     }
 }
