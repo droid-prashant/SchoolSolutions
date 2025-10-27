@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import {ButtonModule} from 'primeng/button'
+import { ButtonModule } from 'primeng/button'
 import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { SplitterModule } from 'primeng/splitter';
@@ -22,10 +22,12 @@ import { TagModule } from 'primeng/tag';
 import { NgxPrintModule } from 'ngx-print';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { DividerModule } from 'primeng/divider';
+import { PasswordModule } from 'primeng/password';
+import { CheckboxModule } from 'primeng/checkbox';
 
 @NgModule({
-    declarations:[],
-    imports:[
+    declarations: [],
+    imports: [
         CommonModule,
         ButtonModule,
         InputTextModule,
@@ -48,9 +50,11 @@ import { DividerModule } from 'primeng/divider';
         TagModule,
         NgxPrintModule,
         InputSwitchModule,
-        DividerModule
+        DividerModule,
+        PasswordModule,
+        CheckboxModule
     ],
-    exports:[
+    exports: [
         CommonModule,
         ButtonModule,
         InputTextModule,
@@ -73,7 +77,9 @@ import { DividerModule } from 'primeng/divider';
         TagModule,
         NgxPrintModule,
         InputSwitchModule,
-        DividerModule
+        DividerModule,
+        PasswordModule,
+        CheckboxModule
     ]
 })
-export class SharedModule{}
+export class SharedModule { }

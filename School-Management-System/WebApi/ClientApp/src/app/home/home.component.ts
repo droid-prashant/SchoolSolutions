@@ -42,6 +42,7 @@ export class HomeComponent implements OnInit {
         label: 'Master Entry',
         icon: PrimeIcons.USERS,
         items: [
+          { label: 'Academic Year Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-academic-year'] },
           { label: 'Class Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-class'] },
           { label: 'Section Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-section'] },
           { label: 'Course Entry', icon: PrimeIcons.PLUS, routerLink: ['/home/master-entry/add-course'] },

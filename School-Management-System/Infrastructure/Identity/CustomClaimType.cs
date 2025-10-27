@@ -9,6 +9,7 @@ namespace Infrastructure.Identity
     public class CustomClaimType
     {
         public const string Permission = "permission";
+        public const string AcademicYear = "academicYear";
 
     }
 }

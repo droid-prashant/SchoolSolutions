@@ -1,0 +1,79 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #3b82f6, #9333ea);
+  animation: fadeIn 1s ease-in;
+}
+
+:host {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
+
+.login-card {
+  width: 400px;
+  padding: 2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 1rem;
+  background: white;
+  animation: slideUp 0.8s ease-in-out;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  text-decoration: none;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.signup-text {
+  text-align: center;
+}
+
+.signup-text a {
+  color: #9333ea;
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,73 @@
+<div class="register-container">
+  <p-card class="register-card" header="Create Account ✨" subheader="Fill out the details below">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="p-fluid">
+
+        <div class="field">
+          <label for="fullName">Full Name</label>
+          <input id="fullName" type="text" pInputText formControlName="fullName" placeholder="Enter your full name" />
+          <small *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched" class="p-error">
+            Full name is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" pInputText formControlName="email" placeholder="Enter your email" />
+          <small *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="p-error">
+            Valid email is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" type="text" pInputText formControlName="username" placeholder="Choose a username" />
+          <small *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="p-error">
+            Username is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <p-password
+            id="password"
+            formControlName="password"
+            [feedback]="true"
+            toggleMask="true"
+            placeholder="Create a password"
+          ></p-password>
+          <small *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="p-error">
+            Password must be at least 6 characters
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <p-password
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            [feedback]="false"
+            toggleMask="true"
+            placeholder="Re-enter password"
+          ></p-password>
+          <small *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched" class="p-error">
+            Passwords do not match
+          </small>
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Register"
+          icon="pi pi-user-plus"
+          class="p-button-rounded p-button-lg w-full mt-3"
+          [disabled]="registerForm.invalid"
+        ></button>
+      </div>
+    </form>
+
+    <div class="login-text mt-3">
+      <p>Already have an account? <a routerLink="/login">Login</a></p>
+    </div>
+  </p-card>
+</div>

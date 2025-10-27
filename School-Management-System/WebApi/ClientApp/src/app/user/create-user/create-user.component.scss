@@ -1,0 +1,46 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #9333ea, #3b82f6);
+  animation: fadeIn 1s ease-in;
+}
+
+.register-card {
+  width: 420px;
+  padding: 2rem;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.8s ease-in-out;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.login-text {
+  text-align: center;
+}
+
+.login-text a {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

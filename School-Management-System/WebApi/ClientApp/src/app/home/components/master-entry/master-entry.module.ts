@@ -8,6 +8,7 @@ import { ClassEntryComponent } from "./class-entry/class-entry.component";
 import { CourseEntryComponent } from "./course-entry/course-entry.component";
 import { SectionEntryComponent } from "./section-entry/section-entry.component";
 import { FeeTypeComponent } from "./fee-type/fee-type.component";
+import { AcademicYearEntryComponent } from "./academic-year-entry/academic-year-entry.component";
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { FeeTypeComponent } from "./fee-type/fee-type.component";
         ClassEntryComponent,
         CourseEntryComponent,
         SectionEntryComponent,
-        FeeTypeComponent
+        FeeTypeComponent,
+        AcademicYearEntryComponent
     ],
     imports: [
         CommonModule,

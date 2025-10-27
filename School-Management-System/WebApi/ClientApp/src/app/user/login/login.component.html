@@ -1,0 +1,47 @@
+<div class="login-container">
+    <p-card class="login-card" header="Welcome Back 👋" subheader="Please login to your account">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="p-fluid">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" pInputText formControlName="username"
+                        placeholder="Enter your username" />
+                    <small *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+                        class="p-error">
+                        Username is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <p-password id="password" formControlName="password" [feedback]="true" toggleMask="true"
+                        placeholder="Enter your password"></p-password>
+                    <small *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                        class="p-error">
+                        Password is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="academicYear">Academic Year</label>
+                    <p-dropdown [options]="academicYearList" optionLabel="yearName" optionValue="id"
+                        formControlName="academicYear" placeholder="Select Academic Year"></p-dropdown>
+                    <small *ngIf="loginForm.get('academicYear')?.invalid && loginForm.get('academicYear')?.touched"
+                        class="p-error">
+                        Academic Year is required
+                    </small>
+                </div>
+
+                <div class="remember-forgot">
+                    <p-checkbox inputId="remember" formControlName="remember"></p-checkbox>
+                    <label for="remember">Remember me</label>
+                    <a class="forgot-link" routerLink="/forgot-password">Forgot Password?</a>
+                </div>
+
+                <button pButton type="submit" label="Login" class="p-button-rounded p-button-lg w-full mt-3"
+                    [disabled]="!loginForm.valid">
+                </button>
+            </div>
+        </form>
+    </p-card>
+</div>

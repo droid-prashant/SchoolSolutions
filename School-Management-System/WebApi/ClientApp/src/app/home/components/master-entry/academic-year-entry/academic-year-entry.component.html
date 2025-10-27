@@ -1,0 +1,55 @@
+<p-toast></p-toast>
+<div class="card">
+    <form [formGroup]="academicYearForm" (ngSubmit)="submit()" class="p-fluid">
+        <div class="formgrid grid">
+            <div class="field col-6">
+                <label>Academic Year Name</label>
+                <input type="text" pInputText formControlName="yearName" />
+            </div>
+            <div class="field col-6">
+                <label>Active</label>
+                <div class="switch-container">
+                </div>
+                <p-inputSwitch formControlName="isActive"></p-inputSwitch>
+                <!-- <input type="text" pInputText formControlName="isActive" /> -->
+            </div>
+            <div class="field col-6">
+                <label>Start Date</label>
+                <p-calendar formControlName="startDate" />
+            </div>
+            <div class="field col-6">
+                <label>End Date</label>
+                <p-calendar formControlName="endDate" />
+            </div>
+        </div>
+        <div class="col-12 text-right mt-2">
+            <button type="submit" pButton [label]="submitButtonLabel" class="p-button-success"
+                [disabled]="academicYearForm.invalid || isSubmitted"></button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <p-table [value]="academicYearList" dataKey="id" [tableStyle]="{'min-width': '50rem'}">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Id</th>
+                <th>Year Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Active</th>
+                <th>Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-academic let-rowIndex="rowIndex" let-editing="editing" let-ri="rowIndex">
+            <tr>
+                <td>{{ rowIndex + 1 }}</td>
+                <td>{{ academic.yearName }}</td>
+                <td>{{ academic.startDate }}</td>
+                <td>{{ academic.endDate }}</td>
+                <td>{{ academic.isActive }}</td>
+                <td><i pTooltip="edit" class="pi pi-pencil" (click)="editAcademicYear(academic)"></i></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

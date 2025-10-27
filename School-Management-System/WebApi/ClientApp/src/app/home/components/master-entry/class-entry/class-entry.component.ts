@@ -72,7 +72,7 @@ export class ClassEntryComponent implements OnInit {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Updated Class' });
       },
       error: (err) => {
-        this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'Failed to update Class' });
+        this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update Class' });
       },
       complete: () => {
         this.isSubmitted = false;
@@ -90,7 +90,7 @@ export class ClassEntryComponent implements OnInit {
         this.classList = response;
       },
       error: (err) => {
-        this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'Failed to load Class' });
+        this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load Class' });
       }
     })
   }

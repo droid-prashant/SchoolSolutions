@@ -60,7 +60,6 @@ namespace Infrastructure.Identity
                     scope.Complete();
                 }
 
-                return finalResult.ToApplicationResult();
             }
             catch (Exception ex)
             {
@@ -92,7 +91,6 @@ namespace Infrastructure.Identity
                 }
                 scope.Complete();
             }
-            return finalResult.ToApplicationResult();
         }
 
         public async Task<TokenViewModel> LoginUserAsync(LoginUserDto loginUserDto, CancellationToken cancellationToken)
@@ -121,7 +119,7 @@ namespace Infrastructure.Identity
                 }
                 else
                 {
-                    List<Claim> claims = await ConstructUserClaimAsync(identityUser);
+                    List<Claim> claims = await ConstructUserClaimAsync(identityUser, loginUserDto.AcademicYear);
                     JwtSecurityToken token = GenerateJwtTokenAsync(claims);
                     TokenViewModel tokenResult = new TokenViewModel
                     {
@@ -133,18 +131,26 @@ namespace Infrastructure.Identity
                 }
             }
         }
-        private async Task<List<Claim>> ConstructUserClaimAsync(ApplicationUser user)
+        private async Task<List<Claim>> ConstructUserClaimAsync(ApplicationUser user, string academicYear)
         {
             var roles = await _userManager.GetRolesAsync(user);
+            bool isAcademicClaimExist = await CheckAcademicClaimExist(user);
+            if (isAcademicClaimExist)
+            {
+                var existingClaim = (await _userManager.GetClaimsAsync(user)).First(x => x.Type == CustomClaimType.AcademicYear);
+                await _userManager.RemoveClaimAsync(user, existingClaim);
+            }
+            Claim claim = new Claim(CustomClaimType.AcademicYear, academicYear);
+            await _userManager.AddClaimAsync(user, claim);
             List<Claim> assignedRoles = roles.Select(role => new Claim("roles", role)).ToList();
             List<Claim> userClaims = (await _userManager.GetClaimsAsync(user)).ToList();
             List<Claim> claims = userClaims.Union(assignedRoles).ToList();
 
-            foreach(var role in roles)
+            foreach (var role in roles)
             {
                 ApplicationRole appRole = await _roleManager.FindByNameAsync(role);
                 IList<Claim> roleClaims = await _roleManager.GetClaimsAsync(appRole);
-                claims= claims.Union(roleClaims).ToList();
+                claims = claims.Union(roleClaims).ToList();
             }
 
             claims = new List<Claim>(claims)
@@ -154,6 +160,12 @@ namespace Infrastructure.Identity
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
             return claims;
+        }
+
+        private async Task<bool> CheckAcademicClaimExist(ApplicationUser user)
+        {
+            bool isExist = (await _userManager.GetClaimsAsync(user)).Any(x => x.Type == CustomClaimType.AcademicYear);
+            return isExist;
         }
         private JwtSecurityToken GenerateJwtTokenAsync(List<Claim> claims)
         {

@@ -20,6 +20,8 @@ import { FeeStructureDto } from '../home/components/fees/model/feeStructure.dto'
 import { FeeStructureViewModel } from '../home/components/fees/model/feeStructure.viewModel';
 import { StudentFeeSummaryViewModel } from '../home/components/fees/model/studentFeeSummary.viewModel';
 import { ClassRoomDto } from '../home/components/master-entry/model/dtos/classRoom.dto';
+import { AcademicYearDto } from '../home/components/master-entry/model/dtos/academicYear.dto';
+import { AcademicViewModel } from '../home/components/master-entry/model/viewModels/academicYear.ViewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +29,18 @@ import { ClassRoomDto } from '../home/components/master-entry/model/dtos/classRo
 export class ApiService {
   baseUrl: string = environment.API_BASE_URL;
   constructor(private _httpClient: HttpClient) { }
+
+  postAcademicYear(academicYearDetail: AcademicYearDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Academic/AddAcademicYear", academicYearDetail);
+  }
+
+  getAcademicYear(): Observable<AcademicViewModel[]> {
+    return this._httpClient.get<AcademicViewModel[]>(this.baseUrl + "api/Academic/GetAllAcademicYear");
+  }
+
+  putAcademicYear(academicYearDetail: AcademicYearDto, academicYearId: string): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Academic/UpdateAcademicYear?academicYearId?${academicYearId}`, academicYearDetail);
+  }
 
   postStudent(student: StudentDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Student/AddStudent", student);
