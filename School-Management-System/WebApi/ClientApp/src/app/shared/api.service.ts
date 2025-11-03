@@ -22,6 +22,9 @@ import { StudentFeeSummaryViewModel } from '../home/components/fees/model/studen
 import { ClassRoomDto } from '../home/components/master-entry/model/dtos/classRoom.dto';
 import { AcademicYearDto } from '../home/components/master-entry/model/dtos/academicYear.dto';
 import { AcademicViewModel } from '../home/components/master-entry/model/viewModels/academicYear.ViewModel';
+import { StudentEnrollmentViewModel } from '../home/components/exam/shared/viewModels/studentEnrollment.viewModel';
+import { StudentStudentEnrollmentDto } from '../home/components/exam/shared/models/examEnrollment.dto';
+import { ProvinceViewModel } from './common/models/master/master.ViewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +43,10 @@ export class ApiService {
 
   putAcademicYear(academicYearDetail: AcademicYearDto, academicYearId: string): Observable<void> {
     return this._httpClient.put<void>(this.baseUrl + `api/Academic/UpdateAcademicYear?academicYearId?${academicYearId}`, academicYearDetail);
+  }
+
+   getProvinceDetails(): Observable<ProvinceViewModel[]> {
+    return this._httpClient.get<ProvinceViewModel[]>(this.baseUrl + "api/MasterData/GetAllProvince");
   }
 
   postStudent(student: StudentDto): Observable<void> {
@@ -117,8 +124,8 @@ export class ApiService {
     return this._httpClient.post<void>(this.baseUrl + "api/Exam/AddMarks", studentmarks);
   }
 
-  getResult(studentId: string): Observable<ResultViewModel> {
-    return this._httpClient.get<ResultViewModel>(this.baseUrl + `api/Exam/GetResult?studentId=${studentId}`);
+  getResult(studentEnrollmentId: string): Observable<ResultViewModel> {
+    return this._httpClient.get<ResultViewModel>(this.baseUrl + `api/Exam/GetResult?studentEnrollmentId=${studentEnrollmentId}`);
   }
 
   postFeeType(feeTypeData: FeeTypeDto): Observable<void> {
@@ -137,8 +144,8 @@ export class ApiService {
     return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeStructure", feeStructure);
   }
 
-  ensureMissingMonthlyFees(studentId: string): Observable<void> {
-    return this._httpClient.get<void>(this.baseUrl + `api/Fees/EnsureMissingMonthlyFees?studentId=${studentId}`);
+  ensureMissingMonthlyFees(studentEnrollmentIdGuid: string): Observable<void> {
+    return this._httpClient.get<void>(this.baseUrl + `api/Fees/EnsureMissingMonthlyFees?studentEnrollmentIdGuid=${studentEnrollmentIdGuid}`);
   }
 
   putFeeStructure(feeStructure: FeeStructureDto, feeStructureId: string): Observable<void> {
@@ -150,6 +157,17 @@ export class ApiService {
   }
 
   getStudentFeeSummary(studentId: string, classSectionId: string): Observable<StudentFeeSummaryViewModel> {
-    return this._httpClient.get<StudentFeeSummaryViewModel>(this.baseUrl + `api/Fees/GetStudentFeeSummary?studentId=${studentId}&classSectionId=${classSectionId}`);
+    return this._httpClient.get<StudentFeeSummaryViewModel>(this.baseUrl + `api/Fees/GetStudentFeeSummary?studentEnrollmentIdGuid=${studentId}&classSectionId=${classSectionId}`);
+  }
+
+  payFees(paymentRequest: any): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeStructure", paymentRequest);
+  }
+  assignRegistrationAndSymbolNumber(paymentRequest: StudentStudentEnrollmentDto, studentEnrollmentId:string): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + `api/Student/AssignRegistrationAndSymbolNumber?studentEnrollmentId=${studentEnrollmentId}`, paymentRequest);
+  }
+
+  getRegAndSymCompliantStudent(classSectionId: any): Observable<StudentEnrollmentViewModel[]> {
+    return this._httpClient.get<StudentEnrollmentViewModel[]>(this.baseUrl + `api/Student/GetRegAndSymCompliantEnrolledStudents?classSectionId=${classSectionId}`);
   }
 }

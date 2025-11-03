@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../../shared/api.service';
 import { Router } from '@angular/router';
-import { ClassSectionViewModel } from '../../class-room/shared/models/viewModels/classSectionviewModel';
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
 import { StudentDto } from '../shared/models/dtos/student.dto';
+import { ProvinceViewModel } from '../../../../shared/common/models/master/master.ViewModel';
+import { DistrictViewModel } from '../../../../shared/common/models/master/district.ViewModel';
+import { MunicipalityViewModel } from '../../../../shared/common/models/master/municipality.ViewModel';
 
 @Component({
   selector: 'app-add-student',
@@ -17,6 +19,10 @@ export class AddStudentComponent implements OnInit {
   genders: any[] = []
   classRooms: ClassRoomViewModel[] = []
   sections: SectionViewModel[] = [];
+  provinceDetails: ProvinceViewModel[] = [];
+  selectedDistricts: DistrictViewModel[] = [];
+  selectedMunicipalities: MunicipalityViewModel[] = [];
+
   selectedClass!: ClassRoomViewModel
   studentForm: FormGroup
   constructor(private _fb: FormBuilder,
@@ -34,10 +40,14 @@ export class AddStudentComponent implements OnInit {
       age: [null, [Validators.required, Validators.min(1)]],
       address: ['', Validators.required],
       dob: ['', Validators.required],
-      municipality: ['', Validators.required],
       wardNo: ['', Validators.required],
       contactNumber: ['', Validators.required],
-      classSectionId: [null, Validators.required]
+      parentContactNumber: ['', Validators.required],
+      parentEmail: ['', Validators.required],
+      classSectionId: [null, Validators.required],
+      provinceId: [null, Validators.required],
+      districtId: [null, Validators.required],
+      municipalityId: [null, Validators.required]
     });
   }
   ngOnInit(): void {
@@ -47,6 +57,28 @@ export class AddStudentComponent implements OnInit {
       { label: 'Other', value: 3 }
     ];
     this.getClassRooms();
+    this.getProvinceDetails();
+    this.studentForm.get('provinceId')?.valueChanges.subscribe(value => {
+      this.onProvinceChange(value);
+    })
+    this.studentForm.get('districtId')?.valueChanges.subscribe(value => {
+      if (value != null) {
+        this.onDistrictChange(value);
+      }
+    })
+  }
+
+  getProvinceDetails() {
+    this._apiService.getProvinceDetails().subscribe(
+      {
+        next: (response) => {
+          this.provinceDetails = response;
+          console.log()
+        },
+        error: (err) => console.log(err),
+        complete: () => console.log("Request is complete")
+      }
+    )
   }
 
   getClassRooms() {
@@ -62,7 +94,7 @@ export class AddStudentComponent implements OnInit {
   }
 
   addStudent() {
-    let student:StudentDto = this.studentForm.value;
+    let student: StudentDto = this.studentForm.value;
     this._apiService.postStudent(student).subscribe(
       {
         next: (response) => this._router.navigateByUrl("/home/student/list-student"),
@@ -87,6 +119,27 @@ export class AddStudentComponent implements OnInit {
       const selectedClassSection = this.sections.filter(x => x.sectionId === sectionId);
       const selectedCLassSectionId = selectedClassSection[0].classSectionId;
       this.studentForm.get('classSectionId')?.setValue(selectedCLassSectionId);
+    }
+  }
+
+  onProvinceChange(provinceId: any) {
+    this.studentForm.get('districtId')?.patchValue(null);
+    this.studentForm.get('municipalityId')?.patchValue(null);
+    if (provinceId) {
+      const selectedProvince = this.provinceDetails.find(x => x.id == provinceId)
+      if (selectedProvince) {
+        this.selectedDistricts = selectedProvince.districts;
+      }
+    }
+  }
+
+  onDistrictChange(districtId: any) {
+    this.studentForm.get('')
+    if (districtId) {
+      const selectedMunicipalities = this.selectedDistricts.find(x => x.id == districtId)
+      if (selectedMunicipalities) {
+        this.selectedMunicipalities = selectedMunicipalities.municipalities;
+      }
     }
   }
 }

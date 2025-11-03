@@ -46,6 +46,16 @@
     </div>
 
     <div class="field col-6">
+      <label>Parent Email</label>
+      <input type="text" pInputText formControlName="parentEmail" />
+    </div>
+
+    <div class="field col-6">
+      <label>Parent Contact</label>
+      <input type="text" pInputText formControlName="parentContactNumber" />
+    </div>
+
+    <div class="field col-6">
       <label>Address</label>
       <input rows="3" pInputText formControlName="address" />
     </div>
@@ -56,8 +66,28 @@
     </div>
 
     <div class="field col-6">
+      <label>Province</label>
+      <p-dropdown [options]="provinceDetails" optionLabel="name" optionValue="id" formControlName="provinceId"
+        placeholder="Select Province" [style]="{ width: '100%' }">
+      </p-dropdown>
+      <!-- <input rows="3" pInputText formControlName="municipality" /> -->
+    </div>
+
+    <div class="field col-6">
+      <label>District</label>
+      <p-dropdown [options]="selectedDistricts" optionLabel="name" optionValue="id" formControlName="districtId"
+        placeholder="Select District" [style]="{ width: '100%' }">
+      </p-dropdown>
+      <!-- <input rows="3" pInputText formControlName="municipality" /> -->
+    </div>
+
+
+    <div class="field col-6">
       <label>Municipality</label>
-      <input rows="3" pInputText formControlName="municipality" />
+        <p-dropdown [options]="selectedMunicipalities" optionLabel="name" optionValue="id" formControlName="municipalityId"
+        placeholder="Select Municipality" [style]="{ width: '100%' }">
+      </p-dropdown>
+      <!-- <input rows="3" pInputText formControlName="municipality" /> -->
     </div>
 
     <div class="field col-6">

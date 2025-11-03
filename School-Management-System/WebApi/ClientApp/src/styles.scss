@@ -4,11 +4,12 @@
 
 
 html, body {
+  font-size: 0.875rem;
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* 🔒 stops scrollbars globally */
+ // overflow: hidden; /* 🔒 stops scrollbars globally */
   box-sizing: border-box;
 }
 
@@ -16,4 +17,47 @@ html, body {
 *::before,
 *::after {
   box-sizing: inherit;
+}
+
+
+/* ===== Global Table Styling ===== */
+.p-table {
+    font-size: 0.875rem; /* smaller font globally */
+    line-height: 1.2px;
+    min-width: 50rem; /* your original min-width */
+}
+
+/* Table container to control height and paginator visibility */
+.table-container {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 120px); /* leave space for header, paginator, margins */
+    overflow: auto; /* no scroll unless content exceeds */
+}
+
+/* Table body styling */
+.p-table .p-datatable-tbody {
+    max-height: none !important; /* allow table body to expand naturally */
+}
+
+/* Table rows spacing */
+.p-table .p-datatable-tbody > tr {
+    height: 2.2rem; /* adjust row height for compact view */
+}
+
+/* Paginator styling */
+.p-paginator {
+    font-size: 0.875rem; /* match table font */
+    flex-shrink: 0;
+}
+
+/* Optional: reduce header font size */
+.p-table .p-datatable-thead > tr > th {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Optional: compact table cells */
+.p-table .p-datatable-tbody > tr > td {
+    padding: 0.35rem 0.5rem;
 }

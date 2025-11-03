@@ -10,6 +10,7 @@
     <Folder Include="ExamResults\Interfaces\" />
     <Folder Include="ExamResults\Query\" />
     <Folder Include="ExamResults\ViewModels\" />
+    <Folder Include="Master\Dtos\" />
     <Folder Include="Teachers\Query\" />
   </ItemGroup>
 

@@ -5,13 +5,16 @@ using Application.Common.Interfaces;
 using Application.Courses.Interfaces;
 using Application.Fees.Interfaces;
 using Application.Identity.Interfaces;
+using Application.Master.Interface;
 using Application.Students.Interfaces;
 using Application.SubjectMarks.Interfaces;
 using Infrastructure.Identity;
 using Infrastructure.Persistance;
+using Infrastructure.Services.Academics;
 using Infrastructure.Services.ClassSections;
 using Infrastructure.Services.Courses;
 using Infrastructure.Services.Fees;
+using Infrastructure.Services.MasterData;
 using Infrastructure.Services.Students;
 using Infrastructure.Services.SubjectMarks;
 using Microsoft.AspNetCore.Identity;
@@ -37,7 +40,8 @@ namespace Infrastructure
             services.AddScoped<UserManager<ApplicationUser>>();
             services.AddScoped<IIdentityService, IdentityService>();
 
-            services.AddScoped<IAcademicService, IAcademicService>();
+            services.AddScoped<IAcademicService, AcademicService>();
+            services.AddScoped<IMasterDataService, MasterDataService>();
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<IClassSectionService, ClassSectionService>();
             services.AddScoped<ICourseService, CourseService>();

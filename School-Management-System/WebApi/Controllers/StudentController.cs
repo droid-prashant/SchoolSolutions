@@ -42,9 +42,38 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddStudent")]
-        public async Task Post([FromBody] StudentDto addStudent, CancellationToken cancellationToken)
+        public async Task AddStudent([FromBody] StudentDto addStudent, CancellationToken cancellationToken)
         {
             await _studentService.AddStudentAsync(addStudent, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("AssignRegistrationAndSymbolNumber")]
+        public async Task AssignRegistrationAndSymbolNumber([FromBody] StudentEnrollmentDto studentEnrollmentDto, [FromQuery] string studentEnrollmentId, CancellationToken cancellationToken)
+        {
+            await _studentService.AssignRegistrationAndSymbolNumber(studentEnrollmentDto, studentEnrollmentId, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("UpdateStudent")]
+        public async Task UpdateStudent([FromBody] StudentDto addStudent, [FromQuery] string studentId, CancellationToken cancellationToken)
+        {
+            await _studentService.UpdateStudentAsync(addStudent, studentId, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("AssignRollNumber")]
+        public async Task AssignRollNumbersAsync([FromQuery] string classSectionId, CancellationToken cancellationToken)
+        {
+            await _studentService.AssignRollNumbersAsync(classSectionId, cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("GetRegAndSymCompliantEnrolledStudents")]
+        public async Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents([FromQuery] string classSectionId, CancellationToken cancellationToken)
+        {
+            var result = await _studentService.GetRegAndSymCompliantEnrolledStudents(classSectionId, cancellationToken);
+            return result;
         }
 
         [HttpPut("{id}")]

@@ -46,6 +46,14 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("PrincipalName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SchoolName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -190,6 +198,41 @@ namespace Infrastructure.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("Domain.District", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DistrictName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.ToTable("Districts");
+                });
+
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
                     b.Property<Guid>("Id")
@@ -327,6 +370,64 @@ namespace Infrastructure.Migrations
                     b.ToTable("FeeTypes");
                 });
 
+            modelBuilder.Entity("Domain.Municipality", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BudgetCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cluster")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DistrictId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Eco_Region")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Eco_Region_Value")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("MunicipalityDisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MunicipalityName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MunicipalityNameNp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DistrictId");
+
+                    b.ToTable("Municipalities");
+                });
+
             modelBuilder.Entity("Domain.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -366,6 +467,40 @@ namespace Infrastructure.Migrations
                     b.HasIndex("StudentFeeId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("Domain.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ProvinceName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProvinceNameNp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Provinces");
                 });
 
             modelBuilder.Entity("Domain.Section", b =>
@@ -412,6 +547,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("DistrictId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("FatherName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -441,9 +579,8 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Municipality")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("MunicipalityId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ParentContactNumber")
                         .IsRequired()
@@ -453,12 +590,21 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("WardNo")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClassSectionId");
+
+                    b.HasIndex("DistrictId");
+
+                    b.HasIndex("MunicipalityId");
+
+                    b.HasIndex("ProvinceId");
 
                     b.ToTable("Students");
                 });
@@ -493,8 +639,17 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("RegistrationNumber")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("RollNumber")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("SymbolNumber")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -757,6 +912,9 @@ namespace Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -764,8 +922,19 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -791,6 +960,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -980,6 +1153,17 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("ClassRoomId");
                 });
 
+            modelBuilder.Entity("Domain.District", b =>
+                {
+                    b.HasOne("Domain.Province", "Province")
+                        .WithMany("Districts")
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Province");
+                });
+
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
                     b.HasOne("Domain.StudentEnrollment", "StudentEnrollment")
@@ -1021,6 +1205,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("FeeType");
                 });
 
+            modelBuilder.Entity("Domain.Municipality", b =>
+                {
+                    b.HasOne("Domain.District", "District")
+                        .WithMany("Municipalities")
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("District");
+                });
+
             modelBuilder.Entity("Domain.Payment", b =>
                 {
                     b.HasOne("Domain.StudentFee", "StudentFee")
@@ -1037,6 +1232,30 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.ClassSection", null)
                         .WithMany("Students")
                         .HasForeignKey("ClassSectionId");
+
+                    b.HasOne("Domain.District", "District")
+                        .WithMany()
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Municipality", "Municipality")
+                        .WithMany()
+                        .HasForeignKey("MunicipalityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("District");
+
+                    b.Navigation("Municipality");
+
+                    b.Navigation("Province");
                 });
 
             modelBuilder.Entity("Domain.StudentEnrollment", b =>
@@ -1233,6 +1452,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("ClassCourses");
                 });
 
+            modelBuilder.Entity("Domain.District", b =>
+                {
+                    b.Navigation("Municipalities");
+                });
+
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
                     b.Navigation("SubjectMarks");
@@ -1246,6 +1470,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.FeeType", b =>
                 {
                     b.Navigation("FeeStructures");
+                });
+
+            modelBuilder.Entity("Domain.Province", b =>
+                {
+                    b.Navigation("Districts");
                 });
 
             modelBuilder.Entity("Domain.Section", b =>

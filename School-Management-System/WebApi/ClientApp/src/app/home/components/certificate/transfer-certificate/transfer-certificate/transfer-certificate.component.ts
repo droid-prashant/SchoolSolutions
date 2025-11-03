@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { StudentViewModel } from '../../../student/shared/models/viewModels/student.viewModel';
 
 @Component({
   selector: 'app-transfer-certificate',
@@ -7,6 +8,7 @@ import { Component } from '@angular/core';
   styleUrl: './transfer-certificate.component.scss'
 })
 export class TransferCertificateComponent {
+  @Input('studentObj') studentObj!:StudentViewModel
   studentName = 'Birendra Bir Bikram Shah Dev';
   fatherName = 'Uncle Bhatta';
   address = 'Dodhara Chandani Municipality-08, Kanchanpur';

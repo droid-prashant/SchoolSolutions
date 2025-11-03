@@ -9,7 +9,9 @@ namespace Domain
     public class AcademicYear:AuditableEntry
     {
         public Guid Id { get; set; }
+        public string SchoolName { get; set; } = string.Empty; 
         public string YearName { get; set; } = string.Empty; 
+        public string PrincipalName { get; set; } = string.Empty; 
         public bool IsActive { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

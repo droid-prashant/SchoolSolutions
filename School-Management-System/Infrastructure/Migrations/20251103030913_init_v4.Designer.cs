@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251025071100_init_version_3")]
-    partial class init_version_3
+    [Migration("20251103030913_init_v4")]
+    partial class init_v4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,14 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PrincipalName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SchoolName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -193,6 +201,41 @@ namespace Infrastructure.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("Domain.District", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DistrictName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.ToTable("Districts");
+                });
+
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
                     b.Property<Guid>("Id")
@@ -330,6 +373,64 @@ namespace Infrastructure.Migrations
                     b.ToTable("FeeTypes");
                 });
 
+            modelBuilder.Entity("Domain.Municipality", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BudgetCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cluster")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DistrictId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Eco_Region")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Eco_Region_Value")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("MunicipalityDisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MunicipalityName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MunicipalityNameNp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DistrictId");
+
+                    b.ToTable("Municipalities");
+                });
+
             modelBuilder.Entity("Domain.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -369,6 +470,40 @@ namespace Infrastructure.Migrations
                     b.HasIndex("StudentFeeId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("Domain.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("ProvinceName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProvinceNameNp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Provinces");
                 });
 
             modelBuilder.Entity("Domain.Section", b =>
@@ -415,6 +550,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("DistrictId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("FatherName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -444,9 +582,19 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Municipality")
+                    b.Property<int>("MunicipalityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ParentContactNumber")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ParentEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("WardNo")
                         .HasColumnType("integer");
@@ -454,6 +602,12 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClassSectionId");
+
+                    b.HasIndex("DistrictId");
+
+                    b.HasIndex("MunicipalityId");
+
+                    b.HasIndex("ProvinceId");
 
                     b.ToTable("Students");
                 });
@@ -488,8 +642,17 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("RegistrationNumber")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("RollNumber")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("SymbolNumber")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -705,6 +868,249 @@ namespace Infrastructure.Migrations
                     b.ToTable("TeacherClassSection");
                 });
 
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ApplicationRoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationRoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ApplicationUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApplicationRoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApplicationUserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("ApplicationRoleId");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
             modelBuilder.Entity("Domain.ClassCourse", b =>
                 {
                     b.HasOne("Domain.ClassRoom", "ClassRoom")
@@ -750,6 +1156,17 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("ClassRoomId");
                 });
 
+            modelBuilder.Entity("Domain.District", b =>
+                {
+                    b.HasOne("Domain.Province", "Province")
+                        .WithMany("Districts")
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Province");
+                });
+
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
                     b.HasOne("Domain.StudentEnrollment", "StudentEnrollment")
@@ -791,6 +1208,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("FeeType");
                 });
 
+            modelBuilder.Entity("Domain.Municipality", b =>
+                {
+                    b.HasOne("Domain.District", "District")
+                        .WithMany("Municipalities")
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("District");
+                });
+
             modelBuilder.Entity("Domain.Payment", b =>
                 {
                     b.HasOne("Domain.StudentFee", "StudentFee")
@@ -807,6 +1235,30 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.ClassSection", null)
                         .WithMany("Students")
                         .HasForeignKey("ClassSectionId");
+
+                    b.HasOne("Domain.District", "District")
+                        .WithMany()
+                        .HasForeignKey("DistrictId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Municipality", "Municipality")
+                        .WithMany()
+                        .HasForeignKey("MunicipalityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("District");
+
+                    b.Navigation("Municipality");
+
+                    b.Navigation("Province");
                 });
 
             modelBuilder.Entity("Domain.StudentEnrollment", b =>
@@ -901,6 +1353,73 @@ namespace Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationRole", null)
+                        .WithMany("RoleClaims")
+                        .HasForeignKey("ApplicationRoleId");
+
+                    b.HasOne("Infrastructure.Identity.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany("UserClaims")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationRole", null)
+                        .WithMany("UserRoles")
+                        .HasForeignKey("ApplicationRoleId");
+
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany("UserRoles")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("Infrastructure.Identity.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.AcademicYear", b =>
                 {
                     b.Navigation("Enrollments");
@@ -936,6 +1455,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("ClassCourses");
                 });
 
+            modelBuilder.Entity("Domain.District", b =>
+                {
+                    b.Navigation("Municipalities");
+                });
+
             modelBuilder.Entity("Domain.ExamResult", b =>
                 {
                     b.Navigation("SubjectMarks");
@@ -949,6 +1473,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.FeeType", b =>
                 {
                     b.Navigation("FeeStructures");
+                });
+
+            modelBuilder.Entity("Domain.Province", b =>
+                {
+                    b.Navigation("Districts");
                 });
 
             modelBuilder.Entity("Domain.Section", b =>
@@ -978,6 +1507,20 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Teacher", b =>
                 {
                     b.Navigation("TeacherClassSections");
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationRole", b =>
+                {
+                    b.Navigation("RoleClaims");
+
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
+                {
+                    b.Navigation("UserClaims");
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

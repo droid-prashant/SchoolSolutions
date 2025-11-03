@@ -27,6 +27,9 @@ namespace Application.Common.Interfaces
         DbSet<StudentFee> StudentFees { get; }
         DbSet<Payment> Payments { get; }
         DbSet<FeeAdjustment> FeeAdjustments { get; }
+        DbSet<Province> Provinces { get; }
+        DbSet<District> Districts { get; }
+        DbSet<Municipality> Municipalities { get; }
         DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

@@ -17,6 +17,18 @@ namespace Infrastructure.Persistance.Configuration
                    .WithOne(x => x.Student)
                    .HasForeignKey(x => x.StudentId);
 
+            builder.HasOne(x => x.Province)
+                   .WithMany()
+                   .HasForeignKey(x => x.ProvinceId);
+
+            builder.HasOne(x => x.District)
+                   .WithMany()
+                   .HasForeignKey(x => x.DistrictId);
+
+            builder.HasOne(x => x.Municipality)
+                   .WithMany()
+                   .HasForeignKey(x => x.MunicipalityId);
+
         }
     }
 }

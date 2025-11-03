@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
@@ -15,10 +16,15 @@ namespace Domain
         public int Gender { get; set; }
         public int Age { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public string Municipality { get; set; }
         public int WardNo { get; set; }
         public string Address { get; set; }
         public string ContactNumber { get; set; }
+        public int ProvinceId { get; set; }
+        public Province Province { get; set; }
+        public int DistrictId { get; set; }
+        public District District { get; set; }
+        public int MunicipalityId { get; set; }
+        public Municipality Municipality{ get; set; }
         public ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
     }
 }

@@ -1,7 +1,17 @@
 <h2 class="mb-4">Generate Certificate</h2>
-<div class="classDropdown">
-    <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-        placeholder="Select Class"></p-dropdown>
+<div class="grid mb-3">
+    <div class="col-6 md:col-4">
+        <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+            placeholder="Select Class" [style]="{ width: '100%' }">
+        </p-dropdown>
+    </div>
+
+    <div class="col-6 md:col-4">
+        <p-dropdown [options]="sections" optionLabel="name" optionValue="classSectionId"
+            (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected" placeholder="Select Section"
+            [style]="{ width: '100%' }">
+        </p-dropdown>
+    </div>
 </div>
 <div class="card">
     <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
@@ -39,7 +49,7 @@
     [baseZIndex]="10000" (onHide)="onDialogClose()">
     <div id="print-section" *ngIf="showResult">
         <div *ngIf="isTransferCertificate">
-            <app-transfer-certificate></app-transfer-certificate>
+            <app-transfer-certificate [studentObj]="student"></app-transfer-certificate>
         </div>
         <div *ngIf="isCharacterCertificate">
             <app-character-certificate></app-character-certificate>

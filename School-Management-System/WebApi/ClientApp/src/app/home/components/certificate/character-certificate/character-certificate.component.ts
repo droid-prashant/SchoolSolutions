@@ -1,4 +1,5 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { StudentViewModel } from '../../student/shared/models/viewModels/student.viewModel';
 
 @Component({
   selector: 'app-character-certificate',
@@ -8,6 +9,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
   encapsulation: ViewEncapsulation.None
 })
 export class CharacterCertificateComponent {
+  @Input('studentObj') studentObj!:StudentViewModel
  studentName = 'BP Bhatta';
   fatherName = 'Uncle Bhatta';
   address = 'Dodhara Chandani Municipality-08, Kanchanpur';

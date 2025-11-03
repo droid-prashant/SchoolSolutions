@@ -15,6 +15,7 @@ export class ResultComponent implements OnInit {
   students: StudentViewModel[] = [];
   classRooms: ClassRoomViewModel[] = []
   classId: string = "";
+  student!: StudentViewModel;
   showResult: boolean = false;
   result!: ResultViewModel
   constructor(private _apiService: ApiService) {
@@ -24,11 +25,13 @@ export class ResultComponent implements OnInit {
     this.getClassRooms();
   }
   previewResult(student: StudentViewModel) {
+    this.student = student;
     this.getResult(student.id);
+    this.students
   }
 
-  getResult(studentId: string) {
-    this._apiService.getResult(studentId).subscribe(
+  getResult(studentEnrollmentId: string) {
+    this._apiService.getResult(studentEnrollmentId).subscribe(
       {
         next: (response) => {
           this.result = response;

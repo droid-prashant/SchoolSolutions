@@ -8,6 +8,7 @@ namespace Application.Fees.Dtos
 {
     public class StudentFeeDetailViewModel
     {
+        public string Id { get; set; }
         public string ClassName { get; set; } = string.Empty;
         public string FeeType { get; set; } = string.Empty;
         public DateTime? FeeMonth { get; set; }

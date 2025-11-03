@@ -9,6 +9,7 @@ import { ExamTerminal } from '../shared/models/examTerminal.dto';
 import { StudentMarksList, SubjectMarkDto } from '../shared/models/examMarksEntry.dto';
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
 import { ClassCreditCourseViewModel } from '../../course/shared/models/classCourse.viewModel';
+import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
 
 @Component({
   selector: 'app-exam-marks-entry',
@@ -20,9 +21,11 @@ export class ExamMarksEntryComponent implements OnInit {
   classRooms: ClassRoomViewModel[] = []
   students: StudentViewModel[] = [];
   courses: ClassCreditCourseViewModel[] = [];
-  sections: Section[];
+  sections: SectionViewModel[] = [];
   examTerminals: ExamTerminal[] = [];
   classId: string = "";
+
+  isClassSectionSelected:boolean = false;
 
 
   studentMarks: FormGroup;
@@ -34,10 +37,6 @@ export class ExamMarksEntryComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _messageService: MessageService
   ) {
-    this.sections = [
-      { id: 1, name: "A" },
-      { id: 2, name: "B" }]
-
     this.examTerminals = [
       { id: 1, terminalName: 'First Terminal' },
       { id: 2, terminalName: 'Second Terminal' },
@@ -81,15 +80,50 @@ export class ExamMarksEntryComponent implements OnInit {
   }
 
   onClassRoomChange(event: any) {
-    this.classId = event.value;
+    // this.classId = event.value;
+    // if (this.classId) {
+    //   this.isClassSelected = true;
+    //   this.listSubject();
+    //   this.listStudent();
+    // }
+    // else {
+    //   this.isClassSelected = false;
+    // }
+       this.classId = event.value;
     if (this.classId) {
       this.isClassSelected = true;
-      this.listSubject();
-      this.listStudent();
+      const selectedClass = this.classRooms.filter(x => x.id === this.classId);
+      const sections = selectedClass.map(x => x.sections);
+      this.sections = sections[0];
     }
-    else {
-      this.isClassSelected = false;
+
+  }
+
+   onClassSectionChange(event: any) {
+    const classsSectionId = event.value;
+    if (classsSectionId) {
+      this.isClassSectionSelected = true;
+      const selectedClassSection = this.sections.filter(x => x.classSectionId === classsSectionId);
+      if(selectedClassSection){
+        this.getStudentByClassSection(classsSectionId);
+
+      }
+      // this.classSectionId = selectedClassSection[0].classSectionId;
     }
+  }
+
+  getStudentByClassSection(classSectionId: string) {
+    this._apiService.getStudentsByClassSectionId(classSectionId).subscribe({
+      next: (response) => {
+        this.students = response;
+      },
+      error: (err) => console.log(err),
+      complete: () => console.log("Request is complete")
+    });
+  }
+
+  onClassSectionChanged(event:any){
+
   }
 
   onExamTerminalChange() {
@@ -121,20 +155,6 @@ export class ExamMarksEntryComponent implements OnInit {
         complete: () => {
 
         }
-      }
-    )
-  }
-
-  listStudent() {
-    this._apiService.getStudentsByClass(this.classId).subscribe(
-      {
-        next: (response) => {
-          this.students = response;
-        },
-        error: (err) => {
-
-        },
-        complete: () => console.log("Req is completed")
       }
     )
   }

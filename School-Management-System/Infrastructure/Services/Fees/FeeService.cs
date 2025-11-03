@@ -123,12 +123,14 @@ namespace Infrastructure.Services.Fees
 
             var feeDetails = studentFees.GroupBy(f => new
             {
+                Id = f.Id,
                 ClassName = f.FeeStructure.ClassRoom.Name,
                 FeeType = f.FeeStructure.FeeType.Name,
                 f.FeeMonth
             })
                                             .Select(g => new StudentFeeDetailViewModel
                                             {
+                                                Id = g.Key.Id.ToString(),
                                                 ClassName = g.Key.ClassName,
                                                 FeeType = g.Key.FeeType,
                                                 FeeMonth = g.Key.FeeMonth,

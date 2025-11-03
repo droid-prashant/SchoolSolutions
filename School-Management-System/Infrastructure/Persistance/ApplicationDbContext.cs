@@ -37,6 +37,12 @@ namespace Infrastructure.Persistance
 
         public DbSet<StudentEnrollment> StudentEnrollments => Set<StudentEnrollment>();
 
+        public DbSet<Province> Provinces => Set<Province>();
+
+        public DbSet<District> Districts => Set<District>();
+
+        public DbSet<Municipality> Municipalities => Set<Municipality>();
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             foreach (var entry in ChangeTracker.Entries<AuditableEntry>())

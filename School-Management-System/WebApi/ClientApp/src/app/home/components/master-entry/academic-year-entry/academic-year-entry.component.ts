@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { AcademicYearDto } from '../model/dtos/academicYear.dto';
@@ -11,7 +11,7 @@ import { AcademicViewModel } from '../model/viewModels/academicYear.ViewModel';
   templateUrl: './academic-year-entry.component.html',
   styleUrl: './academic-year-entry.component.scss'
 })
-export class AcademicYearEntryComponent {
+export class AcademicYearEntryComponent implements OnInit {
   academicYearForm!: FormGroup
   academicYearList: AcademicViewModel[] = [];
   submitButtonLabel: string = "Save";
@@ -27,6 +27,9 @@ export class AcademicYearEntryComponent {
       startDate: [new Date(), Validators.required],
       endDate: [new Date(), Validators.required]
     });
+  }
+  ngOnInit(): void {
+    this.listAcademicYear();
   }
 
   submit() {

@@ -3,9 +3,16 @@
 <form [formGroup]="studentMarks" class="p-fluid">
     <div class="formgrid grid">
         <div class="field col-3">
-            <label>Class</label>
-            <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id"
+            <label for="class">Class</label>
+            <p-dropdown id="class" [options]="classRooms" optionLabel="name" optionValue="id"
                 (onChange)="onClassRoomChange($event)" placeholder="Select Class"></p-dropdown>
+        </div>
+        <div class="field col-3">
+            <label for="classSection">Class</label>
+            <p-dropdown id="classSection" [options]="sections" optionLabel="name" optionValue="classSectionId"
+                (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected" placeholder="Select Section"
+                [style]="{ width: '100%' }">
+            </p-dropdown>
         </div>
     </div>
 

@@ -11,11 +11,14 @@ namespace Domain
         public Guid Id { get; set; }
         public Guid StudentId { get; set; }
         public Student Student { get; set; }
+        public int? RollNumber { get; set; }
         public Guid ClassSectionId { get; set; }
         public ClassSection ClassSection { get; set; }
         public Guid AcademicYearId { get; set; }
         public AcademicYear AcademicYear { get; set; }
         public DateTime EnrollmentDate { get; set; }
+        public string? RegistrationNumber { get; set; }
+        public string? SymbolNumber { get; set; }
         public bool IsPromoted { get; set; }
         public ICollection<SubjectMark> SubjectMarks { get; set; } = new List<SubjectMark>();
         public ICollection<ExamResult> ExamResults { get; set; } = new List<ExamResult>();

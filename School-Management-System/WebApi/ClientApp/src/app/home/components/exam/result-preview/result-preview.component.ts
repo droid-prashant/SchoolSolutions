@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ResultViewModel } from '../shared/viewModels/result.viewModel';
+import { StudentViewModel } from '../../student/shared/models/viewModels/student.viewModel';
 
 @Component({
   selector: 'app-result-preview',
@@ -10,6 +11,7 @@ import { ResultViewModel } from '../shared/viewModels/result.viewModel';
 export class ResultPreviewComponent implements OnInit {
 
   @Input('resultObj') result!: ResultViewModel;
+  @Input('studentObj') studentObj!: StudentViewModel;
 
   students = Array.from({ length: 50 }, (_, i) => ({
     name: `Student ${i + 1}`,
@@ -23,15 +25,15 @@ export class ResultPreviewComponent implements OnInit {
     alias: '(Jubie International English Academy)',
     address: 'Dodhara Chandani Municipality-7, Kanchanpur',
     province: 'Sudurpashchim Pradesh, Nepal',
-    statement: 'STATEMENT OF GRADE-SHEET 2081 BS (2025 AD)',
+    statement: 'STATEMENT OF GRADE-SHEET 2082 BS (2025 AD)',
 
     name: 'Rijan Sunar',
     father: 'Suresh Sunar',
     mother: 'Renu Sunar',
     dob: '2069/02/07 B.S.',
-    rollNo: 9,
+    rollNo: '08',
     class: 7,
-    wardNo: '07',
+    wardNo: '06',
 
     subjects: [
       { sn: 1, name: 'English', credit: 4, th: 'A', pr: 'A+', final: 'A', gp: 3.6 },
@@ -45,7 +47,7 @@ export class ResultPreviewComponent implements OnInit {
 
     gpa: 3.21,
     attendance: '249/254',
-    issueDate: '2081/12/28'
+    issueDate: '2082/04/15'
   };
 
   constructor(){

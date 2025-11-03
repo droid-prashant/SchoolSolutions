@@ -1,4 +1,5 @@
 export interface StudentFeeDetailViewModel {
+  id: string;
   className: string;
   feeType: string;
   feeMonth?: string; // Use string for date from API (ISO format)

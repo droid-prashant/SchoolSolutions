@@ -45,7 +45,7 @@ export class ManageFeesTypesComponent implements OnInit {
           this.classRooms = response;
         },
         error: (err) => {
-           this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'failed to load Class rooms' });
+          this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'failed to load Class rooms' });
         }
       }
     )
@@ -97,6 +97,12 @@ export class ManageFeesTypesComponent implements OnInit {
 
   }
   onSave() {
+    if (this.classId) {
+      this.feeStructureForm.get('classId')?.setValue(this.classId);
+    }
+    if (!this.feeStructureForm.valid) {
+      return;
+    }
     const feeStructure: FeeStructureDto = this.feeStructureForm.value;
     this._apiService.postFeeStructure(feeStructure).pipe
       (

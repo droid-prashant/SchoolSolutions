@@ -4,6 +4,7 @@ export interface StudentViewModel {
     gender: string;
     age: number;
     classRoom: string;
-    section:string
+    section: string
     address: string;
+    dateOfBirth: string;
 }
