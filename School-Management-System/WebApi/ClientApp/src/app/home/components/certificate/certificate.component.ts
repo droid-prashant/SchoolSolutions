@@ -3,6 +3,7 @@ import { ApiService } from '../../../shared/api.service';
 import { StudentViewModel } from '../student/shared/models/viewModels/student.viewModel';
 import { ClassRoomViewModel } from '../class-room/shared/models/viewModels/classRoom.viewModel';
 import { SectionViewModel } from '../class-room/shared/models/viewModels/section.viewModel';
+import { StudentCertificateViewModel } from './model/studentCertificate.ViewModel';
 
 @Component({
     selector: 'app-certificate',
@@ -17,8 +18,8 @@ export class CertificateComponent implements OnInit {
     showResult: boolean = false;
     isClassSelected: boolean = false;
     classId: string = "";
-    students: StudentViewModel[] = [];
-    student!: StudentViewModel;
+    students: StudentCertificateViewModel[] = [];
+    student!: StudentCertificateViewModel;
     classRooms: ClassRoomViewModel[] = []
     sections: SectionViewModel[] = [];
 
@@ -87,7 +88,7 @@ export class CertificateComponent implements OnInit {
     }
 
     getStudentByClassSection(classSectionId: string) {
-        this._apiService.getStudentsByClassSectionId(classSectionId).subscribe({
+        this._apiService.getStudentCertificateDataByClassSectionId(classSectionId).subscribe({
             next: (response) => {
                 this.students = response;
             },
@@ -96,13 +97,13 @@ export class CertificateComponent implements OnInit {
         });
     }
 
-    previewCharacterCertificate(student: StudentViewModel) {
+    previewCharacterCertificate(student: StudentCertificateViewModel) {
         this.student = student;
         this.showResult = true;
         this.isCharacterCertificate = true;
     }
 
-    previewTransferCertificate(student: StudentViewModel) {
+    previewTransferCertificate(student: StudentCertificateViewModel) {
         this.student = student;
         this.showResult = true;
         this.isTransferCertificate = true;

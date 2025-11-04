@@ -23,6 +23,14 @@ namespace WebApi.Controllers
             return result;
         }
 
+        [HttpGet]
+        [Route("GetStudentCertificateData")]
+        public async Task<List<StudentCertificateViewModel>> GetStudentCertificateData([FromQuery] string classSectionId, CancellationToken cancellationToken)
+        {
+            var result = await _studentService.GetStudentCertificateDataAsync(classSectionId, cancellationToken);
+            return result;
+        }
+
         [HttpGet()]
         [Route("GetStudentByClassId")]
         public async Task<List<StudentViewModel>> GetStudentByClassId([FromQuery] string classId, CancellationToken cancellationToken)

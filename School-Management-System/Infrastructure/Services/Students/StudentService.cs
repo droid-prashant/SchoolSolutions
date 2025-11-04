@@ -203,6 +203,55 @@ namespace Infrastructure.Services.Students
               .ToListAsync(cancellationToken);
             return students;
         }
+
+        public async Task<List<StudentCertificateViewModel>> GetStudentCertificateDataAsync(string classSectionId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var enrolledStudent = await _context.StudentEnrollments.Include(x => x.ClassSection).FirstOrDefaultAsync(x => x.ClassSection.Id == Guid.Parse(classSectionId));
+                var studentFirstEnrollment = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == enrolledStudent.StudentId);
+                var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
+                                                      .ThenInclude(x => x.ClassRoom)
+                                                     .Where(x => x.ClassSection.Id == Guid.Parse(classSectionId)).Select(x => new StudentCertificateViewModel
+                                                     {
+                                                         Id = x.Id,
+                                                         Name = x.Student.FirstName + " " + x.Student.LastName,
+                                                         Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
+                                                         Age = x.Student.Age,
+                                                         ClassRoom = x.ClassSection.ClassRoom.Name,
+                                                         FirstAdmittedClass = studentFirstEnrollment.ClassSection.ClassRoom.Name,
+                                                         Section = x.ClassSection.Section.Name,
+                                                         WardNo = x.Student.WardNo,
+                                                         RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
+                                                         SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
+                                                         DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
+                                                         AcademicYear = x.AcademicYear.YearName,
+                                                         AdmittedYear = x.Student.CreatedDate.Year.ToString(),
+                                                         IssueDate = DateTime.UtcNow.ToString("dd-MM-yyyy"),
+                                                         FatherName = x.Student.FatherName,
+                                                         MotherName = x.Student.MotherName,
+                                                         Gender = x.Student.Gender,
+                                                         GPA = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                            .Select(x => x.GPA)
+                                                                            .FirstOrDefault(),
+                                                         ExamType = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                                 .Select(x => x.ExamType)
+                                                                                 .First(),
+                                                         ExamHeldYear = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                                 .Select(x => x.CreatedDate)
+                                                                                 .First()
+                                                                                 .Year
+                                                                                 .ToString()
+
+                                                     }).OrderBy(x => x.Name)
+                  .ToListAsync(cancellationToken);
+                return students;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         public async Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents(string classSectionId, CancellationToken cancellationToken)
         {
             var result = await _context.StudentEnrollments.Include(x => x.ClassSection)

@@ -176,7 +176,10 @@
 }
 
 .header {
+    position: relative;
     display: flex;
+    z-index: 5;
+    /* higher than logo and watermark */
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 10px;
@@ -187,21 +190,29 @@
     margin-left: 16px;
 }
 
+.logo-section {
+    position: relative;
+    display: flex;
+    z-index: 2;
+    /* below header */
+    align-items: flex-start;
+    margin-bottom: 15px;
+    margin-left: 29px;
+    width: 80%;
+}
+
+/* LOGO: make white parts semi-transparent using blending */
 .school-logo {
-    width: 150px;
-    height: 170px;
+    position: relative;
+    width: 187px;
+    height: 210px;
     margin-top: -35px;
     background-color: transparent;
     mix-blend-mode: multiply;
-}
-
-.logo-section {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 15px;
-    position: relative;
-    margin-left: 29px;
-    width: 80%;
+    /* allows watermark to show through */
+    opacity: 0.9;
+    /* optional, slight fade for realism */
+    z-index: 2;
 }
 
 .logo {

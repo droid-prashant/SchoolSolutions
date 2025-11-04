@@ -25,6 +25,7 @@ import { AcademicViewModel } from '../home/components/master-entry/model/viewMod
 import { StudentEnrollmentViewModel } from '../home/components/exam/shared/viewModels/studentEnrollment.viewModel';
 import { StudentStudentEnrollmentDto } from '../home/components/exam/shared/models/examEnrollment.dto';
 import { ProvinceViewModel } from './common/models/master/master.ViewModel';
+import { StudentCertificateViewModel } from '../home/components/certificate/model/studentCertificate.ViewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +63,9 @@ export class ApiService {
 
   getStudentsByClassSectionId(classSectionId: string): Observable<StudentViewModel[]> {
     return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}`);
+  }
+  getStudentCertificateDataByClassSectionId(classSectionId: string): Observable<StudentCertificateViewModel[]> {
+    return this._httpClient.get<StudentCertificateViewModel[]>(this.baseUrl + `api/Student/GetStudentCertificateData?classSectionId=${classSectionId}`);
   }
 
   addClass(classRoom: ClassRoomDto): Observable<void> {

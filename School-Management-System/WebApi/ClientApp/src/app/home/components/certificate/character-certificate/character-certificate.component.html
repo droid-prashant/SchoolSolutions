@@ -135,7 +135,7 @@
         </div>
         <div class="logo-section">
           <!-- <div class="logo">LOGO</div> -->
-          <img src="assets/Om Pushpanjali logo.jpg" alt="School Logo" class="school-logo" />
+          <img src="assets/Om Pushpanjali logo.png" alt="School Logo" class="school-logo" />
           <div class="school-info">
             <div class="school-name">OM PUSHPANJALI ENGLISH SCHOOL</div>
             <div class="school-subtitle">(JUBIE INTERNATIONAL ENGLISH ACADEMY)</div>
@@ -149,14 +149,14 @@
         <div class="certificate-body">
           <p class="certificate">
             <span class="first-line-space">This is to certify that Mr./Miss</span>
-            <span class="fill-in">{{ studentName }}</span>Son/Daughter of Mr./Mrs
-            <span class="fill-in">{{ fatherName }},</span>
-            resident of <span class="fill-in">{{ address }},</span>
-            was a regular student of this school and passed the<span class="fill-in">{{ examName }}</span>Examination of Grade
-            <span class="fill-in">{{ grade }},</span>held in the Year
-            <span class="fill-in">{{ bsYear }}</span>B.S.
-            <span class="fill-in">{{ adYear }}</span>A.D in
-            <span class="fill-in">{{ gpa }}</span>GPA.
+            <span class="fill-in">{{ studentObj.name }}</span>Son/Daughter of Mr./Mrs
+            <span class="fill-in">{{ studentObj.fatherName }},</span>
+            resident of <span class="fill-in">{{ studentObj.address }},</span>
+            was a regular student of this school and passed the<span class="fill-in">{{studentObj.examType}}</span>Examination of Grade
+            <span class="fill-in">{{ studentObj.classRoom }},</span>held in the Year
+            <span class="fill-in">{{studentObj.examHeldYear}}</span>B.S.
+            <span class="fill-in">Blank</span>A.D in
+            <span class="fill-in">{{studentObj.gpa}}</span>GPA.
             <br>
             <span class="first-line-space">To the best of our knowledge, he/she bears a good moral character and his/her
               conduct was good while he/she was at school.</span>
@@ -165,10 +165,10 @@
 
         <div class="footer">
           <div class="footer-left">
-            <div><em>Registration No :</em> <span class="fill-in"></span></div>
-            <div><em>Symbol No :</em> <span class="fill-in">22</span></div>
-            <div><em>Batch Year:</em> <span class="fill-in">2081</span></div>
-            <div><em>Date of Issue:</em> <span class="fill-in">2082-03-24</span></div>
+            <div><em>Registration No :</em> <span class="fill-in">{{studentObj.registrationNumber}}</span></div>
+            <div><em>Symbol No :</em> <span class="fill-in">{{studentObj.symbolNumber}}</span></div>
+            <div><em>Batch Year:</em> <span class="fill-in">{{studentObj.academicYear}}</span></div>
+            <div><em>Date of Issue:</em> <span class="fill-in">{{studentObj.issueDate}}</span></div>
           </div>
           <div class="footer-right">
             <div class="signature-section">

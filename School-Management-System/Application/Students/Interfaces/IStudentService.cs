@@ -15,6 +15,7 @@ namespace Application.Students.Interfaces
         Task UpdateStudentAsync(StudentDto addStudent, string studentId, CancellationToken cancellationToken);
         Task AssignRollNumbersAsync(string classSectionId, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken);
+        Task<List<StudentCertificateViewModel>> GetStudentCertificateDataAsync(string classSectionId, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRommId, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, CancellationToken cancellationToken);
         Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents(string classSectionId, CancellationToken cancellationToken);

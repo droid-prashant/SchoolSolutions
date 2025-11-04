@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain
 {
-    public class ExamResult
+    public class ExamResult:AuditableEntry
     {
         public Guid Id { get; set; }
         public Guid StudentEnrollmentId { get; set; }

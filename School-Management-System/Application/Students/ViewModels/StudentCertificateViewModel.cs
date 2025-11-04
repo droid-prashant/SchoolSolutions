@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Students.ViewModels
+{
+    public class StudentCertificateViewModel
+    {
+        public Guid Id { get; set; }
+        public string AcademicYear { get; set; }
+        public string AdmittedYear { get; set; }
+        public string IssueDate { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public int Gender { get; set; }
+        public string FatherName { get; set; }
+        public string MotherName { get; set; }
+        public string DateOfBirth { get; set; }
+        public string Address { get; set; }
+        public string? RegistrationNumber { get; set; }
+        public string? SymbolNumber { get; set; }
+        public int WardNo { get; set; }
+        public string ClassRoom { get; set; }
+        public string FirstAdmittedClass { get; set; }
+        public string Section { get; set; }
+        public double GPA { get; set; }
+        public string ExamType { get; set; }
+        public string ExamHeldYear { get; set; }
+    }
+}

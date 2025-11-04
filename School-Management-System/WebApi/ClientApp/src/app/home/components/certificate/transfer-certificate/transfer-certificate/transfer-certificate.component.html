@@ -129,7 +129,7 @@
         </div>
         <div class="logo-section">
           <!-- <div class="logo">LOGO</div> -->
-          <img src="assets/Om Pushpanjali logo.jpg" alt="School Logo" class="school-logo" />
+          <img src="assets/Om Pushpanjali logo.png" alt="School Logo" class="school-logo" />
           <div class="school-info">
             <div class="school-name">OM PUSHPANJALI ENGLISH SCHOOL</div>
             <div class="school-subtitle">(JUBIE INTERNATIONAL ENGLISH ACADEMY)</div>
@@ -144,13 +144,12 @@
           <p class="certificate">
             <span class="first-line-space">This is to certify that on the completion of all the requirements of all the
               course prescribed by the English Medium School</span>
-            Mr./Mrs<span class="fill-in">{{ studentName }}</span>R.N<span class="fill-in">22</span>the inhabitant
-            of<span class="fill-in">Kanchanpur District, Dodhara Chandani
-              Municipality</span>
-            was admitted in this school in<span class="fill-in">2070</span>B.S. in class <span
-              class="fill-in">Nursery</span>and studied in this school up to<span class="fill-in">2080</span>B.S.
-            in class<span class="fill-in">6</span>.He/She duly passed/failed in<span class="fill-in">2.85</span>GPA.
-            His/Her date of birth according to school record is<span class="fill-in">2065/09/17</span>B.S. His character
+            Mr./Mrs<span class="fill-in">{{ studentObj.name }}</span>R.N<span class="fill-in">22</span>the inhabitant
+            of<span class="fill-in">{{studentObj.address}}</span>
+            was admitted in this school in<span class="fill-in">{{studentObj.admittedYear}}</span>B.S. in class <span
+              class="fill-in">{{studentObj.firstAdmittedClass}}</span>and studied in this school up to<span class="fill-in">{{studentObj.academicYear}}</span>B.S.
+            in class<span class="fill-in">{{studentObj.classRoom}}</span>.He/She duly passed/failed in<span class="fill-in">{{studentObj.gpa}}</span>GPA.
+            His/Her date of birth according to school record is<span class="fill-in">{{studentObj.dateOfBirth}}</span>B.S. His character
             was<span class="fill-in">Good</span> while at school.
             <br>
             <span class="first-line-space">To the best of our knowledge, he/she bears a good moral character and his/her
@@ -160,10 +159,10 @@
 
         <div class="footer">
           <div class="footer-left">
-            <div><em>Registration No :</em> <span class="fill-in"></span></div>
-            <div><em>Symbol No :</em> <span class="fill-in">22</span></div>
-            <div><em>Batch Year:</em> <span class="fill-in">2081</span></div>
-            <div><em>Date of Issue:</em> <span class="fill-in">2082-03-24</span></div>
+            <div><em>Registration No :</em> <span class="fill-in">{{studentObj.registrationNumber}}</span></div>
+            <div><em>Symbol No :</em> <span class="fill-in">{{studentObj.symbolNumber}}</span></div>
+            <div><em>Batch Year:</em> <span class="fill-in">{{studentObj.academicYear}}</span></div>
+            <div><em>Date of Issue:</em> <span class="fill-in">{{studentObj.issueDate}}</span></div>
           </div>
           <div class="footer-right">
             <div class="signature-section">

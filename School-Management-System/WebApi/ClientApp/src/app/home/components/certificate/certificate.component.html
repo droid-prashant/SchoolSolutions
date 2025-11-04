@@ -52,7 +52,7 @@
             <app-transfer-certificate [studentObj]="student"></app-transfer-certificate>
         </div>
         <div *ngIf="isCharacterCertificate">
-            <app-character-certificate></app-character-certificate>
+            <app-character-certificate [studentObj]="student"></app-character-certificate>
         </div>
     </div>
     <ng-template pTemplate="header">
