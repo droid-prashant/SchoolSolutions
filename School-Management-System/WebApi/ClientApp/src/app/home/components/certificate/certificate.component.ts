@@ -4,6 +4,8 @@ import { StudentViewModel } from '../student/shared/models/viewModels/student.vi
 import { ClassRoomViewModel } from '../class-room/shared/models/viewModels/classRoom.viewModel';
 import { SectionViewModel } from '../class-room/shared/models/viewModels/section.viewModel';
 import { StudentCertificateViewModel } from './model/studentCertificate.ViewModel';
+import { StudentCertificateDto } from './model/studentCertificate.dto';
+import { CertificateType } from './model/certificateType.enum';
 
 @Component({
     selector: 'app-certificate',
@@ -17,11 +19,20 @@ export class CertificateComponent implements OnInit {
     isTransferCertificate: boolean = false;
     showResult: boolean = false;
     isClassSelected: boolean = false;
+
     classId: string = "";
     students: StudentCertificateViewModel[] = [];
     student!: StudentCertificateViewModel;
     classRooms: ClassRoomViewModel[] = []
     sections: SectionViewModel[] = [];
+
+    certificateLog: StudentCertificateDto = {
+        certificateType: CertificateType.characterCertificate,
+        studentEnrollmentId: '',
+        certificateNumber: 0
+    };
+    serialNumber: number = 0;
+    classSectionId: string = "";
 
     constructor(private _apiService: ApiService) {
 
@@ -31,19 +42,6 @@ export class CertificateComponent implements OnInit {
         this.getClassRooms();
     }
 
-    // listStudent() {
-    //     this._apiService.getStudentsByClass(this.classId).subscribe(
-    //         {
-    //             next: (response) => {
-    //                 this.students = response;
-    //             },
-    //             error: (err) => {
-
-    //             },
-    //             complete: () => console.log("Req is completed")
-    //         }
-    //     )
-    // }
     getClassRooms() {
         this._apiService.getClassRooms().subscribe(
             {
@@ -55,13 +53,6 @@ export class CertificateComponent implements OnInit {
             }
         )
     }
-
-    // onClassRoomChange(event: any) {
-    //     this.classId = event.value;
-    //     if (this.classId) {
-    //         this.listStudent();
-    //     }
-    // }
 
     onClassRoomChange(event: any) {
         this.classId = event.value;
@@ -77,13 +68,13 @@ export class CertificateComponent implements OnInit {
     onClassSectionChange(event: any) {
         const classsSectionId = event.value;
         if (classsSectionId) {
+            this.classSectionId = classsSectionId;
             this.isClassSelected = true;
             const selectedClassSection = this.sections.filter(x => x.classSectionId === classsSectionId);
             if (selectedClassSection) {
                 this.getStudentByClassSection(classsSectionId);
 
             }
-            // this.classSectionId = selectedClassSection[0].classSectionId;
         }
     }
 
@@ -99,18 +90,50 @@ export class CertificateComponent implements OnInit {
 
     previewCharacterCertificate(student: StudentCertificateViewModel) {
         this.student = student;
-        this.showResult = true;
+        this.getStudentCertificateLog(CertificateType.characterCertificate);
+        this.certificateLog.studentEnrollmentId = student.id;
+        this.certificateLog.certificateType = CertificateType.characterCertificate;
         this.isCharacterCertificate = true;
     }
 
     previewTransferCertificate(student: StudentCertificateViewModel) {
         this.student = student;
-        this.showResult = true;
+        this.getStudentCertificateLog(CertificateType.transferCertificate);
+        this.certificateLog.studentEnrollmentId = student.id;
+        this.certificateLog.certificateType = CertificateType.transferCertificate;
         this.isTransferCertificate = true;
     }
 
     onDialogClose() {
+        this.getStudentByClassSection(this.classSectionId);
         this.isCharacterCertificate = false;
         this.isTransferCertificate = false;
+    }
+
+    getStudentCertificateLog(certificateLog: CertificateType) {
+        this._apiService.getStudentCertificateLog(certificateLog).subscribe({
+            next: (res) => {
+                let serialNumber: number = res.certificateNumber;
+                serialNumber++;
+                this.serialNumber = serialNumber;
+                this.certificateLog.certificateNumber = this.serialNumber;
+                this.showResult = true;
+                this.addStudentCertificateLog(this.certificateLog);
+            },
+            error: (err) => {
+
+            }
+        });
+    }
+
+    addStudentCertificateLog(certificateLog: StudentCertificateDto) {
+        this._apiService.addStudentCertificateLog(certificateLog).subscribe({
+            next: (res) => {
+
+            },
+            error: (err) => {
+
+            }
+        });
     }
 }

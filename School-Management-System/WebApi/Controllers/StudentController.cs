@@ -1,6 +1,7 @@
 ﻿using Application.Students.Dtos;
 using Application.Students.Interfaces;
 using Application.Students.ViewModels;
+using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
@@ -84,14 +85,19 @@ namespace WebApi.Controllers
             return result;
         }
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPost]
+        [Route("AddStudentCertificateLog")]
+        public async Task AddStudentCertificateLog([FromBody] StudentCertificateDto studentCertificateDto, CancellationToken cancellationToken)
         {
+            await _studentService.AddStudentCertificateLog(studentCertificateDto, cancellationToken);
         }
 
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpGet]
+        [Route("GetStudentCertificateLog")]
+        public async Task<StudentCertificateLogViewModel> GetStudentCertificateLog([FromQuery] CertificateType certificateType, CancellationToken cancellationToken)
         {
+            var result = await _studentService.GetStudentCertificateLog(certificateType, cancellationToken);
+            return result;
         }
     }
 }

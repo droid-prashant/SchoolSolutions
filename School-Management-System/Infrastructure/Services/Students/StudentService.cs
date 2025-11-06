@@ -4,8 +4,11 @@ using Application.Students.Interfaces;
 using Application.Students.ViewModels;
 using Azure.Core;
 using Domain;
+using Domain.Enums;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +26,25 @@ namespace Infrastructure.Services.Students
         {
             _context = context;
             _userResolver = userResolver;
+        }
+        private bool CheckCharacterCertificateTaken(Guid studentId)
+        {
+            var isCertificateTaken = _context.studentCharacterCertificateLogs.Any(x => x.StudentId == studentId);
+            return isCertificateTaken;
+        }
+        private bool CheckTransferCertificateTaken(Guid studentId)
+        {
+            var isCertificateTaken = _context.studentTransferCertificateLogs.Any(x => x.StudentId == studentId);
+            return isCertificateTaken;
+        }
+        private async Task SetStudentInActive(Guid studentId, CancellationToken cancellationToken)
+        {
+            var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == studentId);
+            if (student != null)
+            {
+                student.isActive = false;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
         }
         private async Task MapStudentFeesAsync(StudentEnrollment studentEnrollment, CancellationToken cancellationToken)
         {
@@ -179,31 +201,32 @@ namespace Infrastructure.Services.Students
         }
         public async Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken)
         {
-            var students = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).Select(x => new StudentViewModel
-            {
-                Id = x.Id,
-                Name = x.Student.FirstName + " " + x.Student.LastName,
-                Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
-                Age = x.Student.Age,
-                ClassRoom = x.ClassSection.ClassRoom.Name,
-                Section = x.ClassSection.Section.Name,
-                Gender = x.Student.Gender == 1 ? "Male" : "Female",
-                ProvinceName = x.Student.Province.ProvinceName,
-                ProvinceId = x.Student.ProvinceId.ToString(),
-                DistrictName = x.Student.District.DistrictName,
-                DistrictId = x.Student.DistrictId.ToString(),
-                MunicipalityName = x.Student.Municipality.MunicipalityName,
-                MunicipalityId = x.Student.MunicipalityId.ToString(),
-                WardNo = x.Student.WardNo,
-                RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
-                SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
-                DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy")
-
-            }).OrderBy(x => x.Name)
+            var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
+                                                            .ThenInclude(x => x.ClassRoom)
+                                                            .Where(x => x.Student.isActive == true)
+                                                            .Select(x => new StudentViewModel
+                                                            {
+                                                                Id = x.Id,
+                                                                Name = x.Student.FirstName + " " + x.Student.LastName,
+                                                                Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
+                                                                Age = x.Student.Age,
+                                                                ClassRoom = x.ClassSection.ClassRoom.Name,
+                                                                Section = x.ClassSection.Section.Name,
+                                                                Gender = x.Student.Gender == 1 ? "Male" : "Female",
+                                                                ProvinceName = x.Student.Province.ProvinceName,
+                                                                ProvinceId = x.Student.ProvinceId.ToString(),
+                                                                DistrictName = x.Student.District.DistrictName,
+                                                                DistrictId = x.Student.DistrictId.ToString(),
+                                                                MunicipalityName = x.Student.Municipality.MunicipalityName,
+                                                                MunicipalityId = x.Student.MunicipalityId.ToString(),
+                                                                WardNo = x.Student.WardNo,
+                                                                RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
+                                                                SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
+                                                                DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
+                                                            }).OrderBy(x => x.Name)
               .ToListAsync(cancellationToken);
             return students;
         }
-
         public async Task<List<StudentCertificateViewModel>> GetStudentCertificateDataAsync(string classSectionId, CancellationToken cancellationToken)
         {
             try
@@ -211,40 +234,46 @@ namespace Infrastructure.Services.Students
                 var enrolledStudent = await _context.StudentEnrollments.Include(x => x.ClassSection).FirstOrDefaultAsync(x => x.ClassSection.Id == Guid.Parse(classSectionId));
                 var studentFirstEnrollment = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == enrolledStudent.StudentId);
                 var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
-                                                      .ThenInclude(x => x.ClassRoom)
-                                                     .Where(x => x.ClassSection.Id == Guid.Parse(classSectionId)).Select(x => new StudentCertificateViewModel
-                                                     {
-                                                         Id = x.Id,
-                                                         Name = x.Student.FirstName + " " + x.Student.LastName,
-                                                         Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
-                                                         Age = x.Student.Age,
-                                                         ClassRoom = x.ClassSection.ClassRoom.Name,
-                                                         FirstAdmittedClass = studentFirstEnrollment.ClassSection.ClassRoom.Name,
-                                                         Section = x.ClassSection.Section.Name,
-                                                         WardNo = x.Student.WardNo,
-                                                         RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
-                                                         SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
-                                                         DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
-                                                         AcademicYear = x.AcademicYear.YearName,
-                                                         AdmittedYear = x.Student.CreatedDate.Year.ToString(),
-                                                         IssueDate = DateTime.UtcNow.ToString("dd-MM-yyyy"),
-                                                         FatherName = x.Student.FatherName,
-                                                         MotherName = x.Student.MotherName,
-                                                         Gender = x.Student.Gender,
-                                                         GPA = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                .ThenInclude(x => x.ClassRoom)
+                                                                .Where(x => x.Student.isActive == true && x.ClassSection.Id == Guid.Parse(classSectionId)).Select(x => new StudentCertificateViewModel
+                                                                {
+                                                                    Id = x.Id,
+                                                                    StudentId = x.StudentId,
+                                                                    Name = x.Student.FirstName + " " + x.Student.LastName,
+                                                                    Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
+                                                                    Age = x.Student.Age,
+                                                                    ClassRoom = x.ClassSection.ClassRoom.Name,
+                                                                    FirstAdmittedClass = studentFirstEnrollment.ClassSection.ClassRoom.Name,
+                                                                    Section = x.ClassSection.Section.Name,
+                                                                    WardNo = x.Student.WardNo,
+                                                                    RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
+                                                                    SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
+                                                                    DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
+                                                                    AcademicYear = x.AcademicYear.YearName,
+                                                                    AdmittedYear = x.Student.CreatedDate.Year.ToString(),
+                                                                    IssueDate = DateTime.UtcNow.ToString("dd-MM-yyyy"),
+                                                                    FatherName = x.Student.FatherName,
+                                                                    MotherName = x.Student.MotherName,
+                                                                    Gender = x.Student.Gender,
+                                                                    GPA = x.ExamResults.OrderByDescending(x => x.CreatedDate)
                                                                             .Select(x => x.GPA)
                                                                             .FirstOrDefault(),
-                                                         ExamType = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                    ExamType = x.ExamResults.OrderByDescending(x => x.CreatedDate)
                                                                                  .Select(x => x.ExamType)
                                                                                  .First(),
-                                                         ExamHeldYear = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                    ExamHeldYear = x.ExamResults.OrderByDescending(x => x.CreatedDate)
                                                                                  .Select(x => x.CreatedDate)
                                                                                  .First()
                                                                                  .Year
-                                                                                 .ToString()
-
-                                                     }).OrderBy(x => x.Name)
+                                                                                 .ToString(),
+                                                                }).OrderBy(x => x.Name)
                   .ToListAsync(cancellationToken);
+
+                foreach (var student in students)
+                {
+                    student.IsCharacterCertificateTaken = CheckCharacterCertificateTaken(student.StudentId);
+                    student.IsTransferCertificateTaken = CheckTransferCertificateTaken(student.StudentId);
+                }
                 return students;
             }
             catch (Exception ex)
@@ -255,18 +284,19 @@ namespace Infrastructure.Services.Students
         public async Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents(string classSectionId, CancellationToken cancellationToken)
         {
             var result = await _context.StudentEnrollments.Include(x => x.ClassSection)
-                                                    .Include(x => x.Student)
-                                                   .Where(x => x.ClassSectionId == Guid.Parse(classSectionId) &&
-                                                            (x.ClassSection.ClassRoom.OrderNumber == 8 || x.ClassSection.ClassRoom.OrderNumber == 10))
-                                                   .Select(x => new StudentEnrollmentViewModel
-                                                   {
-                                                       Id = x.Id.ToString(),
-                                                       Name = x.Student.FirstName + ' ' + x.Student.LastName,
-                                                       Class = x.ClassSection.ClassRoom.Name,
-                                                       ClassSectionId = x.ClassSectionId.ToString(),
-                                                       RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "-",
-                                                       SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : "-"
-                                                   }).ToListAsync(cancellationToken);
+                                                          .Include(x => x.Student)
+                                                          .Where(x => x.Student.isActive == true &&
+                                                                      x.ClassSectionId == Guid.Parse(classSectionId) &&
+                                                                     (x.ClassSection.ClassRoom.OrderNumber == 8 || x.ClassSection.ClassRoom.OrderNumber == 10))
+                                                          .Select(x => new StudentEnrollmentViewModel
+                                                          {
+                                                              Id = x.Id.ToString(),
+                                                              Name = x.Student.FirstName + ' ' + x.Student.LastName,
+                                                              Class = x.ClassSection.ClassRoom.Name,
+                                                              ClassSectionId = x.ClassSectionId.ToString(),
+                                                              RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "-",
+                                                              SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : "-"
+                                                          }).ToListAsync(cancellationToken);
 
             return result;
 
@@ -295,20 +325,107 @@ namespace Infrastructure.Services.Students
         public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, CancellationToken cancellationToken)
         {
             var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
-                                                  .ThenInclude(x => x.ClassRoom)
-                                                 .Where(x => x.ClassSection.Id == Guid.Parse(classSectionId))
-                                                 .Select(x => new StudentViewModel
-                                                 {
-                                                     Id = x.Id,
-                                                     Name = x.Student.FirstName + " " + x.Student.LastName,
-                                                     Address = x.Student.Address,
-                                                     Age = x.Student.Age,
-                                                     ClassRoom = x.ClassSection.ClassRoom.Name,
-                                                     Section = x.ClassSection.Section.Name,
-                                                     Gender = x.Student.Gender == 1 ? "Male" : "Female"
-                                                 }).OrderBy(x => x.Name)
+                                                            .ThenInclude(x => x.ClassRoom)
+                                                            .Where(x => x.Student.isActive == true &&
+                                                                   x.ClassSection.Id == Guid.Parse(classSectionId))
+                                                            .Select(x => new StudentViewModel
+                                                            {
+                                                                Id = x.Id,
+                                                                Name = x.Student.FirstName + " " + x.Student.LastName,
+                                                                Address = x.Student.Address,
+                                                                Age = x.Student.Age,
+                                                                ClassRoom = x.ClassSection.ClassRoom.Name,
+                                                                Section = x.ClassSection.Section.Name,
+                                                                Gender = x.Student.Gender == 1 ? "Male" : "Female"
+                                                            }).OrderBy(x => x.Name)
                                                    .ToListAsync(cancellationToken);
             return students;
+        }
+        public async Task AddStudentCertificateLog(StudentCertificateDto studentCertificateDto, CancellationToken cancellationToken)
+        {
+            var enrolledStudent = await _context.StudentEnrollments.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == Guid.Parse(studentCertificateDto.StudentEnrollmentId));
+            bool isCharacterCertificateLogged = await _context.studentCharacterCertificateLogs.AnyAsync(x => x.StudentId == enrolledStudent.StudentId);
+            bool isTransferCertificateLogged = await _context.studentTransferCertificateLogs.AnyAsync(x => x.StudentId == enrolledStudent.StudentId);
+            if (studentCertificateDto.certificateType == CertificateType.CharacterCertificate)
+            {
+                var characterCertificate = new StudentCharacterCertificateLog
+                {
+                    StudentId = enrolledStudent.StudentId,
+                    CreatedBy = Guid.Parse(_userResolver.UserId),
+                    CreatedDate = DateTime.UtcNow,
+                    CertificateNumber = studentCertificateDto.CertificateNumber
+                };
+                await _context.studentCharacterCertificateLogs.AddAsync(characterCertificate);
+                if (isTransferCertificateLogged)
+                {
+                    await SetStudentInActive(enrolledStudent.StudentId, cancellationToken);
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            else if (studentCertificateDto.certificateType == CertificateType.TransferCertificate)
+            {
+                var transferCertificate = new StudentTransferCertificateLog
+                {
+                    StudentId = enrolledStudent.StudentId,
+                    CreatedBy = Guid.Parse(_userResolver.UserId),
+                    CreatedDate = DateTime.UtcNow,
+                    CertificateNumber = studentCertificateDto.CertificateNumber
+                };
+                await _context.studentTransferCertificateLogs.AddAsync(transferCertificate);
+                if (isCharacterCertificateLogged)
+                {
+                    await SetStudentInActive(enrolledStudent.StudentId, cancellationToken);
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                throw new Exception("Invalid Certificate Type");
+            }
+        }
+        public async Task<StudentCertificateLogViewModel> GetStudentCertificateLog(CertificateType certificateType, CancellationToken cancellationToken)
+        {
+            if (certificateType == CertificateType.CharacterCertificate)
+            {
+                var result = await _context.studentCharacterCertificateLogs.OrderByDescending(x => x.CreatedDate)
+                                                                           .Select(x => new StudentCertificateLogViewModel
+                                                                           {
+                                                                               Id = x.Id.ToString(),
+                                                                               StudentId = x.StudentId.ToString(),
+                                                                               CertificateNumber = x.CertificateNumber
+                                                                           }).FirstOrDefaultAsync();
+                if (result != null)
+                {
+                    return result;
+                }
+                else
+                {
+                    return new StudentCertificateLogViewModel { Id = "", StudentId = "", CertificateNumber = 0 };
+                }
+            }
+            else if (certificateType == CertificateType.TransferCertificate)
+            {
+                var result = await _context.studentTransferCertificateLogs.OrderByDescending(x => x.CreatedDate)
+                                                                          .Select(x => new StudentCertificateLogViewModel
+                                                                          {
+                                                                              Id = x.Id.ToString(),
+                                                                              StudentId = x.StudentId.ToString(),
+                                                                              CertificateNumber = x.CertificateNumber
+                                                                          }).FirstOrDefaultAsync();
+
+                if (result != null)
+                {
+                    return result;
+                }
+                else
+                {
+                    return new StudentCertificateLogViewModel { Id = "", StudentId = "", CertificateNumber = 0 };
+                }
+            }
+            else
+            {
+                throw new Exception("Invalid Certificate Type");
+            }
         }
     }
 }

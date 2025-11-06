@@ -43,6 +43,10 @@ namespace Infrastructure.Persistance
 
         public DbSet<Municipality> Municipalities => Set<Municipality>();
 
+        public DbSet<StudentCharacterCertificateLog> studentCharacterCertificateLogs => Set<StudentCharacterCertificateLog>();
+
+        public DbSet<StudentTransferCertificateLog> studentTransferCertificateLogs => Set<StudentTransferCertificateLog>();
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             foreach (var entry in ChangeTracker.Entries<AuditableEntry>())

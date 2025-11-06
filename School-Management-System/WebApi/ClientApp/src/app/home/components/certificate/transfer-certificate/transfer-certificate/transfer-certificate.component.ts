@@ -10,6 +10,7 @@ import { StudentCertificateViewModel } from '../../model/studentCertificate.View
 })
 export class TransferCertificateComponent implements OnInit {
   @Input('studentObj') studentObj!: StudentCertificateViewModel
+   @Input('serialNumber') serialNumber: number = 0;
   
   ngOnInit(): void {
     console.log(this.studentObj);

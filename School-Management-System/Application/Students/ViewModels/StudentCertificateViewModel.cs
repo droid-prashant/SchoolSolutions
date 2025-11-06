@@ -9,6 +9,7 @@ namespace Application.Students.ViewModels
     public class StudentCertificateViewModel
     {
         public Guid Id { get; set; }
+        public Guid StudentId { get; set; }
         public string AcademicYear { get; set; }
         public string AdmittedYear { get; set; }
         public string IssueDate { get; set; }
@@ -28,5 +29,7 @@ namespace Application.Students.ViewModels
         public double GPA { get; set; }
         public string ExamType { get; set; }
         public string ExamHeldYear { get; set; }
+        public bool IsCharacterCertificateTaken { get; set; }
+        public bool IsTransferCertificateTaken { get; set; }
     }
 }

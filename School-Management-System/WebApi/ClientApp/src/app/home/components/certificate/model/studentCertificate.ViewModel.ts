@@ -19,4 +19,6 @@ export interface StudentCertificateViewModel {
   gpa: number;
   examType: string;
   examHeldYear: string;
+  isCharacterCertificateTaken:boolean;
+  isTransferCertificateTaken:boolean;
 }

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105053518_Alter_Student_Certificate_Log")]
+    partial class Alter_Student_Certificate_Log
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -608,9 +611,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("WardNo")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("isActive")
-                        .HasColumnType("boolean");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ClassSectionId");
@@ -648,15 +648,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("StudentId1")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("StudentId");
-
-                    b.HasIndex("StudentId1")
-                        .IsUnique();
 
                     b.ToTable("studentCharacterCertificateLogs");
                 });
@@ -780,15 +774,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("StudentId1")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("StudentId");
-
-                    b.HasIndex("StudentId1")
-                        .IsUnique();
 
                     b.ToTable("studentTransferCertificateLogs");
                 });
@@ -1355,10 +1343,6 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Student", null)
-                        .WithOne("StudentCharacterCertificateLog")
-                        .HasForeignKey("Domain.StudentCharacterCertificateLog", "StudentId1");
-
                     b.Navigation("Student");
                 });
 
@@ -1415,10 +1399,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Student", null)
-                        .WithOne("studentTransferCertificateLog")
-                        .HasForeignKey("Domain.StudentTransferCertificateLog", "StudentId1");
 
                     b.Navigation("Student");
                 });
@@ -1603,13 +1583,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Student", b =>
                 {
-                    b.Navigation("StudentCharacterCertificateLog")
-                        .IsRequired();
-
                     b.Navigation("StudentEnrollments");
-
-                    b.Navigation("studentTransferCertificateLog")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.StudentEnrollment", b =>

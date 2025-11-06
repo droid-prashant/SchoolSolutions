@@ -28,7 +28,6 @@ namespace Infrastructure.Persistance.Configuration
             builder.HasOne(x => x.Municipality)
                    .WithMany()
                    .HasForeignKey(x => x.MunicipalityId);
-
         }
     }
 }

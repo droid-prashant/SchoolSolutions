@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { StudentViewModel } from '../../student/shared/models/viewModels/student.viewModel';
 import { StudentCertificateViewModel } from '../model/studentCertificate.ViewModel';
 
@@ -11,5 +11,5 @@ import { StudentCertificateViewModel } from '../model/studentCertificate.ViewMod
 })
 export class CharacterCertificateComponent {
   @Input('studentObj') studentObj!: StudentCertificateViewModel
-
+  @Input('serialNumber') serialNumber: number = 0;
 }

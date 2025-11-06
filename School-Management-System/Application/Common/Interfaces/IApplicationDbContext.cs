@@ -30,6 +30,8 @@ namespace Application.Common.Interfaces
         DbSet<Province> Provinces { get; }
         DbSet<District> Districts { get; }
         DbSet<Municipality> Municipalities { get; }
+        DbSet<StudentCharacterCertificateLog> studentCharacterCertificateLogs { get; }
+        DbSet<StudentTransferCertificateLog> studentTransferCertificateLogs { get; }
         DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

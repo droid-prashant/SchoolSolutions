@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Students.Dtos;
 using Application.Students.ViewModels;
+using Domain.Enums;
 
 namespace Application.Students.Interfaces
 {
@@ -14,6 +15,8 @@ namespace Application.Students.Interfaces
         Task AssignRegistrationAndSymbolNumber(StudentEnrollmentDto studentEnrollmentDto, string studentEnrollmentId, CancellationToken cancellationToken);
         Task UpdateStudentAsync(StudentDto addStudent, string studentId, CancellationToken cancellationToken);
         Task AssignRollNumbersAsync(string classSectionId, CancellationToken cancellationToken);
+        Task AddStudentCertificateLog(StudentCertificateDto studentCertificateDto, CancellationToken cancellationToken);
+        Task<StudentCertificateLogViewModel> GetStudentCertificateLog(CertificateType certificateType, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken);
         Task<List<StudentCertificateViewModel>> GetStudentCertificateDataAsync(string classSectionId, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRommId, CancellationToken cancellationToken);

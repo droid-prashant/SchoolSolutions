@@ -26,6 +26,9 @@ import { StudentEnrollmentViewModel } from '../home/components/exam/shared/viewM
 import { StudentStudentEnrollmentDto } from '../home/components/exam/shared/models/examEnrollment.dto';
 import { ProvinceViewModel } from './common/models/master/master.ViewModel';
 import { StudentCertificateViewModel } from '../home/components/certificate/model/studentCertificate.ViewModel';
+import { StudentCertificateDto } from '../home/components/certificate/model/studentCertificate.dto';
+import { StudentCertificateLogViewModel } from '../home/components/certificate/model/certificateLog.ViewModel';
+import { CertificateType } from '../home/components/certificate/model/certificateType.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +49,7 @@ export class ApiService {
     return this._httpClient.put<void>(this.baseUrl + `api/Academic/UpdateAcademicYear?academicYearId?${academicYearId}`, academicYearDetail);
   }
 
-   getProvinceDetails(): Observable<ProvinceViewModel[]> {
+  getProvinceDetails(): Observable<ProvinceViewModel[]> {
     return this._httpClient.get<ProvinceViewModel[]>(this.baseUrl + "api/MasterData/GetAllProvince");
   }
 
@@ -167,11 +170,18 @@ export class ApiService {
   payFees(paymentRequest: any): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeStructure", paymentRequest);
   }
-  assignRegistrationAndSymbolNumber(paymentRequest: StudentStudentEnrollmentDto, studentEnrollmentId:string): Observable<void> {
+  assignRegistrationAndSymbolNumber(paymentRequest: StudentStudentEnrollmentDto, studentEnrollmentId: string): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + `api/Student/AssignRegistrationAndSymbolNumber?studentEnrollmentId=${studentEnrollmentId}`, paymentRequest);
   }
 
   getRegAndSymCompliantStudent(classSectionId: any): Observable<StudentEnrollmentViewModel[]> {
     return this._httpClient.get<StudentEnrollmentViewModel[]>(this.baseUrl + `api/Student/GetRegAndSymCompliantEnrolledStudents?classSectionId=${classSectionId}`);
+  }
+
+  addStudentCertificateLog(certificateLog: StudentCertificateDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Student/AddStudentCertificateLog", certificateLog);
+  }
+  getStudentCertificateLog(certificateType: CertificateType): Observable<StudentCertificateLogViewModel> {
+    return this._httpClient.get<StudentCertificateLogViewModel>(this.baseUrl + `api/Student/GetStudentCertificateLog?certificateType=${certificateType}`);
   }
 }

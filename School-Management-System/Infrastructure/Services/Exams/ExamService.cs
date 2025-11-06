@@ -110,7 +110,7 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 40 => "C",
                 >= 35 => "D+",
                 >= 30 => "D",
-                >= 0 => "E",   // Fail
+                >= 0 => "NQ",   // Fail
                 _ => "N/A"      // Invalid safeguard
             };
             return grade;
@@ -128,7 +128,7 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 2.0 => "C",
                 >= 1.6 => "D+",
                 >= 1.2 => "D",
-                >= 0.8 => "E",   // Fail
+                >= 0.8 => "NQ",   // Fail
                 _ => "N/A"
             };
             return grade;

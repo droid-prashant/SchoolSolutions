@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
-    public class Student:AuditableEntry
+    public class Student : AuditableEntry
     {
-        public Guid Id { get; set; } 
-        public string FirstName { get; set; } 
-        public string LastName { get; set; } 
-        public string GrandFatherName { get; set; } 
-        public string FatherName { get; set; } 
+        public Guid Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string GrandFatherName { get; set; }
+        public string FatherName { get; set; }
         public string MotherName { get; set; }
         public string ParentContactNumber { get; set; }
         public string ParentEmail { get; set; }
@@ -24,7 +24,10 @@ namespace Domain
         public int DistrictId { get; set; }
         public District District { get; set; }
         public int MunicipalityId { get; set; }
-        public Municipality Municipality{ get; set; }
+        public bool isActive { get; set; }
+        public Municipality Municipality { get; set; }
+        public StudentCharacterCertificateLog StudentCharacterCertificateLog { get; set; }
+        public StudentTransferCertificateLog studentTransferCertificateLog { get; set; }
         public ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
     }
 }

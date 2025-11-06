@@ -35,10 +35,10 @@
                 <td>{{ student.section }}</td>
                 <td>{{ student.gender }}</td>
                 <td>{{ student.address }}</td>
-                <td><span><i pTooltip="Character Certificate" class="pi pi-eye certificate"
-                            (click)="previewCharacterCertificate(student)"></i></span>
-                    <span><i pTooltip="Transfer Certificate" class="pi pi-eye"
-                            (click)="previewTransferCertificate(student)"></i></span>
+                <td><span *ngIf="!student.isCharacterCertificateTaken"><i pTooltip="Character Certificate"
+                            class="pi pi-eye certificate" (click)="previewCharacterCertificate(student)"></i></span>
+                    <span *ngIf="!student.isTransferCertificateTaken"><i pTooltip="Transfer Certificate"
+                            class="pi pi-eye" (click)="previewTransferCertificate(student)"></i></span>
                 </td>
             </tr>
         </ng-template>
@@ -49,10 +49,10 @@
     [baseZIndex]="10000" (onHide)="onDialogClose()">
     <div id="print-section" *ngIf="showResult">
         <div *ngIf="isTransferCertificate">
-            <app-transfer-certificate [studentObj]="student"></app-transfer-certificate>
+            <app-transfer-certificate [studentObj]="student" [serialNumber]="serialNumber"></app-transfer-certificate>
         </div>
         <div *ngIf="isCharacterCertificate">
-            <app-character-certificate [studentObj]="student"></app-character-certificate>
+            <app-character-certificate [studentObj]="student" [serialNumber]="serialNumber"></app-character-certificate>
         </div>
     </div>
     <ng-template pTemplate="header">
