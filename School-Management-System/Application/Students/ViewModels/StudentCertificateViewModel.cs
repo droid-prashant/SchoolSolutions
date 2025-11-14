@@ -11,8 +11,8 @@ namespace Application.Students.ViewModels
         public Guid Id { get; set; }
         public Guid StudentId { get; set; }
         public string AcademicYear { get; set; }
-        public string AdmittedYear { get; set; }
-        public string IssueDate { get; set; }
+        public DateTime AdmittedDate { get; set; }
+        public DateTime IssueDate { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
         public int Gender { get; set; }
@@ -28,7 +28,7 @@ namespace Application.Students.ViewModels
         public string Section { get; set; }
         public double GPA { get; set; }
         public string ExamType { get; set; }
-        public string ExamHeldYear { get; set; }
+        public DateTime ExamHeld { get; set; }
         public bool IsCharacterCertificateTaken { get; set; }
         public bool IsTransferCertificateTaken { get; set; }
     }

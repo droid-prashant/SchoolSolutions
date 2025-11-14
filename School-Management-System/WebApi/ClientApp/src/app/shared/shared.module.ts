@@ -24,9 +24,11 @@ import { InputSwitchModule } from 'primeng/inputswitch';
 import { DividerModule } from 'primeng/divider';
 import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
+import { NpDatepickerComponent } from "./np-datepicker/np-datepicker.component";
+import { FormsModule } from "@angular/forms";
 
 @NgModule({
-    declarations: [],
+    declarations: [NpDatepickerComponent],
     imports: [
         CommonModule,
         ButtonModule,
@@ -52,7 +54,9 @@ import { CheckboxModule } from 'primeng/checkbox';
         InputSwitchModule,
         DividerModule,
         PasswordModule,
-        CheckboxModule
+        CheckboxModule,
+        FormsModule,
+        
     ],
     exports: [
         CommonModule,
@@ -79,7 +83,8 @@ import { CheckboxModule } from 'primeng/checkbox';
         InputSwitchModule,
         DividerModule,
         PasswordModule,
-        CheckboxModule
+        CheckboxModule,
+        NpDatepickerComponent
     ]
 })
 export class SharedModule { }

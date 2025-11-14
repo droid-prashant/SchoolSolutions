@@ -108,7 +108,8 @@ namespace Infrastructure.Services.Students
                     GrandFatherName = addStudent.GrandFatherName,
                     Gender = addStudent.Gender,
                     Age = addStudent.Age,
-                    DateOfBirth = addStudent.Dob,
+                    DateOfBirthNp = addStudent.DobNp,
+                    DateOfBirthEn = addStudent.DobEn,
                     ProvinceId = addStudent.ProvinceId,
                     DistrictId = addStudent.DistrictId,
                     MunicipalityId = addStudent.MunicipalityId,
@@ -118,7 +119,8 @@ namespace Infrastructure.Services.Students
                     Address = addStudent.Address,
                     ContactNumber = addStudent.ContactNumber,
                     CreatedDate = DateTime.UtcNow,
-                    CreatedBy = Guid.Parse(_userResolver.UserId)
+                    CreatedBy = Guid.Parse(_userResolver.UserId),
+                    isActive = true
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -152,7 +154,8 @@ namespace Infrastructure.Services.Students
                 existingStudent.MunicipalityId = studentDto.MunicipalityId;
                 existingStudent.WardNo = studentDto.WardNo;
                 existingStudent.ContactNumber = studentDto.ContactNumber;
-                existingStudent.DateOfBirth = studentDto.Dob;
+                existingStudent.DateOfBirthNp = studentDto.DobNp;
+                existingStudent.DateOfBirthEn = studentDto.DobEn;
                 existingStudent.ModifiedBy = Guid.Parse(_userResolver.UserId);
                 existingStudent.ModifiedDate = DateTime.UtcNow;
             }
@@ -222,7 +225,7 @@ namespace Infrastructure.Services.Students
                                                                 WardNo = x.Student.WardNo,
                                                                 RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
                                                                 SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
-                                                                DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
+                                                                DateOfBirth = x.Student.DateOfBirthNp,
                                                             }).OrderBy(x => x.Name)
               .ToListAsync(cancellationToken);
             return students;
@@ -248,10 +251,10 @@ namespace Infrastructure.Services.Students
                                                                     WardNo = x.Student.WardNo,
                                                                     RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
                                                                     SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
-                                                                    DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
+                                                                    DateOfBirth = x.Student.DateOfBirthNp,
                                                                     AcademicYear = x.AcademicYear.YearName,
-                                                                    AdmittedYear = x.Student.CreatedDate.Year.ToString(),
-                                                                    IssueDate = DateTime.UtcNow.ToString("dd-MM-yyyy"),
+                                                                    AdmittedDate= x.Student.CreatedDate,
+                                                                    IssueDate = DateTime.UtcNow,
                                                                     FatherName = x.Student.FatherName,
                                                                     MotherName = x.Student.MotherName,
                                                                     Gender = x.Student.Gender,
@@ -261,11 +264,9 @@ namespace Infrastructure.Services.Students
                                                                     ExamType = x.ExamResults.OrderByDescending(x => x.CreatedDate)
                                                                                  .Select(x => x.ExamType)
                                                                                  .First(),
-                                                                    ExamHeldYear = x.ExamResults.OrderByDescending(x => x.CreatedDate)
+                                                                    ExamHeld = x.ExamResults.OrderByDescending(x => x.CreatedDate)
                                                                                  .Select(x => x.CreatedDate)
-                                                                                 .First()
-                                                                                 .Year
-                                                                                 .ToString(),
+                                                                                 .First(),
                                                                 }).OrderBy(x => x.Name)
                   .ToListAsync(cancellationToken);
 
@@ -317,7 +318,7 @@ namespace Infrastructure.Services.Students
                                                       Section = x.ClassSection.Section.Name,
                                                       Gender = x.Student.Gender == 1 ? "Male" : "Female",
                                                       WardNo = x.Student.WardNo,
-                                                      DateOfBirth = x.Student.DateOfBirth.ToString("dd-MM-yyyy"),
+                                                      DateOfBirth = x.Student.DateOfBirthNp,
                                                   }).OrderBy(x => x.Name)
                                                     .ToListAsync(cancellationToken);
             return students;

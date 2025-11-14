@@ -25,7 +25,7 @@ export class ExamMarksEntryComponent implements OnInit {
   examTerminals: ExamTerminal[] = [];
   classId: string = "";
 
-  isClassSectionSelected:boolean = false;
+  isClassSectionSelected: boolean = false;
 
 
   studentMarks: FormGroup;
@@ -83,14 +83,15 @@ export class ExamMarksEntryComponent implements OnInit {
     // this.classId = event.value;
     // if (this.classId) {
     //   this.isClassSelected = true;
-    //   this.listSubject();
+    //   
     //   this.listStudent();
     // }
     // else {
     //   this.isClassSelected = false;
     // }
-       this.classId = event.value;
+    this.classId = event.value;
     if (this.classId) {
+      this.listSubject();
       this.isClassSelected = true;
       const selectedClass = this.classRooms.filter(x => x.id === this.classId);
       const sections = selectedClass.map(x => x.sections);
@@ -99,12 +100,12 @@ export class ExamMarksEntryComponent implements OnInit {
 
   }
 
-   onClassSectionChange(event: any) {
+  onClassSectionChange(event: any) {
     const classsSectionId = event.value;
     if (classsSectionId) {
       this.isClassSectionSelected = true;
       const selectedClassSection = this.sections.filter(x => x.classSectionId === classsSectionId);
-      if(selectedClassSection){
+      if (selectedClassSection) {
         this.getStudentByClassSection(classsSectionId);
 
       }
@@ -122,7 +123,7 @@ export class ExamMarksEntryComponent implements OnInit {
     });
   }
 
-  onClassSectionChanged(event:any){
+  onClassSectionChanged(event: any) {
 
   }
 
@@ -167,7 +168,7 @@ export class ExamMarksEntryComponent implements OnInit {
   }
 
   saveStudentMarks() {
-    if(this.studentMarks.invalid){
+    if (this.studentMarks.invalid) {
       return;
     }
     let studentMarks: SubjectMarkDto = this.studentMarks.value;

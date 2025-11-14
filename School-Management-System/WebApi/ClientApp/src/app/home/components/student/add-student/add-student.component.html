@@ -62,7 +62,11 @@
 
     <div class="field col-6">
       <label>Date Of Birth</label>
-      <p-calendar formControlName="dob" />
+      <!-- <p-calendar formControlName="dob" /> -->
+      <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+        [minDate]="{ year: 2070, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+        (dateChange)="onDobChange($event)">
+      </app-np-datepicker>
     </div>
 
     <div class="field col-6">
@@ -84,8 +88,8 @@
 
     <div class="field col-6">
       <label>Municipality</label>
-        <p-dropdown [options]="selectedMunicipalities" optionLabel="name" optionValue="id" formControlName="municipalityId"
-        placeholder="Select Municipality" [style]="{ width: '100%' }">
+      <p-dropdown [options]="selectedMunicipalities" optionLabel="name" optionValue="id"
+        formControlName="municipalityId" placeholder="Select Municipality" [style]="{ width: '100%' }">
       </p-dropdown>
       <!-- <input rows="3" pInputText formControlName="municipality" /> -->
     </div>

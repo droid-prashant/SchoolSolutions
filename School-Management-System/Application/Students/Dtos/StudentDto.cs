@@ -17,7 +17,8 @@ namespace Application.Students.Dtos
         public int Age { get; set; }
         public string ParentContactNumber { get; set; }
         public string ParentEmail { get; set; }
-        public DateTime Dob { get; set; }
+        public string DobNp { get; set; }
+        public string DobEn { get; set; }
         public int ProvinceId { get; set; }
         public int DistrictId { get; set; }
         public int MunicipalityId { get; set; }

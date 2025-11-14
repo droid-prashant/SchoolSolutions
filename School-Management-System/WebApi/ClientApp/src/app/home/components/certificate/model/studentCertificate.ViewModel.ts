@@ -1,14 +1,15 @@
 export interface StudentCertificateViewModel {
   id: string;
   academicYear: string;
-  admittedYear: string;
-  issueDate: string;
+  admittedDate: Date;
+  issueDate: Date;
   name: string;
   age: number;
   gender: number;
   fatherName: string;
   motherName: string;
-  dateOfBirth: string;
+  dateOfBirthNp: string;
+  dateOfBirthEn: string;
   address: string;
   registrationNumber?: string | null;
   symbolNumber?: string | null;
@@ -18,7 +19,7 @@ export interface StudentCertificateViewModel {
   section: string;
   gpa: number;
   examType: string;
-  examHeldYear: string;
+  examHeld: Date;
   isCharacterCertificateTaken:boolean;
   isTransferCertificateTaken:boolean;
 }

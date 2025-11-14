@@ -76,3 +76,19 @@ VALUES ('20251106165410_Student_Is_Active_column', '8.0.15');
 COMMIT;
 
 
+
+START TRANSACTION;
+
+ALTER TABLE "Students" DROP COLUMN "DateOfBirth";
+
+ALTER TABLE "Students" ADD "DateOfBirthEn" text NOT NULL DEFAULT '';
+
+ALTER TABLE "Students" ADD "DateOfBirthNp" text NOT NULL DEFAULT '';
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20251113172439_Student_Dob_alter', '8.0.15');
+
+COMMIT;
+
+
+

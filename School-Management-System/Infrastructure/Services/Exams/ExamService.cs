@@ -44,7 +44,8 @@ namespace Infrastructure.Services.SubjectMarks
                     var practicalGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
 
                     double totalCredit = subjectMarkObj.TheoryCredit + subjectMarkObj.PracticalCredit;
-                    double finalGradePoint = ((theoryGradeAndPoint.GradePoint * subjectMarkObj.TheoryCredit) + (practicalGradeAndPoint.GradePoint * subjectMarkObj.PracticalCredit)) / totalCredit;
+                    double finalGradePointFloat = ((theoryGradeAndPoint.GradePoint * subjectMarkObj.TheoryCredit) + (practicalGradeAndPoint.GradePoint * subjectMarkObj.PracticalCredit)) / totalCredit;
+                    double finalGradePoint = Math.Floor(finalGradePointFloat * 100) / 100;
 
                     string gradeTheory = calculateGrade(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
                     string gradePractical = calculateGrade(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
@@ -93,7 +94,8 @@ namespace Infrastructure.Services.SubjectMarks
                 totalCreditHour += totalCredit;
 
             }
-            var gpa = weightedGP / totalCreditHour;
+            var gpaFloat = weightedGP / totalCreditHour;
+            var gpa = Math.Floor(gpaFloat * 100) / 100;
             return (gpa, totalCreditHour);
         }
 

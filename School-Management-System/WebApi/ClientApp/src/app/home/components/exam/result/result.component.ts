@@ -17,6 +17,7 @@ export class ResultComponent implements OnInit {
   classId: string = "";
   student!: StudentViewModel;
   showResult: boolean = false;
+  isClassSelected: boolean = false;
   result!: ResultViewModel
   constructor(private _apiService: ApiService) {
 

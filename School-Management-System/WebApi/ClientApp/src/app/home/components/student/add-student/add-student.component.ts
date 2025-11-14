@@ -39,7 +39,8 @@ export class AddStudentComponent implements OnInit {
       gender: [null, Validators.required],
       age: [null, [Validators.required, Validators.min(1)]],
       address: ['', Validators.required],
-      dob: ['', Validators.required],
+      dobNp: ['', Validators.required],
+      dobEn: ['', Validators.required],
       wardNo: ['', Validators.required],
       contactNumber: ['', Validators.required],
       parentContactNumber: ['', Validators.required],
@@ -66,6 +67,15 @@ export class AddStudentComponent implements OnInit {
         this.onDistrictChange(value);
       }
     })
+  }
+
+  onDobChange(event: { bs: string; ad: string }) {
+    const dobNp = event.bs;
+    const dobEn = event.ad;
+    if (dobNp && dobEn) {
+      this.studentForm.get('dobNp')?.setValue(dobNp);
+      this.studentForm.get('dobEn')?.setValue(dobNp);
+    }
   }
 
   getProvinceDetails() {
