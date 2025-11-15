@@ -15,6 +15,7 @@ import { MessageService } from 'primeng/api';
 })
 export class ManageCourseComponent implements OnInit {
   courses: CourseViewModel[] = []
+  masterCourses: CourseViewModel[] = []
   classCourses: ClassCreditCourseViewModel[] = [];
   classCourseForm: FormGroup
   classRooms: ClassRoomViewModel[] = [];
@@ -41,6 +42,14 @@ export class ManageCourseComponent implements OnInit {
     this.listAllClassCourse();
     this.listCourses();
     this.listClass();
+  }
+
+  onClassChange(event: any) {
+    const classRoomId = event.value;
+    if (classRoomId) {
+      this.classCourseForm.get('classRoomId')?.setValue(classRoomId);
+      this.listClassCourseByClassId(classRoomId);
+    }
   }
 
   listClass() {
@@ -70,11 +79,29 @@ export class ManageCourseComponent implements OnInit {
     )
   }
 
+  listClassCourseByClassId(classCourseId: string) {
+    this._apiService.getClassCourseByClassId(classCourseId).subscribe(
+      {
+        next: (response) => {
+          this.classCourses = response;
+          this.filterCourse();
+        },
+        error: (error) => {
+
+        },
+        complete: () => {
+
+        }
+      }
+    )
+  }
+
   listCourses() {
     this._apiService.getCourses().subscribe(
       {
         next: (response) => {
           this.courses = response;
+          this.masterCourses = response;
         },
         error: (error) => {
 
@@ -126,7 +153,8 @@ export class ManageCourseComponent implements OnInit {
       {
         next: (response) => {
           this._messageService.add({ severity: 'success', summary: 'Success', detail: 'successfully configured class and course' });
-          this.listAllClassCourse();
+          const classId = this.classCourseForm.get('classRoomId')?.value;
+          this.listClassCourseByClassId(classId);
           this.reset();
         },
         error: (error) => {
@@ -154,8 +182,24 @@ export class ManageCourseComponent implements OnInit {
     this.reset();
   }
 
+  filterCourse() {
+    if (this.classCourses.length > 0) {
+      const classCourses = this.classCourses.map(x => x.courseId);
+      const filteredCourses = this.masterCourses.filter(x => !classCourses.includes(x.id));
+      this.courses = filteredCourses;
+    }
+  }
+
   reset() {
-    this.classCourseForm.reset();
+    const classId = this.classCourseForm.get('classRoomId')?.value;
+    this.classCourseForm.reset({
+      classRoomId: classId,
+      courseId: '',
+      theoryCreditHour: '',
+      practicalCreditHour: '',
+      theoryFullMarks: '',
+      practicalFullMarks: '',
+    });
     this.isNewRow = false;
     this.isUpdateRow = false;
   }

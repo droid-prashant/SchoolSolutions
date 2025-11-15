@@ -1,4 +1,6 @@
 <p-toast></p-toast>
+<p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassChange($event)" appendTo="body"
+    placeholder="Select a Class" />
 <p-button severity="success" label="New" icon="pi pi-plus" class="mr-2" pTooltip="Add New Row" (click)="addNewRow()" />
 <div class="card">
     <form [formGroup]="classCourseForm">
@@ -17,8 +19,7 @@
                 </tr>
                 <tr *ngIf="isNewRow || isUpdateRow">
                     <td></td>
-                    <td><p-dropdown formControlName="classRoomId" [options]="classRooms" optionLabel="name"
-                            optionValue="id" appendTo="body" placeholder="Select a Class" /></td>
+                    <td></td>
                     <td><p-dropdown formControlName="courseId" [options]="courses" optionLabel="name" optionValue="id"
                             appendTo="body" placeholder="Select a Course" /></td>
                     <td><input type="number" formControlName="theoryCreditHour" pInputText
@@ -48,8 +49,8 @@
                     <td>{{ classCourse.practicalCreditHour }}</td>
                     <td>{{ classCourse.theoryFullMarks }}</td>
                     <td>{{ classCourse.practicalFullMarks }}</td>
-                    <td> <button pButton pRipple type="button" icon="pi pi-pencil"
-                            (click)="onRowEdit(classCourse)" class="p-button-rounded p-button-text">
+                    <td> <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEdit(classCourse)"
+                            class="p-button-rounded p-button-text">
                         </button></td>
                 </tr>
             </ng-template>
