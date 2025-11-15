@@ -32,6 +32,8 @@ namespace Infrastructure.Services.SubjectMarks
                     StudentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId),
                     ExamType = subjectMarkDto.ExamType,
                     GPA = gpaAndTotalCreaditHour.GPA,
+                    Attendance = subjectMarkDto.Attendance,
+                    TotalSchoolDays = subjectMarkDto.TotalSchoolDays,
                     TotalCredit = gpaAndTotalCreaditHour.TotalCreditHour
                 };
 
@@ -168,6 +170,10 @@ namespace Infrastructure.Services.SubjectMarks
                                                        MotherName = x.StudentEnrollment.Student.MotherName,
                                                        ClassRoom = x.StudentEnrollment.ClassSection.ClassRoom.Name,
                                                        Section = x.StudentEnrollment.ClassSection.Section.Name,
+                                                       RollNo = (int)(x.StudentEnrollment.RollNumber != null ? x.StudentEnrollment.RollNumber : 0),
+                                                       WardNo = x.StudentEnrollment.Student.WardNo,
+                                                       Attendance = x.Attendance,
+                                                       TotalSchoolDays = x.TotalSchoolDays,
                                                        StudentMarks = x.SubjectMarks.Where(x => x.ClassCourseId == x.ClassCourseId)
                                                                                     .Select(s => new StudentMarksViewModel
                                                                                     {
@@ -177,7 +183,8 @@ namespace Infrastructure.Services.SubjectMarks
                                                                                         FinalGradePoint = s.FinalGradePoint,
                                                                                         GradePractical = s.GradePractical,
                                                                                         GradeTheory = s.GradeTheory
-                                                                                    }).ToList()
+                                                                                    }).ToList(),
+                                                       IssueDate = DateTime.UtcNow
                                                    }).FirstOrDefaultAsync();
             return result;
         }

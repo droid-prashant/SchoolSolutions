@@ -10,6 +10,8 @@ namespace Application.SubjectMarks.Dtos
     {
         public string StudentId { get; set; }
         public required string ExamType { get; set; }
+        public int Attendance { get; set; }
+        public int TotalSchoolDays { get; set; }
         public required List<StudentMarksList> StudentMarksLists { get; set; }
     }
     public class StudentMarksList

@@ -48,6 +48,8 @@ export class ExamMarksEntryComponent implements OnInit {
     this.studentMarks = fb.group({
       studentId: ['', Validators.required],
       examType: ['', Validators.required],
+      attendance: [null, Validators.required],
+      totalSchoolDays: [null, Validators.required],
       studentMarksLists: fb.array([], Validators.required)
     });
   }
@@ -80,15 +82,6 @@ export class ExamMarksEntryComponent implements OnInit {
   }
 
   onClassRoomChange(event: any) {
-    // this.classId = event.value;
-    // if (this.classId) {
-    //   this.isClassSelected = true;
-    //   
-    //   this.listStudent();
-    // }
-    // else {
-    //   this.isClassSelected = false;
-    // }
     this.classId = event.value;
     if (this.classId) {
       this.listSubject();
@@ -107,9 +100,7 @@ export class ExamMarksEntryComponent implements OnInit {
       const selectedClassSection = this.sections.filter(x => x.classSectionId === classsSectionId);
       if (selectedClassSection) {
         this.getStudentByClassSection(classsSectionId);
-
       }
-      // this.classSectionId = selectedClassSection[0].classSectionId;
     }
   }
 

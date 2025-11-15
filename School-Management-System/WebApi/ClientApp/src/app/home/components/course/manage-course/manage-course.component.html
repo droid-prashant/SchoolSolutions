@@ -1,7 +1,7 @@
 <p-toast></p-toast>
 <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassChange($event)" appendTo="body"
     placeholder="Select a Class" />
-<p-button severity="success" label="New" icon="pi pi-plus" class="mr-2" pTooltip="Add New Row" (click)="addNewRow()" />
+<p-button severity="success" label="New" icon="pi pi-plus" class="mr-2" pTooltip="Add New Row" class="ml-5" (click)="addNewRow()" />
 <div class="card">
     <form [formGroup]="classCourseForm">
         <p-table [value]="classCourses" [paginator]="true" [rows]="10" [tableStyle]="{ 'min-width': '50rem' }"

@@ -27,20 +27,21 @@
     </div>
 
     <div class="student-info">
-      <p>The grade secured by : <b>{{result.studentName}}</b> <span class="tab-space-parent"></span><span>Section : {{result.section}}</span></p>
+      <p>The grade secured by : <b>{{resultObj.studentName}}</b> <span class="tab-space-parent"></span><span>Section :
+          {{resultObj.section}}</span></p>
       <p>
-        <span>Father : {{result.fatherName}}</span>
+        <span>Father : {{resultObj.fatherName}}</span>
         <span class="tab-space-parent"></span>
-        <span>Mother : {{result.motherName}}</span>
+        <span>Mother : {{resultObj.motherName}}</span>
       </p>
       <p>
         <span>Date of birth : {{studentObj.dateOfBirth}} A.D.</span>
         <span class="tab-space"></span>
-        <span>Roll No. : {{student.rollNo}}</span>
+        <span>Roll No. : {{resultObj.rollNo}}</span>
         <span class="tab-space"></span>
-        <span>Class : {{result.classRoom}}</span>
+        <span>Class : {{resultObj.classRoom}}</span>
         <span class="tab-space"></span>
-        <span>Ward No. : {{student.wardNo}}</span>
+        <span>Ward No. : {{resultObj.wardNo}}</span>
       </p>
     </div>
 
@@ -61,7 +62,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let sub of result.studentMarks; let i = index">
+        <tr *ngFor="let sub of resultObj.studentMarks; let i = index">
           <td>{{ i + 1 }}</td>
           <td class="subject-name">{{sub.courseName}}</td>
           <td>{{sub.creditHour}}</td>
@@ -73,7 +74,7 @@
         </tr>
         <tr>
           <td colspan="8" class="gpa">
-            Grade Point Average (GPA) : {{student.gpa}}
+            Grade Point Average (GPA) : {{resultObj.gpa}}
           </td>
         </tr>
       </tbody>
@@ -90,7 +91,7 @@
         </div>
 
         <div class="right-note">
-          <p>Attendance : {{student.attendance}}</p>
+          <p>Attendance : {{resultObj.attendance}}/{{resultObj.totalSchoolDays}}</p>
         </div>
       </div>
       <div class="notes">
@@ -102,7 +103,7 @@
         </div>
         <div>
           <p>..............................................</p>
-          <p>Issue Date : {{student.issueDate}}</p>
+          <p>Issue Date : {{issueDateNp}}</p>
         </div>
         <div>
           <p>..............................................</p>

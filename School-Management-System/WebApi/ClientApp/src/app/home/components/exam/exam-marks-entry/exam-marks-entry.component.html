@@ -20,12 +20,36 @@
     <!-- Start -->
     <div class="card flex justify-content-center subject-marks-form">
         <p-dialog header="Subject Marks Entry" [modal]="true" [(visible)]="isMarksEntryVisible">
-            <div class="field col-3">
-                <label>Exam Terminal</label>
-                <p-dropdown [options]="examTerminals" optionLabel="terminalName" optionValue="terminalName"
-                    formControlName="examType" (onChange)="onExamTerminalChange()"
-                    placeholder="Select Terminal"></p-dropdown>
+            <div class="grid">
+                <div class="col-3">
+                    <div class="field">
+                        <label>Exam Terminal</label>
+                        <p-dropdown [options]="examTerminals" optionLabel="terminalName" optionValue="terminalName"
+                            formControlName="examType" (onChange)="onExamTerminalChange()"
+                            placeholder="Select Terminal">
+                        </p-dropdown>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="field">
+                        <label>Attendance</label>
+                        <input pInputText type="number" formControlName="attendance"
+                            class="p-inputtext p-component input-number" placeholder="Enter Attendance" [min]="0"
+                            [max]="365" />
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="field">
+                        <label>Total School Days</label>
+                        <input pInputText type="number" formControlName="totalSchoolDays"
+                            class="p-inputtext p-component input-number" placeholder="Enter Total School Days" [min]="0"
+                            [max]="365" />
+                    </div>
+                </div>
             </div>
+
             <!-- table -->
             <div formArrayName="studentMarksLists" class="Markscard">
                 <p-table [value]="courses">

@@ -6,9 +6,13 @@ export interface ResultViewModel {
   fatherName: string;
   motherName: string;
   dateOfBirth: string;
+  rollNo: number;
   wardNo: number;
+  attendance: number;
+  totalSchoolDays: number;
   classRoom: string;
   section: string;
+  issueDate: Date;
   studentMarks: StudentMarksViewModel[];
 }
 

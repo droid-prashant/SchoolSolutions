@@ -90,5 +90,16 @@ VALUES ('20251113172439_Student_Dob_alter', '8.0.15');
 
 COMMIT;
 
+START TRANSACTION;
+
+ALTER TABLE "ExamResults" ADD "Attendance" integer NOT NULL DEFAULT 0;
+
+ALTER TABLE "ExamResults" ADD "TotalSchoolDays" integer NOT NULL DEFAULT 0;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20251115083012_ExamResult__column_added', '8.0.15');
+
+COMMIT;
+
 
 

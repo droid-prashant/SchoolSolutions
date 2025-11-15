@@ -14,6 +14,8 @@ namespace Domain
         public string ExamType { get; set; }
         public double TotalCredit { get; set; }
         public double GPA { get; set; }
+        public int Attendance { get; set; }
+        public int TotalSchoolDays { get; set; }
         public ICollection<SubjectMark> SubjectMarks { get; set; }
     }
 }

@@ -36,7 +36,10 @@ export class StudentExamSetupComponent implements OnInit {
     this._apiService.getClassRooms().subscribe(
       {
         next: (response) => {
-          this.classRooms = response;
+          const classRooms = response;
+          if (classRooms) {
+            this.classRooms = classRooms.filter(x => x.name === 'Ten' || x.name === 'Eight');
+          }
         },
         error: (err) => console.log(err),
         complete: () => console.log("Request is complete")
@@ -103,7 +106,7 @@ export class StudentExamSetupComponent implements OnInit {
     if (studentEnrollmentId) {
       this.studentEnrollmentId = studentEnrollmentId;
       this.rowIndex = rowIndex;
-      const formRow= this.formArray.at(rowIndex) as FormGroup;
+      const formRow = this.formArray.at(rowIndex) as FormGroup;
       formRow?.enable();
     }
   }

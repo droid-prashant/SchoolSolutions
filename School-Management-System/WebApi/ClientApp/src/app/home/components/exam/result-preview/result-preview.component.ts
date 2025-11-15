@@ -1,6 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ResultViewModel } from '../shared/viewModels/result.viewModel';
 import { StudentViewModel } from '../../student/shared/models/viewModels/student.viewModel';
+import DateConverter from '@remotemerge/nepali-date-converter';
+import { formatDate } from '@angular/common';
+import { StudentCertificateViewModel } from '../../certificate/model/studentCertificate.ViewModel';
 
 @Component({
   selector: 'app-result-preview',
@@ -8,52 +11,56 @@ import { StudentViewModel } from '../../student/shared/models/viewModels/student
   templateUrl: './result-preview.component.html',
   styleUrl: './result-preview.component.scss'
 })
-export class ResultPreviewComponent implements OnInit {
+export class ResultPreviewComponent implements OnChanges {
 
-  @Input('resultObj') result!: ResultViewModel;
+  @Input('resultObj') resultObj!: ResultViewModel;
   @Input('studentObj') studentObj!: StudentViewModel;
 
-  students = Array.from({ length: 50 }, (_, i) => ({
-    name: `Student ${i + 1}`,
-    course: ['Math', 'Science', 'English', 'Computer'][i % 4],
-    marks: Math.floor(Math.random() * 41) + 60 // random marks 60–100
-  }));
-
-
+  issueDateEn: string = "";
+  issueDateNp: string = "";
+  
   student = {
     schoolName: 'OM PUSHPANJALI ENGLISH SCHOOL',
     alias: '(Jubie International English Academy)',
     address: 'Dodhara Chandani Municipality-7, Kanchanpur',
     province: 'Sudurpashchim Pradesh, Nepal',
-    statement: 'STATEMENT OF GRADE-SHEET 2082 BS (2025 AD)',
-
-    name: 'Rijan Sunar',
-    father: 'Suresh Sunar',
-    mother: 'Renu Sunar',
-    dob: '2069/02/07 B.S.',
-    rollNo: '08',
-    class: 7,
-    wardNo: '06',
-
-    subjects: [
-      { sn: 1, name: 'English', credit: 4, th: 'A', pr: 'A+', final: 'A', gp: 3.6 },
-      { sn: 2, name: 'Nepali', credit: 4, th: 'B+', pr: 'A', final: 'B+', gp: 3.2 },
-      { sn: 3, name: 'Mathematics', credit: 4, th: 'A+', pr: 'A', final: 'A+', gp: 4.0 },
-      { sn: 4, name: 'Science & Environment', credit: 4, th: 'B', pr: 'B+', final: 'B+', gp: 2.8 },
-      { sn: 5, name: 'Social Studies', credit: 4, th: 'B', pr: 'B+', final: 'B+', gp: 2.8 },
-      { sn: 6, name: 'Hamro D.C', credit: 4, th: 'A', pr: 'A+', final: 'A', gp: 3.6 },
-      { sn: 7, name: 'Health', credit: 4, th: 'A', pr: 'A+', final: 'A', gp: 3.6 },
-    ],
-
-    gpa: 3.21,
-    attendance: '249/254',
-    issueDate: '2082/04/15'
+    statement: 'STATEMENT OF GRADE-SHEET 2082 BS (2025 AD)'
   };
 
-  constructor(){
+  constructor() {
 
   }
-  ngOnInit(): void {
-   console.log(this.result)
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['resultObj'] && this.resultObj) {
+      this.convertStudentDates(this.resultObj);
+    }
+  }
+
+  private convertStudentDates(result: ResultViewModel): void {
+
+    if (result.issueDate) {
+      const issue = this.formatDate(result.issueDate, false);
+      this.issueDateEn = issue.ad;
+      this.issueDateNp = issue.bs;
+    }
+  }
+
+  formatDate(inputDate: Date, isYearOnlyRequired: boolean = false): { ad: string, bs: string } {
+    let adDate = '';
+    let bsDate = '';
+    const dateString = inputDate.toString().split('T')[0];
+    const nepaliDate = new DateConverter(dateString).toBs();
+    const year = nepaliDate.year.toString().padStart(4, '0');
+    const month = nepaliDate.month.toString().padStart(2, '0');
+    const day = nepaliDate.date.toString().padStart(2, '0');
+    if (isYearOnlyRequired) {
+      adDate = formatDate(inputDate, 'yyyy', 'en-US');
+      bsDate = `${year}`;
+    }
+    else {
+      adDate = formatDate(inputDate, 'yyyy-MM-dd', 'en-US');
+      bsDate = `${year}-${month}-${day}`;
+    }
+    return { ad: adDate, bs: bsDate };
   }
 }
