@@ -1,8 +1,22 @@
 <!-- <button pButton type="button" label="View Result" (click)="previewResult()"></button> -->
 <h2 class="mb-4">Generate Result</h2>
-<div class="classDropdown">
+<!-- <div class="classDropdown">
     <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
         placeholder="Select Class"></p-dropdown>
+</div> -->
+<div class="grid mb-3">
+    <div class="col-6 md:col-4">
+        <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+            placeholder="Select Class" [style]="{ width: '100%' }">
+        </p-dropdown>
+    </div>
+
+    <div class="col-6 md:col-4">
+        <p-dropdown [options]="sections" optionLabel="name" optionValue="classSectionId"
+            (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected" placeholder="Select Section"
+            [style]="{ width: '100%' }">
+        </p-dropdown>
+    </div>
 </div>
 <div class="card">
     <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
@@ -32,8 +46,8 @@
     </p-table>
 </div>
 
-<p-dialog header="Report Preview" [(visible)]="showResult" [draggable]="false" [closable]="true" [dismissableMask]="true"
-    [style]="{ width: '250mm', maxWidth: '100%', maxHeight:'100%', overflow: 'auto' }"
+<p-dialog header="Report Preview" [(visible)]="showResult" [draggable]="false" [closable]="true"
+    [dismissableMask]="true" [style]="{ width: '250mm', maxWidth: '100%', maxHeight:'100%', overflow: 'auto' }"
     [contentStyle]="{ padding: '0', overflow: 'auto', background: '#fff' }" [baseZIndex]="10000">
     <div id="print-section" *ngIf="showResult">
         <app-result-preview [resultObj]="result" [studentObj]="student"></app-result-preview>
