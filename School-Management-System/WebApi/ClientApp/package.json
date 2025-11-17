@@ -19,6 +19,7 @@
     "@angular/platform-browser-dynamic": "^17.0.0",
     "@angular/router": "^17.0.0",
     "@remotemerge/nepali-date-converter": "^1.0.1",
+    "chart.js": "^4.5.1",
     "jwt-decode": "^4.0.0",
     "nepali-date-converter": "^3.4.0",
     "nepali-date-library": "^1.1.9",

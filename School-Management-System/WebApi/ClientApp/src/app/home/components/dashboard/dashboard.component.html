@@ -1,1 +1,32 @@
-<p>dashboard works!</p>
+<div class="grid">
+    <div class="col-12 md:col-3">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <span class="text-xl font-bold">Students</span>
+            <div class="text-3xl mt-2 font-bold text-primary">{{studentsCount}}</div>
+        </div>
+    </div>
+
+    <div class="col-12 md:col-3">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <span class="text-xl font-bold">Teachers</span>
+            <div class="text-3xl mt-2 font-bold text-primary">30</div>
+        </div>
+    </div>
+
+    <div class="col-12 md:col-3">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <span class="text-xl font-bold">Courses</span>
+            <div class="text-3xl mt-2 font-bold text-primary">{{courseCount}}</div>
+        </div>
+    </div>
+
+    <div class="col-12 md:col-3">
+        <div class="surface-card shadow-2 p-4 p-4 border-round">
+            <span class="text-xl font-bold">Attendance Today</span>
+            <div class="text-3xl mt-2 font-bold text-primary">92%</div>
+        </div>
+    </div>
+</div>
+<div class="grid mt-5">
+    <p-chart type="bar" [data]="data" [options]="options" style="width:50%; height:400px;" />
+</div>

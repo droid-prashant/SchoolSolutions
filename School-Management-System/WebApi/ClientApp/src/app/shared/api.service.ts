@@ -29,6 +29,7 @@ import { StudentCertificateViewModel } from '../home/components/certificate/mode
 import { StudentCertificateDto } from '../home/components/certificate/model/studentCertificate.dto';
 import { StudentCertificateLogViewModel } from '../home/components/certificate/model/certificateLog.ViewModel';
 import { CertificateType } from '../home/components/certificate/model/certificateType.enum';
+import { StudentsByClassViewModel } from '../home/components/dashboard/model/studentsByClass.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +37,18 @@ import { CertificateType } from '../home/components/certificate/model/certificat
 export class ApiService {
   baseUrl: string = environment.API_BASE_URL;
   constructor(private _httpClient: HttpClient) { }
+
+  getStudentsCount(): Observable<number> {
+    return this._httpClient.get<number>(this.baseUrl + "api/Dashboard/GetStudentsCount");
+  }
+
+  getCoursesCount(): Observable<number> {
+    return this._httpClient.get<number>(this.baseUrl + "api/Dashboard/GetCoursesCount");
+  }
+
+  getStudentsByClassCount(): Observable<StudentsByClassViewModel[]> {
+    return this._httpClient.get<StudentsByClassViewModel[]>(this.baseUrl + "api/Dashboard/GetStudentsByClass");
+  }
 
   postAcademicYear(academicYearDetail: AcademicYearDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Academic/AddAcademicYear", academicYearDetail);

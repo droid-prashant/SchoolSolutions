@@ -3,6 +3,7 @@ using Application.Academic.Interfaces;
 using Application.ClassSections.Interfaces;
 using Application.Common.Interfaces;
 using Application.Courses.Interfaces;
+using Application.Dashboard.Interfaces;
 using Application.Fees.Interfaces;
 using Application.Identity.Interfaces;
 using Application.Master.Interface;
@@ -13,6 +14,7 @@ using Infrastructure.Persistance;
 using Infrastructure.Services.Academics;
 using Infrastructure.Services.ClassSections;
 using Infrastructure.Services.Courses;
+using Infrastructure.Services.Dashboard;
 using Infrastructure.Services.Fees;
 using Infrastructure.Services.MasterData;
 using Infrastructure.Services.Students;
@@ -40,6 +42,7 @@ namespace Infrastructure
             services.AddScoped<UserManager<ApplicationUser>>();
             services.AddScoped<IIdentityService, IdentityService>();
 
+            services.AddScoped<IDashboardService, DasboardService>();
             services.AddScoped<IAcademicService, AcademicService>();
             services.AddScoped<IMasterDataService, MasterDataService>();
             services.AddScoped<IStudentService, StudentService>();

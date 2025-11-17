@@ -204,7 +204,7 @@ namespace Infrastructure.Services.Students
         }
         public async Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken)
         {
-            var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
+            var students = await _context.StudentEnrollments.Include(x=>x.Student).Include(x => x.ClassSection)
                                                             .ThenInclude(x => x.ClassRoom)
                                                             .Where(x => x.Student.isActive == true)
                                                             .Select(x => new StudentViewModel
