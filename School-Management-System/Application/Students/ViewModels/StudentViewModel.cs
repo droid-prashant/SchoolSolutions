@@ -10,25 +10,32 @@ namespace Application.Students.ViewModels
     public class StudentViewModel
     {
         public Guid Id { get; set; }
+        public Guid StudentEnrollmentId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int? Age { get; set; }
-        public string Gender { get; set; }
+        public int Gender { get; set; }
         public string GrandFatherName { get; set; }
         public string FatherName { get; set; }
         public string MotherName { get; set; }
-        public string DateOfBirth { get; set; }
-        public string ProvinceId { get; set; }
+        public string DateOfBirthNp { get; set; }
+        public string DateOfBirthEn { get; set; }
+        public string ContactNumber { get; set; }
+        public string? ParentEmail { get; set; }
+        public string ParentContactNumber { get; set; }
+        public int ProvinceId { get; set; }
         public string ProvinceName { get; set; }
-        public string DistrictId { get; set; }
+        public int DistrictId { get; set; }
         public string DistrictName { get; set; }
-        public string MunicipalityId { get; set; }
+        public int MunicipalityId { get; set; }
         public string MunicipalityName { get; set; }
         public string? RegistrationNumber { get; set; }
         public string? SymbolNumber { get; set; }
         public int WardNo { get; set; }
         public string Address { get; set; }
-        public string ClassRoom { get; set; }
-        public string Section { get; set; }
+        public string ClassRoomId { get; set; }
+        public string ClassRoomName { get; set; }
+        public string SectionId { get; set; }
+        public string SectionName { get; set; }
     }
 }

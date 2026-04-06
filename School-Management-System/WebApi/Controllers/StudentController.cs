@@ -63,11 +63,11 @@ namespace WebApi.Controllers
             await _studentService.AssignRegistrationAndSymbolNumber(studentEnrollmentDto, studentEnrollmentId, cancellationToken);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("UpdateStudent")]
-        public async Task UpdateStudent([FromBody] StudentDto addStudent, [FromQuery] string studentId, CancellationToken cancellationToken)
+        public async Task UpdateStudent([FromBody] StudentDto addStudent, CancellationToken cancellationToken)
         {
-            await _studentService.UpdateStudentAsync(addStudent, studentId, cancellationToken);
+            await _studentService.UpdateStudentAsync(addStudent, cancellationToken);
         }
 
         [HttpPost]

@@ -13,7 +13,7 @@ namespace Application.Students.Interfaces
     {
         Task AddStudentAsync(StudentDto addStudent, CancellationToken cancellationToken);
         Task AssignRegistrationAndSymbolNumber(StudentEnrollmentDto studentEnrollmentDto, string studentEnrollmentId, CancellationToken cancellationToken);
-        Task UpdateStudentAsync(StudentDto addStudent, string studentId, CancellationToken cancellationToken);
+        Task UpdateStudentAsync(StudentDto addStudent, CancellationToken cancellationToken);
         Task AssignRollNumbersAsync(string classSectionId, CancellationToken cancellationToken);
         Task AddStudentCertificateLog(StudentCertificateDto studentCertificateDto, CancellationToken cancellationToken);
         Task<StudentCertificateLogViewModel> GetStudentCertificateLog(CertificateType certificateType, CancellationToken cancellationToken);

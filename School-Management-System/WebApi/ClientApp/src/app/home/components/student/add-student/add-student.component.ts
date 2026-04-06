@@ -9,6 +9,7 @@ import { StudentViewModel } from '../shared/models/viewModels/student.viewModel'
 import { ProvinceViewModel } from '../../../../shared/common/models/master/master.ViewModel';
 import { DistrictViewModel } from '../../../../shared/common/models/master/district.ViewModel';
 import { MunicipalityViewModel } from '../../../../shared/common/models/master/municipality.ViewModel';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-add-student',
@@ -32,10 +33,11 @@ export class AddStudentComponent implements OnInit, OnChanges {
   studentForm: FormGroup
   constructor(private _fb: FormBuilder,
     private _apiService: ApiService,
-    private _router: Router
+    private _messageService: MessageService
   ) {
     let fb = this._fb;
     this.studentForm = fb.group({
+      id: [null],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       grandFatherName: ['', Validators.required],
@@ -43,14 +45,14 @@ export class AddStudentComponent implements OnInit, OnChanges {
       motherName: ['', Validators.required],
       gender: [null, Validators.required],
       age: [null],
-      address: ['', Validators.required],
       dobNp: ['', Validators.required],
       dobEn: ['', Validators.required],
       wardNo: ['', Validators.required],
       contactNumber: ['', Validators.required],
       parentContactNumber: ['', Validators.required],
       parentEmail: [''],
-      classSectionId: [null, Validators.required],
+      classRoomId: [null, Validators.required],
+      sectionId: [null, Validators.required],
       provinceId: [null, Validators.required],
       districtId: [null, Validators.required],
       municipalityId: [null, Validators.required]
@@ -84,45 +86,49 @@ export class AddStudentComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(): void {
-    // Handle changes to inputs (e.g., when studentToEdit changes)
     if (this.isEditMode && this.studentToEdit) {
       this.populateFormForEdit();
-      this.onProvinceChange(this.studentToEdit.provinceId);
     }
   }
 
-  private populateFormForEdit(): void {
+  populateFormForEdit(): void {
     if (!this.studentToEdit) {
       return;
     }
 
-    // Load dependent dropdown data first
-    const selectedProvince = this.provinceDetails.find(x => x.id == this.studentToEdit?.provinceId);
+    const student: any = this.studentToEdit;
+    const selectedProvince = this.provinceDetails.find(
+      x => x.id === student.provinceId
+    );
     this.selectedDistricts = selectedProvince?.districts ?? [];
 
-    const selectedDistrict = this.selectedDistricts.find(x => x.id == this.studentToEdit?.districtId);
+    const selectedDistrict = this.selectedDistricts.find(
+      x => x.id === student.districtId
+    );
     this.selectedMunicipalities = selectedDistrict?.municipalities ?? [];
 
-    // Patch without triggering valueChanges reset logic
+    this.onClassRoomChange({ value: student.classRoomId });
     this.studentForm.patchValue({
-      firstName: this.studentToEdit.firstName || '',
-      lastName: this.studentToEdit.lastName || '',
-      grandFatherName: (this.studentToEdit as any).grandFatherName || '',
-      fatherName: this.studentToEdit.fatherName || '',
-      motherName: this.studentToEdit.motherName || '',
-      gender: this.studentToEdit.gender || null,
-      age: this.studentToEdit.age || null,
-      address: this.studentToEdit.address || '',
-      contactNumber: (this.studentToEdit as any).contactNumber || '',
-      parentContactNumber: (this.studentToEdit as any).parentContactNumber || '',
-      parentEmail: (this.studentToEdit as any).parentEmail || '',
-      provinceId: this.studentToEdit.provinceId || null,
-      districtId: this.studentToEdit.districtId || null,
-      municipalityId: this.studentToEdit.municipalityId || null,
-      wardNo: (this.studentToEdit as any).wardNo || '',
-      dobNp: (this.studentToEdit as any).dobNp || '',
-      dobEn: (this.studentToEdit as any).dobEn || '',
-      classSectionId: (this.studentToEdit as any).classSectionId || null
+      id: student.id,
+      firstName: student.firstName || '',
+      lastName: student.lastName || '',
+      grandFatherName: student.grandFatherName || '',
+      fatherName: student.fatherName || '',
+      motherName: student.motherName || '',
+      gender: student.gender,
+      age: student.age ?? null,
+      contactNumber: student.contactNumber || '',
+      parentContactNumber: student.parentContactNumber || '',
+      parentEmail: student.parentEmail || '',
+      classRoomId: student.classRoomId ?? null,
+      sectionId: student.sectionId ?? null,
+      address: student.address || '',
+      provinceId: student.provinceId ?? null,
+      districtId: student.districtId ?? null,
+      municipalityId: student.municipalityId ?? null,
+      wardNo: student.wardNo ?? '',
+      dobNp: student.dateOfBirthNp || '',
+      dobEn: student.dateOfBirthEn || ''
     }, { emitEvent: false });
   }
 
@@ -163,33 +169,42 @@ export class AddStudentComponent implements OnInit, OnChanges {
     if (this.studentForm.invalid) {
       return;
     }
-
     let student: StudentDto = this.studentForm.value;
-
     if (this.isEditMode && this.studentToEdit) {
-      // Update mode
       student.id = this.studentToEdit.id;
-      this._apiService.updateStudent(student).subscribe(
-        {
-          next: (response) => {
-            this.studentSaved.emit();
-          },
-          error: (err) => console.log(err),
-          complete: () => console.log("Update request completed")
-        }
-      );
+      this.updateStudent(student);
     } else {
-      // Add mode
-      this._apiService.postStudent(student).subscribe(
-        {
-          next: (response) => {
-            this.studentSaved.emit();
-          },
-          error: (err) => console.log(err),
-          complete: () => console.log("Add request completed")
-        }
-      );
+      this.addStudent(student);
     }
+  }
+
+  updateStudent(student: StudentDto) {
+    this._apiService.updateStudent(student).subscribe(
+      {
+        next: (response) => {
+          this.studentSaved.emit();
+        },
+        error: (err) => {
+          console.log(err);
+          this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update student' });
+        }
+      }
+    );
+  }
+
+  addStudent(student: StudentDto) {
+    this._apiService.postStudent(student).subscribe(
+      {
+        next: (response) => {
+          this.studentForm.reset();
+         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Student added successfully' });
+        },
+        error: (err) => {
+          console.log(err);
+          this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add student' });
+        }
+      }
+    );
   }
 
   onClassRoomChange(event: any) {
@@ -201,14 +216,14 @@ export class AddStudentComponent implements OnInit, OnChanges {
     }
   }
 
-  onSectionChange(event: any) {
-    const sectionId = event.value;
-    if (sectionId) {
-      const selectedClassSection = this.sections.filter(x => x.sectionId === sectionId);
-      const selectedCLassSectionId = selectedClassSection[0].classSectionId;
-      this.studentForm.get('classSectionId')?.setValue(selectedCLassSectionId);
-    }
-  }
+  // onSectionChange(event: any) {
+  //   const sectionId = event.value;
+  //   if (sectionId) {
+  //     const selectedClassSection = this.sections.filter(x => x.sectionId === sectionId);
+  //     const selectedCLassSectionId = selectedClassSection[0].classSectionId;
+  //     this.studentForm.get('classSectionId')?.setValue(selectedCLassSectionId);
+  //   }
+  // }
 
   onProvinceChange(provinceId: any) {
     this.selectedDistricts = [];
@@ -221,7 +236,7 @@ export class AddStudentComponent implements OnInit, OnChanges {
       }
     }
 
-    // Reset only when user changes province manually
+    // user change only
     this.studentForm.patchValue({
       districtId: null,
       municipalityId: null
@@ -238,7 +253,6 @@ export class AddStudentComponent implements OnInit, OnChanges {
       }
     }
 
-    // Reset municipality only when user changes district manually
     this.studentForm.patchValue({
       municipalityId: null
     }, { emitEvent: false });

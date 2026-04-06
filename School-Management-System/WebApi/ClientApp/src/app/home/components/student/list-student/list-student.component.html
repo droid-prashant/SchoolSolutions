@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="card">
     <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
         [rowsPerPageOptions]="[5, 10, 20]">
@@ -16,9 +17,9 @@
             <tr>
                 <td>{{ rowIndex + 1 }}</td>
                 <td>{{ student.firstName }}  {{ student.lastName }}</td>
-                <td>{{ student.classRoom }}</td>
-                <td>{{ student.section }}</td>
-                <td>{{ student.gender }}</td>
+                <td>{{ getClassName(student.classRoomId) }}</td>
+                <td>{{ getSectionName(student.sectionId) }}</td>
+                <td>{{ getGender(student.gender) }}</td>
                 <td>{{ student.address }}</td>
                 <td>
                     <div class="speeddial-linear-demo">

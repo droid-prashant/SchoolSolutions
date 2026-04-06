@@ -1,5 +1,4 @@
-<!-- src/app/components/student-form/student-form.component.html -->
-
+<p-toast></p-toast>
 <h2 class="mb-4" *ngIf="!isEditMode">Register Student</h2>
 
 <form [formGroup]="studentForm" (ngSubmit)="saveStudent()" class="p-fluid">
@@ -32,7 +31,8 @@
 
     <div class="field col-3">
       <label>Gender <span class="text-danger">*</span></label>
-      <p-dropdown [options]="genders" formControlName="gender" placeholder="Select Gender" required></p-dropdown>
+      <p-dropdown [options]="genders" formControlName="gender" optionLabel="label" optionValue="value"
+        placeholder="Select Gender" required></p-dropdown>
     </div>
 
     <div class="field col-3">
@@ -57,11 +57,10 @@
 
     <div class="field col-3">
       <label>Date Of Birth <span class="text-danger">*</span></label>
-      <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
-        [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
-        (dateChange)="onDobChange($event)" required>
+      <app-np-datepicker [language]="'ne'" [unicodeDate]="false" [selectedDate]="studentForm.get('dobNp')?.value"
+        [selectedDateType]="'bs'" [minDate]="{ year: 2050, month: 1, day: 1 }"
+        [maxDate]="{ year: 2099, month: 12, day: 30 }" (dateChange)="onDobChange($event)">
       </app-np-datepicker>
-      
     </div>
 
     <div class="field col-3">
@@ -96,18 +95,19 @@
 
     <div class="field col-3">
       <label>Class Room <span class="text-danger">*</span></label>
-      <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+      <p-dropdown [options]="classRooms" formControlName="classRoomId" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
         placeholder="Select Class" required></p-dropdown>
     </div>
 
     <div class="field col-3">
       <label>Section <span class="text-danger">*</span></label>
-      <p-dropdown [options]="sections" optionLabel="name" optionValue="sectionId" (onChange)="onSectionChange($event)"
+      <p-dropdown [options]="sections" formControlName="sectionId" optionLabel="name" optionValue="sectionId"
         placeholder="Select Section" required></p-dropdown>
     </div>
 
     <div class="col-12 text-right mt-2">
-      <button type="submit" pButton [label]="isEditMode ? 'Update' : 'Register'" class="p-button-success" [disabled]="studentForm.invalid"></button>
+      <button type="submit" pButton [label]="isEditMode ? 'Update' : 'Register'" class="p-button-success"
+        [disabled]="studentForm.invalid"></button>
     </div>
   </div>
 </form>

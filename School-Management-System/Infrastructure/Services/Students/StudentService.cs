@@ -78,13 +78,13 @@ namespace Infrastructure.Services.Students
             await _context.StudentFees.AddRangeAsync(studentFees, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
-        private async Task StudentEnrollent(Student student, string classSectionId, CancellationToken cancellationToken)
+        private async Task StudentEnrollent(Student student, Guid classSectionId, CancellationToken cancellationToken)
         {
             var studentEnrollment = new StudentEnrollment
             {
                 StudentId = student.Id,
                 AcademicYearId = Guid.Parse(_userResolver.AcademicYearId),
-                ClassSectionId = Guid.Parse(classSectionId),
+                ClassSectionId = classSectionId,
                 RegistrationNumber = null,
                 SymbolNumber = null,
                 CreatedDate = DateTime.UtcNow,
@@ -99,6 +99,7 @@ namespace Infrastructure.Services.Students
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {
+                var classSectionId = await _context.ClassSections.Where(x => x.ClassId == Guid.Parse(addStudent.ClassRoomId) && x.SectionId == Guid.Parse(addStudent.SectionId)).Select(x => x.Id).FirstOrDefaultAsync();
                 var student = new Student
                 {
                     FirstName = addStudent.FirstName,
@@ -123,20 +124,28 @@ namespace Infrastructure.Services.Students
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
-                await StudentEnrollent(student, addStudent.ClassSectionId, cancellationToken);
+                await StudentEnrollent(student, classSectionId, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-                throw;
+                throw new Exception(ex.Message);
             }
 
         }
-        public async Task UpdateStudentAsync(StudentDto studentDto, string studentId, CancellationToken cancellationToken)
+        public async Task UpdateStudentAsync(StudentDto studentDto, CancellationToken cancellationToken)
         {
-            var existingStudent = await _context.Students.FirstOrDefaultAsync(x => x.Id == Guid.Parse(studentId));
-            if (existingStudent != null)
+            if (studentDto.Id == null)
+            {
+                throw new Exception("Invalid Request");
+            }
+            var existingStudent = await _context.Students.FirstOrDefaultAsync(x => x.Id == Guid.Parse(studentDto.Id));
+            if (existingStudent == null)
+            {
+                throw new Exception("No Data to update");
+            }
+            else
             {
                 existingStudent.FirstName = studentDto.FirstName;
                 existingStudent.LastName = studentDto.LastName;
@@ -207,7 +216,8 @@ namespace Infrastructure.Services.Students
                                                             .Where(x => x.Student.isActive == true)
                                                             .Select(x => new StudentViewModel
                                                             {
-                                                                Id = x.Id,
+                                                                Id = x.StudentId,
+                                                                StudentEnrollmentId = x.Id,
                                                                 FirstName = x.Student.FirstName,
                                                                 LastName = x.Student.LastName,
                                                                 Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
@@ -215,19 +225,25 @@ namespace Infrastructure.Services.Students
                                                                 GrandFatherName = x.Student.GrandFatherName,
                                                                 FatherName = x.Student.FatherName,
                                                                 MotherName = x.Student.MotherName,
-                                                                ClassRoom = x.ClassSection.ClassRoom.Name,
-                                                                Section = x.ClassSection.Section.Name,
-                                                                Gender = x.Student.Gender == 1 ? "Male" : "Female",
+                                                                ClassRoomId = x.ClassSection.ClassRoom.Id.ToString(),
+                                                                SectionId = x.ClassSection.Section.Id.ToString(),
+                                                                ContactNumber = x.Student.ContactNumber,
+                                                                ParentContactNumber = x.Student.ParentContactNumber,
+                                                                ParentEmail = x.Student.ParentEmail,
+                                                                Gender = x.Student.Gender,
                                                                 ProvinceName = x.Student.Province.ProvinceName,
-                                                                ProvinceId = x.Student.ProvinceId.ToString(),
+                                                                ProvinceId = x.Student.ProvinceId,
                                                                 DistrictName = x.Student.District.DistrictName,
-                                                                DistrictId = x.Student.DistrictId.ToString(),
+                                                                DistrictId = x.Student.DistrictId,
                                                                 MunicipalityName = x.Student.Municipality.MunicipalityName,
-                                                                MunicipalityId = x.Student.MunicipalityId.ToString(),
+                                                                MunicipalityId = x.Student.MunicipalityId,
                                                                 WardNo = x.Student.WardNo,
                                                                 RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
                                                                 SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
-                                                                DateOfBirth = x.Student.DateOfBirthNp,
+                                                                DateOfBirthNp = x.Student.DateOfBirthNp,
+                                                                DateOfBirthEn = x.Student.DateOfBirthEn,
+                                                                ClassRoomName = x.ClassSection.ClassRoom.Name,
+                                                                SectionName = x.ClassSection.Section.Name
                                                             }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
               .ToListAsync(cancellationToken);
             return students;
@@ -317,11 +333,12 @@ namespace Infrastructure.Services.Students
                                                       LastName = x.Student.LastName,
                                                       Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
                                                       Age = x.Student.Age,
-                                                      ClassRoom = x.ClassSection.ClassRoom.Name,
-                                                      Section = x.ClassSection.Section.Name,
-                                                      Gender = x.Student.Gender == 1 ? "Male" : "Female",
+                                                      ClassRoomId = x.ClassSection.ClassRoom.Id.ToString(),
+                                                      SectionId = x.ClassSection.Section.Id.ToString(),
+                                                      Gender = x.Student.Gender,
                                                       WardNo = x.Student.WardNo,
-                                                      DateOfBirth = x.Student.DateOfBirthNp,
+                                                      DateOfBirthNp = x.Student.DateOfBirthNp,
+                                                      DateOfBirthEn = x.Student.DateOfBirthEn
                                                   }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                     .ToListAsync(cancellationToken);
             return students;
@@ -337,10 +354,11 @@ namespace Infrastructure.Services.Students
                                                                 Id = x.Id,
                                                                 FirstName = x.Student.FirstName,
                                                                 LastName = x.Student.LastName,
-                                                                DateOfBirth = x.Student.DateOfBirthEn,
-                                                                ClassRoom = x.ClassSection.ClassRoom.Name,
-                                                                Section = x.ClassSection.Section.Name,
-                                                                Gender = x.Student.Gender == 1 ? "Male" : "Female"
+                                                                DateOfBirthNp = x.Student.DateOfBirthNp,
+                                                                DateOfBirthEn = x.Student.DateOfBirthEn,
+                                                                ClassRoomId = x.ClassSection.ClassRoom.Id.ToString(),
+                                                                SectionId = x.ClassSection.Section.Id.ToString(),
+                                                                Gender = x.Student.Gender
                                                             }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                    .ToListAsync(cancellationToken);
             return students;

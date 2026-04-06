@@ -1,5 +1,6 @@
 export interface StudentViewModel {
     id: string;
+    studentEntrollmentId: string;
     firstName: string;
     lastName: string;
     gender: string;
@@ -7,10 +8,13 @@ export interface StudentViewModel {
     grandGatherName: string;
     fatherName: string;
     motherName: string;
-    classRoom: string;
-    section: string
+    classRoomId: string;
+    classRoomName: string;
+    sectionId: string
+    sectionName: string;
     address: string;
-    dateOfBirth: string;
+    dateOfBirthNp: string;
+    dateOfBirthEn: string;
     provinceId: number;
     districtId: number;
     municipalityId: number;

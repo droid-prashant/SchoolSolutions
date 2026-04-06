@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MenuItem, PrimeIcons } from 'primeng/api';
+import { MenuItem, MessageService, PrimeIcons } from 'primeng/api';
 import { ApiService } from '../../../../shared/api.service';
 import { StudentViewModel } from '../shared/models/viewModels/student.viewModel';
 
@@ -14,7 +14,7 @@ export class ListStudentComponent implements OnInit {
   isEditDialogVisible: boolean = false;
   selectedStudent: StudentViewModel | null = null;
 
-  constructor(private _apiService: ApiService) {
+  constructor(private _apiService: ApiService, private _messageService: MessageService) {
   }
   ngOnInit(): void {
     this.listStudent();
@@ -33,14 +33,42 @@ export class ListStudentComponent implements OnInit {
   }
 
   editStudent(student: StudentViewModel) {
-    this.selectedStudent = student;
+    this.selectedStudent = { ...student };
     this.isEditDialogVisible = true;
   }
 
+  getGender(genderId: number): string {
+    switch (genderId) {
+      case 1:
+        return 'Male';
+      case 2:
+        return 'Female';
+      case 3:
+        return 'Other';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  getClassName(classRoomId: string): string {
+    const classRoom = this.students.find(s => s.classRoomId === classRoomId);
+    return classRoom ? classRoom.classRoomName : 'Unknown';
+  }
+
+  getSectionName(sectionId: string): string {
+    const section = this.students.find(s => s.sectionId === sectionId);
+    return section ? section.sectionName : 'Unknown';
+  }
+
   onStudentSaved() {
+    if (this.isEditDialogVisible) {
+      this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Student updated successfully' });
+    } else {
+      this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Student added successfully' });
+    }
     this.isEditDialogVisible = false;
     this.selectedStudent = null;
-    this.listStudent(); // Refresh the list
+    this.listStudent();
   }
   listStudent() {
     this._apiService.getStudents().subscribe(

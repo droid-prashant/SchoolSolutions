@@ -11,7 +11,8 @@ export interface StudentDto {
   contactNumber: string;
   parentContactNumber: string;
   parentEmail: string;
-  classSectionId: string;    
+  classRoomId: string;    
+  sectionId: string;    
   provinceId: string;    
   districtId: string;    
   municipalityId: string;    

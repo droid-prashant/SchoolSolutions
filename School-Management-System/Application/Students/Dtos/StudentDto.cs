@@ -8,6 +8,7 @@ namespace Application.Students.Dtos
 {
     public class StudentDto
     {
+        public string? Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string GrandFatherName { get; set; }
@@ -25,6 +26,7 @@ namespace Application.Students.Dtos
         public int WardNo { get; set; }
         //public string Address { get; set; }
         public string ContactNumber { get; set; }
-        public string ClassSectionId { get; set; }
+        public string ClassRoomId { get; set; }
+        public string SectionId { get; set; }
     }
 }
