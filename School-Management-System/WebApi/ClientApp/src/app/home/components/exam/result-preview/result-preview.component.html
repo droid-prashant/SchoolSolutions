@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="statement-container">
-        <div class="statement">{{student.statement}}</div>
+        <div class="statement">{{student.statement}} {{currentYearNp}} BS ({{currentYearEn}} AD)</div>
       </div>
     </div>
 
@@ -48,32 +48,35 @@
     <table class="marks-table">
       <thead>
         <tr>
-          <th rowspan="2">S.N.</th>
-          <th rowspan="2">Subjects</th>
-          <th rowspan="2">Credit Hour</th>
-          <th colspan="2">Obtained Grade</th>
-          <th rowspan="2">Final Grade</th>
-          <th rowspan="2">Grade Point</th>
-          <th rowspan="2">Remarks</th>
+          <th rowspan="2" class="text-align-centre">S.N.</th>
+          <th rowspan="2" class="text-align-centre">Subjects</th>
+          <th colspan="2" class="text-align-centre">Credit Hour</th>
+          <th colspan="2" class="text-align-centre">Obtained Grade</th>
+          <th rowspan="2" class="text-align-centre">Final Grade</th>
+          <th rowspan="2" class="text-align-centre">Grade Point</th>
+          <th rowspan="2" class="text-align-centre">Remarks</th>
         </tr>
         <tr>
-          <th>Theory</th>
-          <th>Practical</th>
+          <th class="text-align-centre">Theory</th>
+          <th class="text-align-centre">Practical</th>
+          <th class="text-align-centre">Theory</th>
+          <th class="text-align-centre">Practical</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let sub of resultObj.studentMarks; let i = index">
-          <td>{{ i + 1 }}</td>
+          <td class="text-align-centre">{{ i + 1 }}</td>
           <td class="subject-name">{{sub.courseName}}</td>
-          <td>{{sub.creditHour}}</td>
-          <td>{{sub.gradeTheory}}</td>
-          <td>{{sub.gradePractical}}</td>
-          <td>{{sub.finalGrade}}</td>
-          <td>{{sub.finalGradePoint}}</td>
-          <td></td>
+          <td class="text-align-centre">{{sub.creditHour}}</td>
+          <td class="text-align-centre">{{sub.creditHour}}</td>
+          <td class="grade-shift-theory">{{sub.gradeTheory}}</td>
+          <td class="grade-shift-practical">{{sub.gradePractical}}</td>
+          <td class="grade-shift-final-grade">{{sub.finalGrade}}</td>
+          <td class="text-align-centre">{{sub.finalGradePoint}}</td>
+          <td class="text-align-centre"></td>
         </tr>
         <tr>
-          <td colspan="8" class="gpa">
+          <td colspan="9" class="gpa">
             Grade Point Average (GPA) : {{resultObj.gpa}}
           </td>
         </tr>

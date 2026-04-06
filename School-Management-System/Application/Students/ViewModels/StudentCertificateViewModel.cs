@@ -14,7 +14,7 @@ namespace Application.Students.ViewModels
         public DateTime AdmittedDate { get; set; }
         public DateTime IssueDate { get; set; }
         public string Name { get; set; }
-        public int Age { get; set; }
+        public int? Age { get; set; }
         public int Gender { get; set; }
         public string FatherName { get; set; }
         public string MotherName { get; set; }
@@ -26,8 +26,8 @@ namespace Application.Students.ViewModels
         public string ClassRoom { get; set; }
         public string FirstAdmittedClass { get; set; }
         public string Section { get; set; }
-        public double GPA { get; set; }
-        public string ExamType { get; set; }
+        public decimal GPA { get; set; }
+        public int ExamType { get; set; }
         public DateTime ExamHeld { get; set; }
         public bool IsCharacterCertificateTaken { get; set; }
         public bool IsTransferCertificateTaken { get; set; }

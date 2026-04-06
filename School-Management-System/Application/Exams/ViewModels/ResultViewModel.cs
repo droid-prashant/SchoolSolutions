@@ -9,9 +9,9 @@ namespace Application.Exams.ViewModels
 {
     public class ResultViewModel
     {
-        public string ExamType { get; set; }
-        public double TotalCredit { get; set; }
-        public double GPA { get; set; }
+        public int ExamType { get; set; }
+        public decimal TotalCredit { get; set; }
+        public decimal GPA { get; set; }
         public string StudentName { get; set; }
         public string FatherName { get; set; }
         public string MotherName { get; set; }
@@ -33,6 +33,6 @@ namespace Application.Exams.ViewModels
         public string GradeTheory { get; set; }
         public string GradePractical { get; set; }
         public string FinalGrade { get; set; }
-        public double FinalGradePoint { get; set; }
+        public decimal FinalGradePoint { get; set; }
     }
 }

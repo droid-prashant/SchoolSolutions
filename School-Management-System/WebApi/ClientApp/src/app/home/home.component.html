@@ -12,26 +12,27 @@
             </a>
         </ng-template>
         <ng-template pTemplate="end">
-            <div class="flex align-items-center gap-2">
+            <div class="flex align-items-center gap-5">
                 <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" />
-                <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" shape="circle" />
+                <p-avatar image="assets/Om Pushpanjali logo.png" shape="circle">
+                </p-avatar>
             </div>
         </ng-template>
     </p-menubar>
 </div>
 
 <!-- app.component.html or main layout component -->
+<div class="card">
+    <div class="min-h-screen flex surface-ground">
 
-<div class="min-h-screen flex surface-ground">
-  
-  <!-- Sidebar Section -->
-  <div class="w-18rem bg-white shadow-2 p-3">
-    <p-panelMenu [model]="sidebarItems" styleClass="w-full" />
-  </div>
+        <!-- Sidebar Section -->
+        <div class="w-18rem bg-white shadow-2 p-3">
+            <p-panelMenu [model]="sidebarItems" styleClass="w-full" />
+        </div>
 
-  <!-- Body / Main Content Section -->
-  <div class="flex-1 p-4">
-    <router-outlet></router-outlet>
-  </div>
-  
+        <!-- Body / Main Content Section -->
+        <div class="flex-1 p-4">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
 </div>

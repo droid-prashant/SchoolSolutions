@@ -30,6 +30,7 @@ import { StudentCertificateDto } from '../home/components/certificate/model/stud
 import { StudentCertificateLogViewModel } from '../home/components/certificate/model/certificateLog.ViewModel';
 import { CertificateType } from '../home/components/certificate/model/certificateType.enum';
 import { StudentsByClassViewModel } from '../home/components/dashboard/model/studentsByClass.viewModel';
+import { SubjectMarksViewModel } from '../home/components/exam/shared/viewModels/student-marks.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -68,6 +69,10 @@ export class ApiService {
 
   postStudent(student: StudentDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Student/AddStudent", student);
+  }
+
+  updateStudent(student: StudentDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + "api/Student/UpdateStudent", student);
   }
 
   getStudents(): Observable<StudentViewModel[]> {
@@ -142,6 +147,12 @@ export class ApiService {
 
   postStudentMarks(studentmarks: SubjectMarkDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Exam/AddMarks", studentmarks);
+  }
+  updateStudentMarks(studentmarks: SubjectMarkDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + "api/Exam/UpdateMarks", studentmarks);
+  }
+  getStudentMarks(studentEnrollmentId: string, examType: number): Observable<SubjectMarksViewModel> {
+    return this._httpClient.get<SubjectMarksViewModel>(this.baseUrl + `api/Exam/GetStudentMarks?studentEnrollmentId=${studentEnrollmentId}&examType=${examType}`);
   }
 
   getResult(studentEnrollmentId: string): Observable<ResultViewModel> {

@@ -116,7 +116,6 @@ namespace Infrastructure.Services.Students
                     ParentContactNumber = addStudent.ParentContactNumber,
                     ParentEmail = addStudent.ParentEmail,
                     WardNo = addStudent.WardNo,
-                    Address = addStudent.Address,
                     ContactNumber = addStudent.ContactNumber,
                     CreatedDate = DateTime.UtcNow,
                     CreatedBy = Guid.Parse(_userResolver.UserId),
@@ -141,7 +140,6 @@ namespace Infrastructure.Services.Students
             {
                 existingStudent.FirstName = studentDto.FirstName;
                 existingStudent.LastName = studentDto.LastName;
-                existingStudent.Address = studentDto.Address;
                 existingStudent.FatherName = studentDto.FatherName;
                 existingStudent.MotherName = studentDto.MotherName;
                 existingStudent.GrandFatherName = studentDto.GrandFatherName;
@@ -204,15 +202,19 @@ namespace Infrastructure.Services.Students
         }
         public async Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken)
         {
-            var students = await _context.StudentEnrollments.Include(x=>x.Student).Include(x => x.ClassSection)
+            var students = await _context.StudentEnrollments.Include(x => x.Student).Include(x => x.ClassSection)
                                                             .ThenInclude(x => x.ClassRoom)
                                                             .Where(x => x.Student.isActive == true)
                                                             .Select(x => new StudentViewModel
                                                             {
                                                                 Id = x.Id,
-                                                                Name = x.Student.FirstName + " " + x.Student.LastName,
-                                                                Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
+                                                                FirstName = x.Student.FirstName,
+                                                                LastName = x.Student.LastName,
+                                                                Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
                                                                 Age = x.Student.Age,
+                                                                GrandFatherName = x.Student.GrandFatherName,
+                                                                FatherName = x.Student.FatherName,
+                                                                MotherName = x.Student.MotherName,
                                                                 ClassRoom = x.ClassSection.ClassRoom.Name,
                                                                 Section = x.ClassSection.Section.Name,
                                                                 Gender = x.Student.Gender == 1 ? "Male" : "Female",
@@ -226,7 +228,7 @@ namespace Infrastructure.Services.Students
                                                                 RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
                                                                 SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
                                                                 DateOfBirth = x.Student.DateOfBirthNp,
-                                                            }).OrderBy(x => x.Name)
+                                                            }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
               .ToListAsync(cancellationToken);
             return students;
         }
@@ -243,7 +245,7 @@ namespace Infrastructure.Services.Students
                                                                     Id = x.Id,
                                                                     StudentId = x.StudentId,
                                                                     Name = x.Student.FirstName + " " + x.Student.LastName,
-                                                                    Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName,
+                                                                    Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
                                                                     Age = x.Student.Age,
                                                                     ClassRoom = x.ClassSection.ClassRoom.Name,
                                                                     FirstAdmittedClass = studentFirstEnrollment.ClassSection.ClassRoom.Name,
@@ -253,7 +255,7 @@ namespace Infrastructure.Services.Students
                                                                     SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
                                                                     DateOfBirth = x.Student.DateOfBirthNp,
                                                                     AcademicYear = x.AcademicYear.YearName,
-                                                                    AdmittedDate= x.Student.CreatedDate,
+                                                                    AdmittedDate = x.Student.CreatedDate,
                                                                     IssueDate = DateTime.UtcNow,
                                                                     FatherName = x.Student.FatherName,
                                                                     MotherName = x.Student.MotherName,
@@ -311,15 +313,16 @@ namespace Infrastructure.Services.Students
                                                   .Select(x => new StudentViewModel
                                                   {
                                                       Id = x.Id,
-                                                      Name = x.Student.FirstName + " " + x.Student.LastName,
-                                                      Address = x.Student.Address,
+                                                      FirstName = x.Student.FirstName,
+                                                      LastName = x.Student.LastName,
+                                                      Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
                                                       Age = x.Student.Age,
                                                       ClassRoom = x.ClassSection.ClassRoom.Name,
                                                       Section = x.ClassSection.Section.Name,
                                                       Gender = x.Student.Gender == 1 ? "Male" : "Female",
                                                       WardNo = x.Student.WardNo,
                                                       DateOfBirth = x.Student.DateOfBirthNp,
-                                                  }).OrderBy(x => x.Name)
+                                                  }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                     .ToListAsync(cancellationToken);
             return students;
         }
@@ -332,13 +335,13 @@ namespace Infrastructure.Services.Students
                                                             .Select(x => new StudentViewModel
                                                             {
                                                                 Id = x.Id,
-                                                                Name = x.Student.FirstName + " " + x.Student.LastName,
-                                                                Address = x.Student.Address,
-                                                                Age = x.Student.Age,
+                                                                FirstName = x.Student.FirstName,
+                                                                LastName = x.Student.LastName,
+                                                                DateOfBirth = x.Student.DateOfBirthEn,
                                                                 ClassRoom = x.ClassSection.ClassRoom.Name,
                                                                 Section = x.ClassSection.Section.Name,
                                                                 Gender = x.Student.Gender == 1 ? "Male" : "Female"
-                                                            }).OrderBy(x => x.Name)
+                                                            }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                    .ToListAsync(cancellationToken);
             return students;
         }

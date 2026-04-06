@@ -14,16 +14,16 @@ namespace Application.Students.Dtos
         public string FatherName { get; set; }
         public string MotherName { get; set; }
         public int Gender { get; set; }
-        public int Age { get; set; }
+        public int? Age { get; set; }
         public string ParentContactNumber { get; set; }
-        public string ParentEmail { get; set; }
+        public string? ParentEmail { get; set; }
         public string DobNp { get; set; }
         public string DobEn { get; set; }
         public int ProvinceId { get; set; }
         public int DistrictId { get; set; }
         public int MunicipalityId { get; set; }
         public int WardNo { get; set; }
-        public string Address { get; set; }
+        //public string Address { get; set; }
         public string ContactNumber { get; set; }
         public string ClassSectionId { get; set; }
     }

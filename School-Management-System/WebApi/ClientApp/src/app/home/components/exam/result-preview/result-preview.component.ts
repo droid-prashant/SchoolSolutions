@@ -1,9 +1,9 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ResultViewModel } from '../shared/viewModels/result.viewModel';
 import { StudentViewModel } from '../../student/shared/models/viewModels/student.viewModel';
-import DateConverter from '@remotemerge/nepali-date-converter';
 import { formatDate } from '@angular/common';
-import { StudentCertificateViewModel } from '../../certificate/model/studentCertificate.ViewModel';
+import { DateConverterService } from '../../../../shared/calender/date-convertor.service';
+import DateConverter from '@remotemerge/nepali-date-converter';
 
 @Component({
   selector: 'app-result-preview',
@@ -11,24 +11,33 @@ import { StudentCertificateViewModel } from '../../certificate/model/studentCert
   templateUrl: './result-preview.component.html',
   styleUrl: './result-preview.component.scss'
 })
-export class ResultPreviewComponent implements OnChanges {
+export class ResultPreviewComponent implements OnInit, OnChanges {
 
   @Input('resultObj') resultObj!: ResultViewModel;
   @Input('studentObj') studentObj!: StudentViewModel;
 
   issueDateEn: string = "";
   issueDateNp: string = "";
-  
+  currentYearNp: string = "";
+  currentYearEn: string = "";
+
   student = {
     schoolName: 'OM PUSHPANJALI ENGLISH SCHOOL',
     alias: '(Jubie International English Academy)',
     address: 'Dodhara Chandani Municipality-7, Kanchanpur',
     province: 'Sudurpashchim Pradesh, Nepal',
-    statement: 'STATEMENT OF GRADE-SHEET 2082 BS (2025 AD)'
+    statement: 'STATEMENT OF GRADE-SHEET'
   };
 
-  constructor() {
+  constructor(private dateConverter: DateConverterService) {
 
+  }
+  ngOnInit(): void {
+    const todaysDateAd = new Date();
+    const todaysDateBs = this.dateConverter.adToBsParts(todaysDateAd);
+    this.currentYearNp = todaysDateBs.year.toString();
+    this.currentYearEn = formatDate(todaysDateAd, 'yyyy', 'en-US');
+    console.log(this.studentObj);
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['resultObj'] && this.resultObj) {

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { MenuItem, PrimeNGConfig } from 'primeng/api';
 import { PrimeIcons } from 'primeng/api';
 
@@ -14,29 +15,25 @@ export class HomeComponent implements OnInit {
   items: MenuItem[] | undefined;
   sidebarItems: MenuItem[] | undefined;
 
-  constructor() {
+  constructor(private _router: Router) {
 
   }
   ngOnInit(): void {
     this.items = [
       {
         label: 'Dashboard',
-        icon: PrimeIcons.HOME
+        icon: PrimeIcons.HOME,
+        command: () => this.redirectToDashboard()
       },
       {
-        label: 'Features',
-        icon: PrimeIcons.STAR
-      },
-      {
-        label: 'Projects',
-        icon: PrimeIcons.SEARCH,
-      },
-      {
-        label: 'Contact',
-        icon: PrimeIcons.ENVELOPE,
-        badge: '3'
+        label: 'Settings',
+        icon: PrimeIcons.COG,
+        items:[
+          {label:'Users', icon:PrimeIcons.USER},
+          {label:'Roles', icon:PrimeIcons.SHIELD}
+        ]
       }
-    ];
+    ]
     this.sidebarItems = [
       {
         label: 'Master Entry',
@@ -114,12 +111,11 @@ export class HomeComponent implements OnInit {
           { label: 'Fee Payment', icon: PrimeIcons.MONEY_BILL, routerLink: ['/home/fees/fee-payment'] },
           { label: 'Fee Reports', icon: PrimeIcons.FILE, routerLink: ['/fees/reports'] }
         ]
-      },
-      {
-        label: 'Settings',
-        icon: PrimeIcons.COG,
-        routerLink: ['/settings']
       }
     ];
+  }
+
+  redirectToDashboard() {
+    this._router.navigateByUrl('/home/dashboard');
   }
 }

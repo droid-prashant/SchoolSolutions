@@ -9,16 +9,16 @@ namespace Domain
     public class SubjectMark:AuditableEntry
     {
         public Guid Id { get; set; }
-        public double FullTheoryMarks { get; set; }
-        public double FullPracticalMarks { get; set; }
-        public double ObtainedTheoryMarks { get; set; }
-        public double ObtainedPracticalMarks { get; set; }
+        public decimal FullTheoryMarks { get; set; }
+        public decimal FullPracticalMarks { get; set; }
+        public decimal ObtainedTheoryMarks { get; set; }
+        public decimal ObtainedPracticalMarks { get; set; }
         public string GradeTheory { get; set; }
-        public double GradePointTheory { get; set; }
+        public decimal GradePointTheory { get; set; }
         public string GradePractical{ get; set; }
-        public double GradePointPractical { get; set; }
+        public decimal GradePointPractical { get; set; }
         public string FinalGrade { get; set; }
-        public double FinalGradePoint { get; set; }
+        public decimal FinalGradePoint { get; set; }
         public Guid StudentEnrollmentId { get; set; }
         public StudentEnrollment StudentEnrollment { get; set; }
         public Guid ClassCourseId { get; set; }

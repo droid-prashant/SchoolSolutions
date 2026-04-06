@@ -1,118 +1,113 @@
 <!-- src/app/components/student-form/student-form.component.html -->
 
-<h2 class="mb-4">Register Student</h2>
+<h2 class="mb-4" *ngIf="!isEditMode">Register Student</h2>
 
-<form [formGroup]="studentForm" (ngSubmit)="addStudent()" class="p-fluid">
+<form [formGroup]="studentForm" (ngSubmit)="saveStudent()" class="p-fluid">
   <div class="formgrid grid">
 
-    <div class="field col-6">
-      <label>First Name</label>
-      <input type="text" pInputText formControlName="firstName" />
+    <div class="field col-3">
+      <label>First Name <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="firstName" required />
     </div>
 
-    <div class="field col-6">
-      <label>Last Name</label>
-      <input type="text" pInputText formControlName="lastName" />
+    <div class="field col-3">
+      <label>Last Name <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="lastName" required />
     </div>
 
-    <div class="field col-6">
-      <label>Grandfather Name</label>
-      <input type="text" pInputText formControlName="grandFatherName" />
+    <div class="field col-3">
+      <label>Grandfather Name <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="grandFatherName" required />
     </div>
 
-    <div class="field col-6">
-      <label>Father Name</label>
-      <input type="text" pInputText formControlName="fatherName" />
+    <div class="field col-3">
+      <label>Father Name <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="fatherName" required />
     </div>
 
-    <div class="field col-6">
-      <label>Mother Name</label>
-      <input type="text" pInputText formControlName="motherName" />
+    <div class="field col-3">
+      <label>Mother Name <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="motherName" required />
     </div>
 
-    <div class="field col-6">
-      <label>Gender</label>
-      <p-dropdown [options]="genders" formControlName="gender" placeholder="Select Gender"></p-dropdown>
+    <div class="field col-3">
+      <label>Gender <span class="text-danger">*</span></label>
+      <p-dropdown [options]="genders" formControlName="gender" placeholder="Select Gender" required></p-dropdown>
     </div>
 
-    <div class="field col-6">
+    <div class="field col-3">
       <label>Age</label>
       <input type="number" pInputText formControlName="age" />
     </div>
 
-    <div class="field col-6">
-      <label>Contact Number</label>
-      <input type="text" pInputText formControlName="contactNumber" />
+    <div class="field col-3">
+      <label>Contact Number <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="contactNumber" required />
     </div>
 
-    <div class="field col-6">
+    <div class="field col-3">
       <label>Parent Email</label>
       <input type="text" pInputText formControlName="parentEmail" />
     </div>
 
-    <div class="field col-6">
-      <label>Parent Contact</label>
-      <input type="text" pInputText formControlName="parentContactNumber" />
+    <div class="field col-3">
+      <label>Parent Contact <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="parentContactNumber" required />
     </div>
 
-    <div class="field col-6">
-      <label>Address</label>
-      <input rows="3" pInputText formControlName="address" />
-    </div>
-
-    <div class="field col-6">
-      <label>Date Of Birth</label>
-      <!-- <p-calendar formControlName="dob" /> -->
+    <div class="field col-3">
+      <label>Date Of Birth <span class="text-danger">*</span></label>
       <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
-        [minDate]="{ year: 2070, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
-        (dateChange)="onDobChange($event)">
+        [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+        (dateChange)="onDobChange($event)" required>
       </app-np-datepicker>
+      
     </div>
 
-    <div class="field col-6">
-      <label>Province</label>
+    <div class="field col-3">
+      <label>Province <span class="text-danger">*</span></label>
       <p-dropdown [options]="provinceDetails" optionLabel="name" optionValue="id" formControlName="provinceId"
-        placeholder="Select Province" [style]="{ width: '100%' }">
+        placeholder="Select Province" [style]="{ width: '100%' }" required>
       </p-dropdown>
       <!-- <input rows="3" pInputText formControlName="municipality" /> -->
     </div>
 
-    <div class="field col-6">
-      <label>District</label>
+    <div class="field col-3">
+      <label>District <span class="text-danger">*</span></label>
       <p-dropdown [options]="selectedDistricts" optionLabel="name" optionValue="id" formControlName="districtId"
-        placeholder="Select District" [style]="{ width: '100%' }">
+        placeholder="Select District" [style]="{ width: '100%' }" required>
       </p-dropdown>
       <!-- <input rows="3" pInputText formControlName="municipality" /> -->
     </div>
 
 
-    <div class="field col-6">
-      <label>Municipality</label>
+    <div class="field col-3">
+      <label>Municipality <span class="text-danger">*</span></label>
       <p-dropdown [options]="selectedMunicipalities" optionLabel="name" optionValue="id"
-        formControlName="municipalityId" placeholder="Select Municipality" [style]="{ width: '100%' }">
+        formControlName="municipalityId" placeholder="Select Municipality" [style]="{ width: '100%' }" required>
       </p-dropdown>
       <!-- <input rows="3" pInputText formControlName="municipality" /> -->
     </div>
 
-    <div class="field col-6">
-      <label>Ward No</label>
-      <input rows="3" pInputText formControlName="wardNo" />
+    <div class="field col-3">
+      <label>Ward No <span class="text-danger">*</span></label>
+      <input rows="3" pInputText formControlName="wardNo" required />
     </div>
 
-    <div class="field col-6">
-      <label>Class Room</label>
+    <div class="field col-3">
+      <label>Class Room <span class="text-danger">*</span></label>
       <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-        placeholder="Select Class"></p-dropdown>
+        placeholder="Select Class" required></p-dropdown>
     </div>
 
-    <div class="field col-6">
-      <label>Section</label>
+    <div class="field col-3">
+      <label>Section <span class="text-danger">*</span></label>
       <p-dropdown [options]="sections" optionLabel="name" optionValue="sectionId" (onChange)="onSectionChange($event)"
-        placeholder="Select Section"></p-dropdown>
+        placeholder="Select Section" required></p-dropdown>
     </div>
 
     <div class="col-12 text-right mt-2">
-      <button type="submit" pButton label="Register" class="p-button-success" [disabled]="studentForm.invalid"></button>
+      <button type="submit" pButton [label]="isEditMode ? 'Update' : 'Register'" class="p-button-success" [disabled]="studentForm.invalid"></button>
     </div>
   </div>
 </form>

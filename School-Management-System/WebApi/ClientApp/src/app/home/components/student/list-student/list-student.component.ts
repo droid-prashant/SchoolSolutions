@@ -10,23 +10,37 @@ import { StudentViewModel } from '../shared/models/viewModels/student.viewModel'
   styleUrl: './list-student.component.scss'
 })
 export class ListStudentComponent implements OnInit {
-  actionItems: MenuItem[] = [];
   students: StudentViewModel[] = [];
+  isEditDialogVisible: boolean = false;
+  selectedStudent: StudentViewModel | null = null;
 
   constructor(private _apiService: ApiService) {
   }
   ngOnInit(): void {
     this.listStudent();
-    this.actionItems = [
+  }
+
+  getActionItems(student: StudentViewModel): MenuItem[] {
+    return [
       {
-        icon: PrimeIcons.EYE,
+        icon: PrimeIcons.PENCIL,
+        tooltipOptions: { tooltipLabel: 'Edit', tooltipPosition: 'top' },
         command: () => {
-          this.viewStudent();
+          this.editStudent(student);
         }
       }
     ];
   }
-  viewStudent() {
+
+  editStudent(student: StudentViewModel) {
+    this.selectedStudent = student;
+    this.isEditDialogVisible = true;
+  }
+
+  onStudentSaved() {
+    this.isEditDialogVisible = false;
+    this.selectedStudent = null;
+    this.listStudent(); // Refresh the list
   }
   listStudent() {
     this._apiService.getStudents().subscribe(

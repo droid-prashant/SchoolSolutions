@@ -2,14 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../../shared/api.service';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StudentViewModel } from '../../student/shared/models/viewModels/student.viewModel';
-import { CourseViewModel } from '../../course/shared/models/course.viewModel';
-import { MenuItem, MessageService, PrimeIcons } from 'primeng/api';
-import { Section } from '../shared/models/section.dto';
 import { ExamTerminal } from '../shared/models/examTerminal.dto';
-import { StudentMarksList, SubjectMarkDto } from '../shared/models/examMarksEntry.dto';
+import { SubjectMarkDto } from '../shared/models/examMarksEntry.dto';
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
 import { ClassCreditCourseViewModel } from '../../course/shared/models/classCourse.viewModel';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-exam-marks-entry',
@@ -24,8 +22,9 @@ export class ExamMarksEntryComponent implements OnInit {
   sections: SectionViewModel[] = [];
   examTerminals: ExamTerminal[] = [];
   classId: string = "";
-
+  submitButtonLabel: string = "Save";
   isClassSectionSelected: boolean = false;
+  isStudentMarksUpdate: boolean = false;
 
 
   studentMarks: FormGroup;
@@ -66,8 +65,9 @@ export class ExamMarksEntryComponent implements OnInit {
     return this.studentMarks.get('studentMarksLists') as FormArray;
   }
 
-  setStudentMarksFormArray() {
+  createStudentMarksFormArray() {
     const marksArray = this.studentMarks.get('studentMarksLists') as FormArray;
+    marksArray.clear();
     this.courses.forEach(course => {
       marksArray.push(this._formBuilder.group({
         classCourseId: [course.classCreditCourseId, Validators.required],
@@ -139,7 +139,7 @@ export class ExamMarksEntryComponent implements OnInit {
       {
         next: (response) => {
           this.courses = response;
-          this.setStudentMarksFormArray();
+          this.createStudentMarksFormArray();
         },
         error: (error) => {
 
@@ -153,9 +153,90 @@ export class ExamMarksEntryComponent implements OnInit {
 
   showDialog(student: StudentViewModel) {
     if (student) {
+      this.getStudentMarks(student.id);
       this.studentMarks.get('studentId')?.setValue(student.id);
       this.isMarksEntryVisible = true;
     }
+  }
+
+  getStudentMarks(studentEnrollmentId: string) {
+    const examType = this.studentMarks.get('examType')?.value;
+    if (examType) {
+      this._apiService.getStudentMarks(studentEnrollmentId, examType).subscribe(
+        {
+          next: (response) => {
+            this.studentMarks.patchValue({
+              studentId: response.studentId,
+              examType: response.examType,
+              attendance: response.attendance,
+              totalSchoolDays: response.totalSchoolDays
+            });
+            this.patchStudentMarksLists(response.studentMarksLists);
+          },
+          error: (error) => {
+            console.error(error);
+          }
+        });
+    }
+
+  }
+
+  patchStudentMarksLists(studentMarksLists: any[]) {
+    const marksArray = this.studentMarks.get('studentMarksLists') as FormArray;
+
+    if (!studentMarksLists || !studentMarksLists.length) {
+      return;
+    }
+    this.submitButtonLabel = "Update";
+    this.isStudentMarksUpdate = true;
+    studentMarksLists.forEach((item) => {
+      const index = marksArray.controls.findIndex(control =>
+        control.get('classCourseId')?.value === item.classCourseId
+      );
+
+      if (index !== -1) {
+        const group = marksArray.at(index) as FormGroup;
+
+        group.patchValue({
+          classCourseId: item.classCourseId,
+          theoryCredit: item.theoryCredit,
+          practicalCredit: item.practicalCredit,
+          theoryFullMarks: item.theoryFullMarks,
+          practicalFullMarks: item.practicalFullMarks,
+          obtainedTheoryMarks: item.obtainedTheoryMarks,
+          obtainedPracticalMarks: item.obtainedPracticalMarks
+        });
+      }
+    });
+
+    console.log(this.studentMarks.value);
+  }
+
+  save() {
+    if (this.isStudentMarksUpdate) {
+      this.updateStudentMarks();
+    } else {
+      this.saveStudentMarks();
+    }
+  }
+
+  updateStudentMarks() {
+    if (this.studentMarks.invalid) {
+      return;
+    }
+    let studentMarks: SubjectMarkDto = this.studentMarks.value;
+    this._apiService.updateStudentMarks(studentMarks).subscribe(
+      {
+        next: (response) => {
+          this._messageService.add({ severity: 'success', summary: 'Success', detail: 'successfully updated marks' });
+          this.isMarksEntryVisible = false;
+        },
+        error: (err) => {
+          this._messageService.add({ severity: 'error', summary: 'Error', detail: 'failed to update marks' });
+        },
+        complete: () => console.log("Req is completed")
+      }
+    )
   }
 
   saveStudentMarks() {

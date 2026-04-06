@@ -2,6 +2,14 @@
 <h2 class="mb-4">Exam Marks Entry</h2>
 <form [formGroup]="studentMarks" class="p-fluid">
     <div class="formgrid grid">
+        <div class="col-3">
+            <div class="field">
+                <label>Exam Terminal</label>
+                <p-dropdown [options]="examTerminals" optionLabel="terminalName" optionValue="id"
+                    formControlName="examType" (onChange)="onExamTerminalChange()" placeholder="Select Terminal">
+                </p-dropdown>
+            </div>
+        </div>
         <div class="field col-3">
             <label for="class">Class</label>
             <p-dropdown id="class" [options]="classRooms" optionLabel="name" optionValue="id"
@@ -21,16 +29,6 @@
     <div class="card flex justify-content-center subject-marks-form">
         <p-dialog header="Subject Marks Entry" [modal]="true" [(visible)]="isMarksEntryVisible">
             <div class="grid">
-                <div class="col-3">
-                    <div class="field">
-                        <label>Exam Terminal</label>
-                        <p-dropdown [options]="examTerminals" optionLabel="terminalName" optionValue="terminalName"
-                            formControlName="examType" (onChange)="onExamTerminalChange()"
-                            placeholder="Select Terminal">
-                        </p-dropdown>
-                    </div>
-                </div>
-
                 <div class="col-3">
                     <div class="field">
                         <label>Attendance</label>
@@ -80,7 +78,7 @@
                 </p-table>
             </div>
             <!---->
-            <button pButton pRipple label="Submit" class="p-button-success" (click)="saveStudentMarks()">
+            <button pButton pRipple [label]="submitButtonLabel" class="p-button-success" (click)="save()">
             </button>
         </p-dialog>
     </div>

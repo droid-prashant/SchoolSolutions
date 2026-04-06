@@ -150,8 +150,24 @@
   padding: 4px;
   margin-left: 5px;
   text-align: justify;
+  vertical-align: middle;
 }
 
+.text-align-centre {
+  text-align: center !important;
+}
+
+.grade-shift-theory {
+  transform: translateX(16px); 
+}
+
+.grade-shift-practical {
+  transform: translateX(22px); 
+}
+
+.grade-shift-final-grade {
+  transform: translateX(25px); 
+}
 .marks-table .subject-name {
   text-align: left;
 }

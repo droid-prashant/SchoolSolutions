@@ -188,6 +188,9 @@ export class ManageCourseComponent implements OnInit {
       const filteredCourses = this.masterCourses.filter(x => !classCourses.includes(x.id));
       this.courses = filteredCourses;
     }
+    else{
+      this.courses = this.masterCourses;
+    }
   }
 
   reset() {

@@ -47,13 +47,16 @@ namespace Infrastructure.Identity
                     IdentityResult result = await _roleManager.CreateAsync(appRole);
                     if (result.Succeeded)
                     {
-                        ApplicationRole role = await _roleManager.FindByNameAsync(userRoleDto.RoleName);
-                        foreach (var permission in userRoleDto.UserPermissions)
+                        ApplicationRole? role = await _roleManager.FindByNameAsync(userRoleDto.RoleName);
+                        if (role != null)
                         {
-                            if (Enum.IsDefined(typeof(Domain.Enums.Permission), permission.PermissionValue))
+                            foreach (var permission in userRoleDto.UserPermissions)
                             {
-                                Claim claim = new Claim(CustomClaimType.Permission, permission.PermissionValue.ToString());
-                                finalResult = await _roleManager.AddClaimAsync(role, claim);
+                                if (Enum.IsDefined(typeof(Domain.Enums.Permission), permission.PermissionValue))
+                                {
+                                    Claim claim = new Claim(CustomClaimType.Permission, permission.PermissionValue.ToString());
+                                    finalResult = await _roleManager.AddClaimAsync(role, claim);
+                                }
                             }
                         }
                     }
@@ -148,9 +151,12 @@ namespace Infrastructure.Identity
 
             foreach (var role in roles)
             {
-                ApplicationRole appRole = await _roleManager.FindByNameAsync(role);
-                IList<Claim> roleClaims = await _roleManager.GetClaimsAsync(appRole);
-                claims = claims.Union(roleClaims).ToList();
+                ApplicationRole? appRole = await _roleManager.FindByNameAsync(role);
+                if (appRole != null)
+                {
+                    IList<Claim> roleClaims = await _roleManager.GetClaimsAsync(appRole);
+                    claims = claims.Union(roleClaims).ToList();
+                }
             }
 
             claims = new List<Claim>(claims)

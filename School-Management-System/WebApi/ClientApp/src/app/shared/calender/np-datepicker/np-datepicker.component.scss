@@ -1,0 +1,146 @@
+.np-datepicker-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.np-datepicker-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.np-datepicker-input {
+  width: 100%;
+  cursor: pointer;
+  padding-right: 36px;
+}
+
+.np-datepicker-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #5a6c7d;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.np-datepicker-icon:hover {
+  color: #2563eb;
+}
+
+.np-calendar {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1000;
+  min-width: 320px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #dcdfe4;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.np-mode-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.np-mode-switch button {
+  padding: 6px 10px;
+  border: 1px solid #cfd6dd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.np-mode-switch button.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.np-calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.np-calendar-header button,
+.np-calendar-footer button {
+  padding: 6px 10px;
+  border: 1px solid #cfd6dd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.np-calendar-header select {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #cfd6dd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.np-calendar table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.np-calendar th {
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.np-calendar td {
+  padding: 4px;
+  text-align: center;
+}
+
+.day-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.day-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.day-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.day-btn.selected-date {
+  background: #2563eb !important;
+  color: #fff !important;
+  border-color: #2563eb !important;
+  font-weight: 700;
+}
+
+.day-btn.today-date:not(.selected-date) {
+  border: 2px solid #f59e0b !important;
+  font-weight: 700;
+}
+
+.np-calendar-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}

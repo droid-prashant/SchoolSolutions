@@ -102,4 +102,48 @@ VALUES ('20251115083012_ExamResult__column_added', '8.0.15');
 COMMIT;
 
 
+START TRANSACTION;
+
+ALTER TABLE public."SubjectMarks" ALTER COLUMN "ObtainedTheoryMarks" TYPE numeric;
+
+ALTER TABLE "SubjectMarks" ALTER COLUMN "ObtainedPracticalMarks" TYPE numeric;
+
+ALTER TABLE "SubjectMarks" ALTER COLUMN "GradePointTheory" TYPE numeric;
+
+ALTER TABLE "SubjectMarks" ALTER COLUMN "GradePointPractical" TYPE numeric;
+
+ALTER TABLE "SubjectMarks" ALTER COLUMN "FullTheoryMarks" TYPE numeric;
+
+ALTER TABLE "SubjectMarks" ALTER COLUMN "FullPracticalMarks" TYPE numeric;
+
+ALTER TABLE "SubjectMarks" ALTER COLUMN "FinalGradePoint" TYPE numeric;
+
+ALTER TABLE "ExamResults" ALTER COLUMN "TotalCredit" TYPE numeric;
+
+ALTER TABLE "ExamResults" ALTER COLUMN "GPA" TYPE numeric;
+
+ALTER TABLE "ExamResults" ALTER COLUMN "ExamType" TYPE integer USING "ExamType"::integer;;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260405123003_dataType_updated_to_decimal', '8.0.15');
+
+COMMIT;
+
+
+START TRANSACTION;
+
+ALTER TABLE "Students" DROP COLUMN "Address";
+
+ALTER TABLE "Students" ALTER COLUMN "ParentEmail" DROP NOT NULL;
+
+ALTER TABLE "Students" ALTER COLUMN "Age" DROP NOT NULL;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260405144152_student_entity_alter', '8.0.15');
+
+COMMIT;
+
+
+
+
 

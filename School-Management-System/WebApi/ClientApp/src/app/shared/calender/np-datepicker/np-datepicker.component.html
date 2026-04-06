@@ -1,0 +1,116 @@
+<div class="np-datepicker-wrapper">
+  <div class="np-datepicker-input-group">
+    <input
+      pInputText
+      [placeholder]="placeholder"
+      [value]="displayDate"
+      readonly
+      class="np-datepicker-input"
+      (click)="$event.stopPropagation(); toggleCalendar()"
+    />
+    <i 
+      class="pi pi-calendar np-datepicker-icon" 
+      (click)="$event.stopPropagation(); toggleCalendar()"
+      title="Select Date">
+    </i>
+  </div>
+
+  <div
+    class="np-calendar"
+    *ngIf="showCalendar"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="np-mode-switch" *ngIf="calendarVariant === 'both'">
+      <button
+        type="button"
+        [class.active]="calendarMode === 'bs'"
+        (click)="switchMode('bs')"
+      >
+        Nepali (BS)
+      </button>
+      <button
+        type="button"
+        [class.active]="calendarMode === 'ad'"
+        (click)="switchMode('ad')"
+      >
+        English (AD)
+      </button>
+    </div>
+
+    <div class="np-calendar-header">
+      <button type="button" (click)="prevMonth()">&lt;</button>
+
+      <select
+        [(ngModel)]="currentMonth"
+        (change)="selectYearMonth(currentYear, currentMonth)"
+      >
+        <ng-container *ngIf="calendarMode === 'bs'; else adMonthOptions">
+          <option *ngFor="let m of months; let i = index" [value]="i + 1">
+            {{ language === 'ne' ? m.bs : m.en }}
+          </option>
+        </ng-container>
+      </select>
+
+      <ng-template #adMonthOptions>
+        <option *ngFor="let m of adMonths; let i = index" [value]="i + 1">
+          {{ m }}
+        </option>
+      </ng-template>
+
+      <select
+        [(ngModel)]="currentYear"
+        (change)="selectYearMonth(currentYear, currentMonth)"
+      >
+        <ng-container *ngIf="calendarMode === 'bs'; else adYearOptions">
+          <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+        </ng-container>
+      </select>
+
+      <ng-template #adYearOptions>
+        <option *ngFor="let y of adYears" [value]="y">{{ y }}</option>
+      </ng-template>
+
+      <button type="button" (click)="nextMonth()">&gt;</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Su</th>
+          <th>Mo</th>
+          <th>Tu</th>
+          <th>We</th>
+          <th>Th</th>
+          <th>Fr</th>
+          <th>Sa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let week of calendar">
+          <td *ngFor="let day of week">
+            <button
+              type="button"
+              class="day-btn"
+              [disabled]="!day || isDisabled(day)"
+              [class.selected-date]="isSelected(day)"
+              [class.today-date]="isToday(day)"
+              (click)="selectDate(day)"
+            >
+              {{
+                day
+                  ? (calendarMode === 'bs' && unicodeDate
+                      ? toNepaliDigits(day.toString())
+                      : day)
+                  : ''
+              }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="np-calendar-footer">
+      <button type="button" (click)="selectToday()">Today</button>
+    </div>
+  </div>
+</div>
