@@ -1,7 +1,6 @@
 ﻿using Application.Identity.Dtos;
 using Application.Identity.Interfaces;
 using Application.Identity.ViewModel;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
