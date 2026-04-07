@@ -90,12 +90,10 @@
         [rowsPerPageOptions]="[5, 10, 20]">
         <ng-template pTemplate="header">
             <tr>
-                <th style="width:25%">Id</th>
+                <th>Id</th>
                 <th style="width:25%">Name</th>
-                <th style="width:25%">Class</th>
-                <th style="width:25%">Section</th>
-                <th style="width:25%">Gender</th>
-                <th style="width:25%">Address</th>
+                <th >Class</th>
+                <th>Section</th>
                 <th style="width:25%">Action</th>
             </tr>
         </ng-template>
@@ -105,8 +103,6 @@
                 <td>{{ student.firstName }} {{ student.lastName }}</td>
                 <td>{{getClassRoomName(student.classRoomId) }}</td>
                 <td>{{ getSectionName(student.sectionId) }}</td>
-                <td>{{ student.gender }}</td>
-                <td>{{ student.address }}</td>
                 <td>
                     <i class="pi pi-pencil pointer-icon" (click)="showDialog(student)"></i>
                 </td>

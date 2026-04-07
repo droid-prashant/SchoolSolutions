@@ -37,11 +37,11 @@
       <p>
         <span>Date of birth : {{studentObj.dateOfBirthEn}} A.D.</span>
         <span class="tab-space"></span>
-        <span>Roll No. : {{resultObj.rollNo}}</span>
+        <span>Roll No : {{resultObj.rollNo}}</span>
         <span class="tab-space"></span>
         <span>Class : {{resultObj.classRoom}}</span>
         <span class="tab-space"></span>
-        <span>Ward No. : {{resultObj.wardNo}}</span>
+        <span>Ward No : {{resultObj.wardNo}}</span>
       </p>
     </div>
 
@@ -67,8 +67,8 @@
         <tr *ngFor="let sub of resultObj.studentMarks; let i = index">
           <td class="text-align-centre">{{ i + 1 }}</td>
           <td class="subject-name">{{sub.courseName}}</td>
-          <td class="text-align-centre">{{sub.creditHour}}</td>
-          <td class="text-align-centre">{{sub.creditHour}}</td>
+          <td class="text-align-centre">{{sub.theoryCreditHour}}</td>
+          <td class="text-align-centre">{{sub.practicalCreditHour}}</td>
           <td class="grade-shift-theory">{{sub.gradeTheory}}</td>
           <td class="grade-shift-practical">{{sub.gradePractical}}</td>
           <td class="grade-shift-final-grade">{{sub.finalGrade}}</td>

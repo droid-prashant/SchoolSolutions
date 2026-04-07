@@ -315,7 +315,8 @@ namespace Infrastructure.Services.SubjectMarks
                                                                                     .Select(s => new StudentMarksViewModel
                                                                                     {
                                                                                         CourseName = s.ClassCourse.Course.Name,
-                                                                                        CreditHour = s.ClassCourse.TheoryCreditHour + s.ClassCourse.PracticalCreditHour,
+                                                                                        TheoryCreditHour = s.ClassCourse.TheoryCreditHour,
+                                                                                        PracticalCreditHour = s.ClassCourse.PracticalCreditHour,
                                                                                         FinalGrade = s.FinalGrade,
                                                                                         FinalGradePoint = s.FinalGradePoint,
                                                                                         GradePractical = s.GradePractical,

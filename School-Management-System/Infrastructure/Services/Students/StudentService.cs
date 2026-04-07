@@ -125,7 +125,7 @@ namespace Infrastructure.Services.Students
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
-                await StudentEnrollent(student, classSectionId, addStudent.RollNumber, cancellationToken);
+                await StudentEnrollent(student, classSectionId, (int)addStudent.RollNumber, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception ex)

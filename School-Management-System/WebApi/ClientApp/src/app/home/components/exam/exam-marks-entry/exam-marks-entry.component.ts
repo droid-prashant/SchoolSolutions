@@ -75,8 +75,8 @@ export class ExamMarksEntryComponent implements OnInit {
         practicalCredit: [course.practicalCreditHour, Validators.required],
         theoryFullMarks: [course.theoryFullMarks, Validators.required],
         practicalFullMarks: [course.practicalFullMarks, Validators.required],
-        obtainedTheoryMarks: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-        obtainedPracticalMarks: [0, [Validators.required, Validators.min(0), Validators.max(100)]]
+        obtainedTheoryMarks: [0, [Validators.required, Validators.min(0), Validators.max(course.theoryFullMarks)]],
+        obtainedPracticalMarks: [0, [Validators.required, Validators.min(0), Validators.max(course.practicalFullMarks)]]
       }));
     });
   }
