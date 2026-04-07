@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init_v4 : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -506,16 +506,17 @@ namespace Infrastructure.Migrations
                     FatherName = table.Column<string>(type: "text", nullable: false),
                     MotherName = table.Column<string>(type: "text", nullable: false),
                     ParentContactNumber = table.Column<string>(type: "text", nullable: false),
-                    ParentEmail = table.Column<string>(type: "text", nullable: false),
+                    ParentEmail = table.Column<string>(type: "text", nullable: true),
                     Gender = table.Column<int>(type: "integer", nullable: false),
-                    Age = table.Column<int>(type: "integer", nullable: false),
-                    DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Age = table.Column<int>(type: "integer", nullable: true),
+                    DateOfBirthNp = table.Column<string>(type: "text", nullable: false),
+                    DateOfBirthEn = table.Column<string>(type: "text", nullable: false),
                     WardNo = table.Column<int>(type: "integer", nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: false),
                     ContactNumber = table.Column<string>(type: "text", nullable: false),
                     ProvinceId = table.Column<int>(type: "integer", nullable: false),
                     DistrictId = table.Column<int>(type: "integer", nullable: false),
                     MunicipalityId = table.Column<int>(type: "integer", nullable: false),
+                    isActive = table.Column<bool>(type: "boolean", nullable: false),
                     ClassSectionId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -548,6 +549,35 @@ namespace Infrastructure.Migrations
                         principalTable: "Provinces",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "studentCharacterCertificateLogs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CertificateNumber = table.Column<int>(type: "integer", nullable: false),
+                    StudentId1 = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_studentCharacterCertificateLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_studentCharacterCertificateLogs_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_studentCharacterCertificateLogs_Students_StudentId1",
+                        column: x => x.StudentId1,
+                        principalTable: "Students",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -592,14 +622,49 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "studentTransferCertificateLogs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CertificateNumber = table.Column<int>(type: "integer", nullable: false),
+                    StudentId1 = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_studentTransferCertificateLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_studentTransferCertificateLogs_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_studentTransferCertificateLogs_Students_StudentId1",
+                        column: x => x.StudentId1,
+                        principalTable: "Students",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ExamResults",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     StudentEnrollmentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ExamType = table.Column<string>(type: "text", nullable: false),
-                    TotalCredit = table.Column<double>(type: "double precision", nullable: false),
-                    GPA = table.Column<double>(type: "double precision", nullable: false)
+                    ExamType = table.Column<int>(type: "integer", nullable: false),
+                    TotalCredit = table.Column<decimal>(type: "numeric", nullable: false),
+                    GPA = table.Column<decimal>(type: "numeric", nullable: false),
+                    Attendance = table.Column<int>(type: "integer", nullable: false),
+                    TotalSchoolDays = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -649,16 +714,16 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FullTheoryMarks = table.Column<double>(type: "double precision", nullable: false),
-                    FullPracticalMarks = table.Column<double>(type: "double precision", nullable: false),
-                    ObtainedTheoryMarks = table.Column<double>(type: "double precision", nullable: false),
-                    ObtainedPracticalMarks = table.Column<double>(type: "double precision", nullable: false),
+                    FullTheoryMarks = table.Column<decimal>(type: "numeric", nullable: false),
+                    FullPracticalMarks = table.Column<decimal>(type: "numeric", nullable: false),
+                    ObtainedTheoryMarks = table.Column<decimal>(type: "numeric", nullable: false),
+                    ObtainedPracticalMarks = table.Column<decimal>(type: "numeric", nullable: false),
                     GradeTheory = table.Column<string>(type: "text", nullable: false),
-                    GradePointTheory = table.Column<double>(type: "double precision", nullable: false),
+                    GradePointTheory = table.Column<decimal>(type: "numeric", nullable: false),
                     GradePractical = table.Column<string>(type: "text", nullable: false),
-                    GradePointPractical = table.Column<double>(type: "double precision", nullable: false),
+                    GradePointPractical = table.Column<decimal>(type: "numeric", nullable: false),
                     FinalGrade = table.Column<string>(type: "text", nullable: false),
-                    FinalGradePoint = table.Column<double>(type: "double precision", nullable: false),
+                    FinalGradePoint = table.Column<decimal>(type: "numeric", nullable: false),
                     StudentEnrollmentId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClassCourseId = table.Column<Guid>(type: "uuid", nullable: false),
                     ExamResultId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -859,6 +924,17 @@ namespace Infrastructure.Migrations
                 column: "StudentFeeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_studentCharacterCertificateLogs_StudentId",
+                table: "studentCharacterCertificateLogs",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_studentCharacterCertificateLogs_StudentId1",
+                table: "studentCharacterCertificateLogs",
+                column: "StudentId1",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudentEnrollments_AcademicYearId",
                 table: "StudentEnrollments",
                 column: "AcademicYearId");
@@ -902,6 +978,17 @@ namespace Infrastructure.Migrations
                 name: "IX_Students_ProvinceId",
                 table: "Students",
                 column: "ProvinceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_studentTransferCertificateLogs_StudentId",
+                table: "studentTransferCertificateLogs",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_studentTransferCertificateLogs_StudentId1",
+                table: "studentTransferCertificateLogs",
+                column: "StudentId1",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubjectMarks_ClassCourseId",
@@ -952,6 +1039,12 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "studentCharacterCertificateLogs");
+
+            migrationBuilder.DropTable(
+                name: "studentTransferCertificateLogs");
 
             migrationBuilder.DropTable(
                 name: "SubjectMarks");

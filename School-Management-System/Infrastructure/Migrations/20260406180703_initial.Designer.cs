@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251115083012_ExamResult__column_added")]
-    partial class ExamResult__column_added
+    [Migration("20260406180703_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -251,12 +251,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("ExamType")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("ExamType")
+                        .HasColumnType("integer");
 
-                    b.Property<double>("GPA")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("GPA")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
@@ -267,8 +266,8 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("StudentEnrollmentId")
                         .HasColumnType("uuid");
 
-                    b.Property<double>("TotalCredit")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("TotalCredit")
+                        .HasColumnType("numeric");
 
                     b.Property<int>("TotalSchoolDays")
                         .HasColumnType("integer");
@@ -545,11 +544,7 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Age")
+                    b.Property<int?>("Age")
                         .HasColumnType("integer");
 
                     b.Property<Guid?>("ClassSectionId")
@@ -613,7 +608,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("ParentEmail")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("ProvinceId")
@@ -829,20 +823,20 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("FinalGradePoint")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("FinalGradePoint")
+                        .HasColumnType("numeric");
 
-                    b.Property<double>("FullPracticalMarks")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("FullPracticalMarks")
+                        .HasColumnType("numeric");
 
-                    b.Property<double>("FullTheoryMarks")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("FullTheoryMarks")
+                        .HasColumnType("numeric");
 
-                    b.Property<double>("GradePointPractical")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("GradePointPractical")
+                        .HasColumnType("numeric");
 
-                    b.Property<double>("GradePointTheory")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("GradePointTheory")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("GradePractical")
                         .IsRequired()
@@ -858,11 +852,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<double>("ObtainedPracticalMarks")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("ObtainedPracticalMarks")
+                        .HasColumnType("numeric");
 
-                    b.Property<double>("ObtainedTheoryMarks")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("ObtainedTheoryMarks")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("StudentEnrollmentId")
                         .HasColumnType("uuid");

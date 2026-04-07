@@ -78,7 +78,7 @@ namespace Infrastructure.Services.Students
             await _context.StudentFees.AddRangeAsync(studentFees, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
-        private async Task StudentEnrollent(Student student, Guid classSectionId, CancellationToken cancellationToken)
+        private async Task StudentEnrollent(Student student, Guid classSectionId, int rollNumber, CancellationToken cancellationToken)
         {
             var studentEnrollment = new StudentEnrollment
             {
@@ -87,6 +87,7 @@ namespace Infrastructure.Services.Students
                 ClassSectionId = classSectionId,
                 RegistrationNumber = null,
                 SymbolNumber = null,
+                RollNumber = rollNumber,
                 CreatedDate = DateTime.UtcNow,
                 IsPromoted = true
             };
@@ -124,7 +125,7 @@ namespace Infrastructure.Services.Students
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
-                await StudentEnrollent(student, classSectionId, cancellationToken);
+                await StudentEnrollent(student, classSectionId, addStudent.RollNumber, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception ex)
@@ -243,7 +244,8 @@ namespace Infrastructure.Services.Students
                                                                 DateOfBirthNp = x.Student.DateOfBirthNp,
                                                                 DateOfBirthEn = x.Student.DateOfBirthEn,
                                                                 ClassRoomName = x.ClassSection.ClassRoom.Name,
-                                                                SectionName = x.ClassSection.Section.Name
+                                                                SectionName = x.ClassSection.Section.Name,
+                                                                RollNumber = (int)(x.RollNumber)
                                                             }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
               .ToListAsync(cancellationToken);
             return students;

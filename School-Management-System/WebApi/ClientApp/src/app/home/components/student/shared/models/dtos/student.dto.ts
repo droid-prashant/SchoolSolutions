@@ -15,5 +15,6 @@ export interface StudentDto {
   sectionId: string;    
   provinceId: string;    
   districtId: string;    
-  municipalityId: string;    
+  municipalityId: string; 
+  rollNumber: string;
 }

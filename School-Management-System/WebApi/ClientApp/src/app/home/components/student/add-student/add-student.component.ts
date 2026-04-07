@@ -55,7 +55,8 @@ export class AddStudentComponent implements OnInit, OnChanges {
       sectionId: [null, Validators.required],
       provinceId: [null, Validators.required],
       districtId: [null, Validators.required],
-      municipalityId: [null, Validators.required]
+      municipalityId: [null, Validators.required],
+      rollNumber: [null]
     });
   }
   ngOnInit(): void {
@@ -128,7 +129,8 @@ export class AddStudentComponent implements OnInit, OnChanges {
       municipalityId: student.municipalityId ?? null,
       wardNo: student.wardNo ?? '',
       dobNp: student.dateOfBirthNp || '',
-      dobEn: student.dateOfBirthEn || ''
+      dobEn: student.dateOfBirthEn || '',
+      rollNumber: student.rollNumber || null
     }, { emitEvent: false });
   }
 

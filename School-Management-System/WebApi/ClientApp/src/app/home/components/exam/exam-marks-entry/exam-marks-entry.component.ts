@@ -257,4 +257,14 @@ export class ExamMarksEntryComponent implements OnInit {
       }
     )
   }
+
+  getClassRoomName(classRoomId: string): string {
+    const classRoom = this.classRooms.find(x => x.id === classRoomId);
+    return classRoom ? classRoom.name : '';
+  }
+
+  getSectionName(sectionId: string): string {
+    const section = this.sections.find(x => x.sectionId === sectionId);
+    return section ? section.name : '';
+  }
 }

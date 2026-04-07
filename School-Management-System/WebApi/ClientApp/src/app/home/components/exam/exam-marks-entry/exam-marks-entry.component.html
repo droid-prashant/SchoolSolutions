@@ -102,9 +102,9 @@
         <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
             <tr>
                 <td>{{ rowIndex + 1 }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.classRoom }}</td>
-                <td>{{ student.section }}</td>
+                <td>{{ student.firstName }} {{ student.lastName }}</td>
+                <td>{{getClassRoomName(student.classRoomId) }}</td>
+                <td>{{ getSectionName(student.sectionId) }}</td>
                 <td>{{ student.gender }}</td>
                 <td>{{ student.address }}</td>
                 <td>

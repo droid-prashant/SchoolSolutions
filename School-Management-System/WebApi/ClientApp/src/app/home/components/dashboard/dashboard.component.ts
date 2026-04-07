@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { ApiService } from '../../../shared/api.service';
 import { StudentsByClassViewModel } from './model/studentsByClass.viewModel';
+import { ProvinceViewModel } from '../../../shared/common/models/master/master.ViewModel';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +17,7 @@ export class DashboardComponent implements OnInit {
   studentsCount: number = 0;
   courseCount: number = 0;
   studentsByClass: StudentsByClassViewModel[] = []
+  provinceDetails: ProvinceViewModel[] = [];
 
   constructor(private _apiService: ApiService) { }
 
@@ -23,6 +25,20 @@ export class DashboardComponent implements OnInit {
     this.studentCount();
     this.coursesCount();
     this.classVsStudents();
+    this.getProvinceDetails();
+  }
+
+   getProvinceDetails() {
+    this._apiService.getProvinceDetails().subscribe(
+      {
+        next: (response) => {
+          this.provinceDetails = response;
+          localStorage.setItem('provinceDetails', JSON.stringify(response));
+        },
+        error: (err) => console.log(err),
+        complete: () => console.log("Request is complete")
+      }
+    )
   }
 
   studentCount() {

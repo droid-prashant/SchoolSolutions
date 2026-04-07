@@ -7,7 +7,6 @@ namespace Domain
     {
         public int Id { get; set; }
         public string MunicipalityName { get; set; } = string.Empty;
-        public string MunicipalityNameNp { get; set; } = string.Empty;
         public string? BudgetCode { get; set; }
         public string? Type { get; set; }
         public string Code { get; set; } = string.Empty;

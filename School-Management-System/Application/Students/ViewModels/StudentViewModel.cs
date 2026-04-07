@@ -37,5 +37,6 @@ namespace Application.Students.ViewModels
         public string ClassRoomName { get; set; }
         public string SectionId { get; set; }
         public string SectionName { get; set; }
+        public int RollNumber { get; set; }
     }
 }

@@ -5,6 +5,7 @@ import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/cl
 import { ResultViewModel } from '../shared/viewModels/result.viewModel';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
 import { StudentCertificateViewModel } from '../../certificate/model/studentCertificate.ViewModel';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-result',
@@ -23,7 +24,9 @@ export class ResultComponent implements OnInit {
   isClassSelected: boolean = false;
   result!: ResultViewModel
   classSectionId: string = "";
-  constructor(private _apiService: ApiService) {
+  constructor(private _apiService: ApiService,
+    private lookupService: LookupService
+  ) {
 
   }
   ngOnInit(): void {
@@ -33,6 +36,16 @@ export class ResultComponent implements OnInit {
     this.student = student;
     this.getResult(student.id);
     this.students
+  }
+
+  loadLookupData() {
+    this.lookupService.getProvinces().subscribe({
+      next: (response) => {
+        let provinceDetails = response;
+        
+      },
+      error: (err) => console.log(err)
+    });
   }
 
   getResult(studentEnrollmentId: string) {
@@ -62,6 +75,16 @@ export class ResultComponent implements OnInit {
         complete: () => console.log("Req is completed")
       }
     )
+  }
+
+  getClassRoomName(classRoomId: string): string {
+    const classRoom = this.classRooms.find(x => x.id === classRoomId);
+    return classRoom ? classRoom.name : '';
+  }
+
+  getSectionName(sectionId: string): string {
+    const section = this.sections.find(x => x.sectionId === sectionId);
+    return section ? section.name : '';
   }
   onClassRoomChange(event: any) {
     this.classId = event.value;

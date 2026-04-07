@@ -105,6 +105,11 @@
         placeholder="Select Section" required></p-dropdown>
     </div>
 
+    <div class="field col-3">
+      <label>Roll Number</label>
+      <input type="number" pInputText formControlName="rollNumber" />
+    </div>
+
     <div class="col-12 text-right mt-2">
       <button type="submit" pButton [label]="isEditMode ? 'Update' : 'Register'" class="p-button-success"
         [disabled]="studentForm.invalid"></button>
