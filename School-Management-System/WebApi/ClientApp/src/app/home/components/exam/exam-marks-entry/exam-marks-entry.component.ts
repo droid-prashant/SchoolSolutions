@@ -8,6 +8,8 @@ import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/cl
 import { ClassCreditCourseViewModel } from '../../course/shared/models/classCourse.viewModel';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
 import { MessageService } from 'primeng/api';
+import { FilterSelection } from '../../student-filter/student-filter.component';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-exam-marks-entry',
@@ -22,6 +24,7 @@ export class ExamMarksEntryComponent implements OnInit {
   sections: SectionViewModel[] = [];
   examTerminals: ExamTerminal[] = [];
   classId: string = "";
+  currentFilter: FilterSelection = {};
   submitButtonLabel: string = "Save";
   isClassSectionSelected: boolean = false;
   isStudentMarksUpdate: boolean = false;
@@ -34,7 +37,8 @@ export class ExamMarksEntryComponent implements OnInit {
 
   constructor(private _apiService: ApiService,
     private _formBuilder: FormBuilder,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _lookupService: LookupService
   ) {
     this.examTerminals = [
       { id: 1, terminalName: 'First Terminal' },
@@ -54,7 +58,7 @@ export class ExamMarksEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getClassRooms();
+    // this.getClassRooms();
   }
 
   getFormGroup(index: number): FormGroup {
@@ -81,17 +85,36 @@ export class ExamMarksEntryComponent implements OnInit {
     });
   }
 
-  onClassRoomChange(event: any) {
-    this.classId = event.value;
-    if (this.classId) {
-      this.listSubject();
-      this.isClassSelected = true;
-      const selectedClass = this.classRooms.filter(x => x.id === this.classId);
-      const sections = selectedClass.map(x => x.sections);
-      this.sections = sections[0];
+  onLoadStudents(filter: FilterSelection) {
+    this.currentFilter = filter;
+    if (filter && filter.classSectionId && filter.classId) {
+      this.listSubject(filter.classId)
+      this.listStudentByClassSection(filter.classSectionId);
     }
-
   }
+
+  listStudentByClassSection(classSectionId: string) {
+    this._apiService.getStudentsByClassSectionId(classSectionId).subscribe(
+      {
+        next: (response) => {
+          this.students = response;
+        },
+        error: (err) => console.log(err)
+      }
+    );
+  }
+
+  // onClassRoomChange(event: any) {
+  //   this.classId = event.value;
+  //   if (this.classId) {
+  //     this.listSubject();
+  //     this.isClassSelected = true;
+  //     const selectedClass = this.classRooms.filter(x => x.id === this.classId);
+  //     const sections = selectedClass.map(x => x.sections);
+  //     this.sections = sections[0];
+  //   }
+
+  // }
 
   onClassSectionChange(event: any) {
     const classsSectionId = event.value;
@@ -134,8 +157,8 @@ export class ExamMarksEntryComponent implements OnInit {
     )
   }
 
-  listSubject() {
-    this._apiService.getClassCourseByClassId(this.classId).subscribe(
+  listSubject(classId: string) {
+    this._apiService.getClassCourseByClassId(classId).subscribe(
       {
         next: (response) => {
           this.courses = response;
@@ -153,8 +176,9 @@ export class ExamMarksEntryComponent implements OnInit {
 
   showDialog(student: StudentViewModel) {
     if (student) {
-      this.getStudentMarks(student.id);
-      this.studentMarks.get('studentId')?.setValue(student.id);
+      const studentEnrollmentId = student.studentEnrollmentId;
+      this.getStudentMarks(studentEnrollmentId);
+      this.studentMarks.get('studentId')?.setValue(studentEnrollmentId);
       this.isMarksEntryVisible = true;
     }
   }
@@ -165,13 +189,15 @@ export class ExamMarksEntryComponent implements OnInit {
       this._apiService.getStudentMarks(studentEnrollmentId, examType).subscribe(
         {
           next: (response) => {
-            this.studentMarks.patchValue({
-              studentId: response.studentId,
-              examType: response.examType,
-              attendance: response.attendance,
-              totalSchoolDays: response.totalSchoolDays
-            });
-            this.patchStudentMarksLists(response.studentMarksLists);
+            if (response) {
+              this.studentMarks.patchValue({
+                studentId: response.studentId,
+                examType: response.examType,
+                attendance: response.attendance,
+                totalSchoolDays: response.totalSchoolDays
+              });
+              this.patchStudentMarksLists(response.studentMarksLists);
+            }
           },
           error: (error) => {
             console.error(error);
@@ -230,13 +256,29 @@ export class ExamMarksEntryComponent implements OnInit {
         next: (response) => {
           this._messageService.add({ severity: 'success', summary: 'Success', detail: 'successfully updated marks' });
           this.isMarksEntryVisible = false;
+          this.resetForm();
         },
         error: (err) => {
           this._messageService.add({ severity: 'error', summary: 'Error', detail: 'failed to update marks' });
-        },
-        complete: () => console.log("Req is completed")
+        }
       }
     )
+  }
+
+  resetForm() {
+    this.studentMarks.reset();
+
+    this.studentMarks.patchValue({
+      studentId: '',
+      examType: '',
+      attendance: null,
+      totalSchoolDays: null
+    });
+
+    const marksArray = this.studentMarks.get('studentMarksLists') as FormArray;
+    marksArray.clear();
+
+    this.createStudentMarksFormArray();
   }
 
   saveStudentMarks() {
@@ -249,22 +291,27 @@ export class ExamMarksEntryComponent implements OnInit {
         next: (response) => {
           this._messageService.add({ severity: 'success', summary: 'Success', detail: 'successfully added marks' });
           this.isMarksEntryVisible = false;
+          this.resetForm();
         },
         error: (err) => {
           this._messageService.add({ severity: 'error', summary: 'Error', detail: 'failed to add marks' });
-        },
-        complete: () => console.log("Req is completed")
+        }
       }
     )
   }
 
-  getClassRoomName(classRoomId: string): string {
-    const classRoom = this.classRooms.find(x => x.id === classRoomId);
-    return classRoom ? classRoom.name : '';
+  getClassName(classRoomId: string): string {
+    let classRoom: string = 'Unknown';
+    this._lookupService.getClassRooms().subscribe(classes => {
+      classRoom = classes.find(s => s.id === classRoomId)?.name || 'Unknown';
+      this.sections = classes.find(s => s.id === classRoomId)?.sections || [];
+    });
+    return classRoom;
   }
 
   getSectionName(sectionId: string): string {
-    const section = this.sections.find(x => x.sectionId === sectionId);
-    return section ? section.name : '';
+    const section = this.sections.find(s => s.sectionId === sectionId);
+    return section ? section.name : 'Unknown';
   }
+
 }

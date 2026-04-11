@@ -72,4 +72,11 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     }
     return { ad: adDate, bs: bsDate };
   }
+
+  getFinalGradePoint(gradePoint: number): string {
+    if (gradePoint === 4) {
+      return '4.0';
+    }
+    return gradePoint.toString();
+  }
 }

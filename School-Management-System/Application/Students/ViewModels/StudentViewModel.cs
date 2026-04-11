@@ -34,6 +34,7 @@ namespace Application.Students.ViewModels
         public int WardNo { get; set; }
         public string Address { get; set; }
         public string ClassRoomId { get; set; }
+        public string ClassSectionId { get; set; }
         public string ClassRoomName { get; set; }
         public string SectionId { get; set; }
         public string SectionName { get; set; }

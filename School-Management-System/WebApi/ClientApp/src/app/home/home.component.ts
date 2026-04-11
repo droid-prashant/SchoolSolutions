@@ -65,8 +65,6 @@ export class HomeComponent implements OnInit {
         icon: PrimeIcons.USER,
         items: [
           { label: 'All Students', icon: PrimeIcons.USERS, routerLink: ['/home/student/list-student'] },
-          { label: 'Add Student', icon: PrimeIcons.PLUS, routerLink: ['/home/student/add-student'] },
-          { label: 'Promotions', icon: PrimeIcons.ARROW_RIGHT_ARROW_LEFT, routerLink: ['/students/promotions'] }
         ]
       },
       {

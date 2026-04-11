@@ -1,0 +1,44 @@
+<div class="filter-container">
+  <div *ngIf="showClassFilter" class="filter-item mr-5">
+    <label for="classDropdown">Class:</label>
+    <p-dropdown
+      id="classDropdown"
+      [options]="classOptions"
+      optionLabel="name"
+      optionValue="id"
+      [style]="{ width: '200px' }"
+      placeholder="Select Class"
+      (onChange)="onClassChange($event)">
+    </p-dropdown>
+  </div>
+
+  <div *ngIf="showSectionFilter" class="filter-item mr-5">
+    <label for="sectionDropdown">Section:</label>
+    <p-dropdown
+      id="sectionDropdown"
+      [options]="sectionOptions"
+      optionLabel="name"
+      optionValue="classSectionId"
+      [style]="{ width: '200px' }"
+      placeholder="Select Section"
+      (onChange)="onSectionChange($event)">
+    </p-dropdown>
+  </div>
+
+  <div *ngIf="showAcademicYearFilter" class="filter-item">
+    <label for="academicYearDropdown">Academic Year:</label>
+    <p-dropdown
+      id="academicYearDropdown"
+      [options]="academicYearOptions"
+      optionLabel="academicYearName"
+      [style]="{ width: '200px' }"
+      optionValue="this"
+      placeholder="Select Academic Year"
+      (onChange)="onAcademicYearChange()">
+    </p-dropdown>
+  </div>
+  
+  <div class="filter-item filter-action">
+    <button pButton type="button" label="Load" icon="pi pi-search" class="p-button-success p-button-sm" (click)="onLoadStudents()"></button>
+  </div>
+</div>

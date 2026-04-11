@@ -25,7 +25,6 @@ namespace Domain
         public int DistrictId { get; set; }
         public District District { get; set; }
         public int MunicipalityId { get; set; }
-        public bool isActive { get; set; }
         public Municipality Municipality { get; set; }
         public StudentCharacterCertificateLog StudentCharacterCertificateLog { get; set; }
         public StudentTransferCertificateLog studentTransferCertificateLog { get; set; }

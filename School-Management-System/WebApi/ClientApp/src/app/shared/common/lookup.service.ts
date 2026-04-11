@@ -4,10 +4,12 @@ import { tap } from 'rxjs/operators';
 import { ClassRoomViewModel } from '../../home/components/class-room/shared/models/viewModels/classRoom.viewModel';
 import { SectionViewModel } from '../../home/components/class-room/shared/models/viewModels/section.viewModel';
 import { ApiService } from '../api.service';
+import { CourseViewModel } from '../../home/components/course/shared/models/course.viewModel';
 import { DistrictViewModel } from './models/master/district.ViewModel';
 import { ProvinceViewModel } from './models/master/master.ViewModel';
 import { MunicipalityViewModel } from './models/master/municipality.ViewModel';
 import { AcademicViewModel } from '../../home/components/master-entry/model/viewModels/academicYear.ViewModel';
+import { MasterApiService } from '../master-api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +20,9 @@ export class LookupService {
   private provincesCache: ProvinceViewModel[] | null = null;
   private academicYearsCache: AcademicViewModel[] | null = null;
   private classRoomsCache: ClassRoomViewModel[] | null = null;
+  private coursesCache: CourseViewModel[] | null = null;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private masterApiService: MasterApiService) { }
 
   getProvinces(forceRefresh = false): Observable<ProvinceViewModel[]> {
     if (!forceRefresh) {
@@ -122,12 +125,45 @@ export class LookupService {
       }
     }
 
-    return this.apiService.getClassRooms().pipe(
+    return this.masterApiService.getClassRooms().pipe(
       tap((response: ClassRoomViewModel[]) => {
         this.classRoomsCache = response ?? [];
         this.saveToStorage('lookup_class_rooms', this.classRoomsCache);
       })
     );
+  }
+
+  getCLassRoomName(classRoomId: string): Observable<string> {
+    return new Observable<string>((observer) => {
+      this.getClassRooms().subscribe({
+        next: (classRooms) => {
+          const classRoom = classRooms.find(x => x.id === classRoomId);
+          observer.next(classRoom ? classRoom.name : '');
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
+  getSectionName(sectionId: string): Observable<string> {
+    return new Observable<string>((observer) => {
+      this.getClassRooms().subscribe({
+        next: (classRooms) => {
+          for (const classRoom of classRooms) {
+            const section = classRoom.sections.find(s => s.sectionId === sectionId);
+            if (section) {
+              observer.next(section.name);
+              observer.complete();
+              return;
+            }
+          }
+          observer.next('');
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
   }
 
   getSectionsByClassRoom(
@@ -146,17 +182,40 @@ export class LookupService {
     });
   }
 
+  getCourses(forceRefresh = false): Observable<CourseViewModel[]> {
+    if (!forceRefresh) {
+      if (this.coursesCache) {
+        return of(this.coursesCache);
+      }
+
+      const stored = this.getFromStorage<CourseViewModel[]>('lookup_courses');
+      if (stored) {
+        this.coursesCache = stored;
+        return of(stored);
+      }
+    }
+
+    return this.masterApiService.getCourses().pipe(
+      tap((response: CourseViewModel[]) => {
+        this.coursesCache = response ?? [];
+        this.saveToStorage('lookup_courses', this.coursesCache);
+      })
+    );
+  }
+
   clearAllCache(): void {
     this.provincesCache = null;
     this.academicYearsCache = null;
     this.classRoomsCache = null;
+    this.coursesCache = null;
 
     localStorage.removeItem('lookup_provinces');
     localStorage.removeItem('lookup_academic_years');
     localStorage.removeItem('lookup_class_rooms');
+    localStorage.removeItem('lookup_courses');
   }
 
-  clearCacheByKey(key: 'provinces' | 'academicYears' | 'classRooms'): void {
+  clearCacheByKey(key: 'provinces' | 'academicYears' | 'classRooms' | 'courses'): void {
     switch (key) {
       case 'provinces':
         this.provincesCache = null;
@@ -169,6 +228,10 @@ export class LookupService {
       case 'classRooms':
         this.classRoomsCache = null;
         localStorage.removeItem('lookup_class_rooms');
+        break;
+      case 'courses':
+        this.coursesCache = null;
+        localStorage.removeItem('lookup_courses');
         break;
     }
   }

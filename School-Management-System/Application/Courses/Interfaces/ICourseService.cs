@@ -14,7 +14,6 @@ namespace Application.Courses.Interfaces
         Task UpdateCourse(CourseDto courseDto, CancellationToken cancellationToken);
         Task AddClassCourse(ClassCourseDto classCourseDto, CancellationToken cancellationToken);
         Task UpdateClassCourse(ClassCourseDto classCourseDto, CancellationToken cancellationToken);
-        Task<List<CourseViewModel>> GetCourse(CancellationToken cancellationToken);
         Task<List<ClassCreditCourseViewModel>> GetClassCourseByClassId(Guid classRoomId, CancellationToken cancellationToken);
         Task<List<ClassCreditCourseViewModel>> GetAllClassCourse(CancellationToken cancellationToken);
     }

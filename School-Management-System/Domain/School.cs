@@ -8,9 +8,9 @@ namespace Domain
 {
     public class School:AuditableEntry
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public DateOnly EstablishedYear { get; set; }
+        public string PrincipalName { get; set; } = string.Empty;
         public string Province { get; set; }
         public string Address { get; set; }
         public string City { get; set; }

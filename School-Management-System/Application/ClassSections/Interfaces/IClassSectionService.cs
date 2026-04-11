@@ -10,8 +10,6 @@ namespace Application.ClassSections.Interfaces
 {
     public interface IClassSectionService
     {
-        Task<List<ClassRoomViewModel>> GetAllClassRooms(CancellationToken cancellationToken);
-        Task<List<SectionViewModel>> GetAllSections(CancellationToken cancellationToken);
         Task CreateClassSection(ClassSectionDto classSectionDto, CancellationToken cancellationToken);
         Task AddSection(SectionDto section, CancellationToken cancellationToken);
         Task UpdateSection(SectionDto section, CancellationToken cancellationToken);

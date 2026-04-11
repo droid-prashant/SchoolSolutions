@@ -35,7 +35,7 @@ namespace Infrastructure.Services.Dashboard
             var result = await _context.StudentEnrollments
                                  .Include(x => x.ClassSection)
                                  .ThenInclude(x => x.ClassRoom)
-                                 .Where(x => x.Student.isActive == true)
+                                 .Where(x => x.Student.IsActive == true)
                                  .GroupBy(x => x.ClassSection.ClassRoom.Name)
                                  .Select(g => new StudentsByClassViewModel
                                  {

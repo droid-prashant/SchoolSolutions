@@ -16,22 +16,6 @@ namespace WebApi.Controllers
             _classSectionService = classSectionService;
         }
 
-        [HttpGet]
-        [Route("GetClassRooms")]
-        public async Task<List<ClassRoomViewModel>> GetAllClassRooms(CancellationToken cancellationToken)
-        {
-            var result = await _classSectionService.GetAllClassRooms(cancellationToken);
-            return result;
-        }
-
-        [HttpGet]
-        [Route("GetSections")]
-        public async Task<List<SectionViewModel>> GetAllSections(CancellationToken cancellationToken)
-        {
-            var result = await _classSectionService.GetAllSections(cancellationToken);
-            return result;
-        }
-
         [HttpPost]
         [Route("AddClass")]
         public async Task AddClass([FromBody] ClassRoomDto classRoomDto, CancellationToken cancellationToken)

@@ -44,39 +44,6 @@ namespace Infrastructure.Services.ClassSections
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<List<ClassRoomViewModel>> GetAllClassRooms(CancellationToken cancellationToken)
-        {
-            var result = await _context.ClassRooms.Include(x => x.ClassSections).Select(x => new ClassRoomViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                OrderNumber = x.OrderNumber,
-                AcademicYear = x.AcademicYear,
-                CreatedOn = x.CreatedDate,
-                Sections = x.ClassSections.Where(c => c.ClassId == x.Id).Select(x => new SectionViewModel
-                {
-                    SectionId = x.SectionId.ToString(),
-                    Name = x.Section.Name,
-                    ClassSectionId = x.Id.ToString()
-                }).ToList()
-            }).OrderBy(x => x.OrderNumber)
-              .ToListAsync();
-            return result;
-        }
-
-
-        public async Task<List<SectionViewModel>> GetAllSections(CancellationToken cancellationToken)
-        {
-            var result = await _context.Sections.Select(x => new SectionViewModel
-            {
-                SectionId = x.Id.ToString(),
-                Name = x.Name
-
-            }).OrderBy(x => x.Name)
-              .ToListAsync();
-            return result;
-        }
-
         public async Task<List<ClassSectionViewModel>> GetAllClassSections(CancellationToken cancellationToken)
         {
             var result = await _context.ClassSections.Include(x => x.ClassRoom)

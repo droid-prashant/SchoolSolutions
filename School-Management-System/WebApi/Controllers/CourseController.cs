@@ -15,13 +15,6 @@ namespace WebApi.Controllers
         {
             _courseService = courseService;
         }
-        [HttpGet]
-        [Route("GetCourse")]
-        public async Task<List<CourseViewModel>> Get(CancellationToken cancellationToken)
-        {
-            var result = await _courseService.GetCourse(cancellationToken);
-            return result;
-        }
 
         [HttpGet]
         [Route("GetAllClassCourse")]

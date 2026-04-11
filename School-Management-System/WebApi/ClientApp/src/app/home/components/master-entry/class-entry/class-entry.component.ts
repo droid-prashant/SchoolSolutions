@@ -5,6 +5,7 @@ import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/cl
 import { ClassRoomDto } from '../model/dtos/classRoom.dto';
 import { MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-class-entry',
@@ -18,7 +19,10 @@ export class ClassEntryComponent implements OnInit {
   classList: ClassRoomViewModel[] = [];
   isUpdate: boolean = false;
   isSubmitted: boolean = false;
-  constructor(private _formBuilder: FormBuilder, private _apiService: ApiService, private _messageService: MessageService
+  constructor(private _formBuilder: FormBuilder,
+    private _apiService: ApiService,
+    private _messageService: MessageService,
+    private _lookupService: LookupService
   ) {
     let fb = _formBuilder;
     this.classForm = fb.group({
@@ -55,7 +59,7 @@ export class ClassEntryComponent implements OnInit {
       },
       complete: () => {
         this.isSubmitted = false;
-        this.listClass();
+        this.listClass(true);
         this.classForm.reset();
       }
     });
@@ -77,22 +81,31 @@ export class ClassEntryComponent implements OnInit {
       complete: () => {
         this.isSubmitted = false;
         this.isUpdate = false;
-        this.listClass();
+        this.listClass(true);
         this.submitButtonLabel = "Save";
         this.classForm.reset();
       }
     })
   }
 
-  listClass() {
-    this._apiService.getClassRooms().subscribe({
+  // listClass() {
+  //   this._apiService.getClassRooms().subscribe({
+  //     next: (response) => {
+  //       this.classList = response;
+  //     },
+  //     error: (err) => {
+  //       this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load Class' });
+  //     }
+  //   })
+  // }
+
+  listClass(forceRefresh=false) {
+    this._lookupService.getClassRooms(forceRefresh).subscribe({
       next: (response) => {
+        console.log(response);
         this.classList = response;
-      },
-      error: (err) => {
-        this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load Class' });
       }
-    })
+    });
   }
 
   editClass(selectedClass: ClassRoomDto) {

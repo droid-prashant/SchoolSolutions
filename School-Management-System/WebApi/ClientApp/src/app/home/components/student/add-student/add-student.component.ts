@@ -10,6 +10,7 @@ import { ProvinceViewModel } from '../../../../shared/common/models/master/maste
 import { DistrictViewModel } from '../../../../shared/common/models/master/district.ViewModel';
 import { MunicipalityViewModel } from '../../../../shared/common/models/master/municipality.ViewModel';
 import { MessageService } from 'primeng/api';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-add-student',
@@ -33,7 +34,8 @@ export class AddStudentComponent implements OnInit, OnChanges {
   studentForm: FormGroup
   constructor(private _fb: FormBuilder,
     private _apiService: ApiService,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _lookupService: LookupService
   ) {
     let fb = this._fb;
     this.studentForm = fb.group({
@@ -53,6 +55,7 @@ export class AddStudentComponent implements OnInit, OnChanges {
       parentEmail: [''],
       classRoomId: [null, Validators.required],
       sectionId: [null, Validators.required],
+      classSectionId: [null, Validators.required],
       provinceId: [null, Validators.required],
       districtId: [null, Validators.required],
       municipalityId: [null, Validators.required],
@@ -123,6 +126,7 @@ export class AddStudentComponent implements OnInit, OnChanges {
       parentEmail: student.parentEmail || '',
       classRoomId: student.classRoomId ?? null,
       sectionId: student.sectionId ?? null,
+      classSectionId: student.classSectionId ?? null,
       address: student.address || '',
       provinceId: student.provinceId ?? null,
       districtId: student.districtId ?? null,
@@ -156,15 +160,9 @@ export class AddStudentComponent implements OnInit, OnChanges {
   }
 
   getClassRooms() {
-    this._apiService.getClassRooms().subscribe(
-      {
-        next: (response) => {
-          this.classRooms = response;
-        },
-        error: (err) => console.log(err),
-        complete: () => console.log("Request is complete")
-      }
-    )
+    this._lookupService.getClassRooms().subscribe(classes => {
+        this.classRooms = classes;
+      });
   }
 
   saveStudent() {
@@ -198,8 +196,7 @@ export class AddStudentComponent implements OnInit, OnChanges {
     this._apiService.postStudent(student).subscribe(
       {
         next: (response) => {
-          this.studentForm.reset();
-         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Student added successfully' });
+          this.studentSaved.emit();
         },
         error: (err) => {
           console.log(err);
@@ -218,14 +215,14 @@ export class AddStudentComponent implements OnInit, OnChanges {
     }
   }
 
-  // onSectionChange(event: any) {
-  //   const sectionId = event.value;
-  //   if (sectionId) {
-  //     const selectedClassSection = this.sections.filter(x => x.sectionId === sectionId);
-  //     const selectedCLassSectionId = selectedClassSection[0].classSectionId;
-  //     this.studentForm.get('classSectionId')?.setValue(selectedCLassSectionId);
-  //   }
-  // }
+  onSectionChange(event: any) {
+    const sectionId = event.value;
+    if (sectionId) {
+      const selectedClassSection = this.sections.filter(x => x.sectionId === sectionId);
+      const selectedCLassSectionId = selectedClassSection[0].classSectionId;
+      this.studentForm.get('classSectionId')?.setValue(selectedCLassSectionId);
+    }
+  }
 
   onProvinceChange(provinceId: any) {
     this.selectedDistricts = [];

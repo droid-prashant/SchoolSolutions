@@ -8,6 +8,7 @@ import { SharedModule } from "../../../shared/shared.module";
 import { StudentRoutingModule } from "./student.routes";
 import { HttpClientModule } from "@angular/common/http";
 import { NpDatepickerComponent } from "../../../shared/calender/np-datepicker/np-datepicker.component";
+import { StudentFilterComponent } from "../student-filter/student-filter.component";
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { NpDatepickerComponent } from "../../../shared/calender/np-datepicker/np
         SharedModule,
         FormsModule,
         HttpClientModule,
-        NpDatepickerComponent
+        NpDatepickerComponent,
+        StudentFilterComponent
     ],
     exports: [],
 })

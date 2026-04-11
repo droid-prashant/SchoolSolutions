@@ -10,17 +10,9 @@
                 </p-dropdown>
             </div>
         </div>
-        <div class="field col-3">
-            <label for="class">Class</label>
-            <p-dropdown id="class" [options]="classRooms" optionLabel="name" optionValue="id"
-                (onChange)="onClassRoomChange($event)" placeholder="Select Class"></p-dropdown>
-        </div>
-        <div class="field col-3">
-            <label for="classSection">Class</label>
-            <p-dropdown id="classSection" [options]="sections" optionLabel="name" optionValue="classSectionId"
-                (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected" placeholder="Select Section"
-                [style]="{ width: '100%' }">
-            </p-dropdown>
+        <div class="field col-6">
+            <app-student-filter [showClassFilter]="true" [showSectionFilter]="true"
+                (loadStudents)="onLoadStudents($event)"></app-student-filter>
         </div>
     </div>
 
@@ -34,7 +26,7 @@
                         <label>Attendance</label>
                         <input pInputText type="number" formControlName="attendance"
                             class="p-inputtext p-component input-number" placeholder="Enter Attendance" [min]="0"
-                            [max]="365" />
+                            [max]="365" required/>
                     </div>
                 </div>
 
@@ -43,7 +35,7 @@
                         <label>Total School Days</label>
                         <input pInputText type="number" formControlName="totalSchoolDays"
                             class="p-inputtext p-component input-number" placeholder="Enter Total School Days" [min]="0"
-                            [max]="365" />
+                            [max]="365" required/>
                     </div>
                 </div>
             </div>
@@ -92,7 +84,7 @@
             <tr>
                 <th>Id</th>
                 <th style="width:25%">Name</th>
-                <th >Class</th>
+                <th>Class</th>
                 <th>Section</th>
                 <th style="width:25%">Action</th>
             </tr>
@@ -101,7 +93,7 @@
             <tr>
                 <td>{{ rowIndex + 1 }}</td>
                 <td>{{ student.firstName }} {{ student.lastName }}</td>
-                <td>{{getClassRoomName(student.classRoomId) }}</td>
+                <td>{{getClassName(student.classRoomId) }}</td>
                 <td>{{ getSectionName(student.sectionId) }}</td>
                 <td>
                     <i class="pi pi-pencil pointer-icon" (click)="showDialog(student)"></i>

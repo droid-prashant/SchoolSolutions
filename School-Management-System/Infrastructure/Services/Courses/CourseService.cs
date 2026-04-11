@@ -47,16 +47,6 @@ namespace Infrastructure.Services.Courses
                 await _context.SaveChangesAsync(cancellationToken);
             }
         }
-        public async Task<List<CourseViewModel>> GetCourse(CancellationToken cancellationToken)
-        {
-            var courseList = await _context.Courses.Select(x => new CourseViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-            }).ToListAsync(cancellationToken);
-
-            return courseList;
-        }
         public async Task<List<ClassCreditCourseViewModel>> GetAllClassCourse(CancellationToken cancellationToken)
         {
             var courseList = await _context.ClassCourses.Select(x => new ClassCreditCourseViewModel

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CourseDto } from '../../course/shared/models/course.dto';
 import { CourseViewModel } from '../../course/shared/models/course.viewModel';
 import { MessageService } from 'primeng/api';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-course-entry',
@@ -20,7 +21,8 @@ export class CourseEntryComponent implements OnInit {
 
   constructor(private _apiService: ApiService,
     private _formBuilder: FormBuilder,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _lookupService: LookupService
   ) {
     let fb = _formBuilder;
     this.courseForm = fb.group({
@@ -80,7 +82,7 @@ export class CourseEntryComponent implements OnInit {
           this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add Course' });
         },
         complete: () => {
-          this.listCourse();
+          this.listCourse(true);
           this.isSubmitted = false;
           this.isUpdate = false;
           this.submitButtonLabel = "Save";
@@ -90,20 +92,12 @@ export class CourseEntryComponent implements OnInit {
     )
   }
 
-  listCourse() {
-    this._apiService.getCourses().subscribe(
-      {
-        next: (response) => {
-          this.courses = response;
-        },
-        error: (error) => {
-
-        },
-        complete: () => {
-
-        }
+  listCourse(forceRefresh = false) {
+    this._lookupService.getCourses(forceRefresh).subscribe({
+      next: (response) => {
+        this.courses = response;
       }
-    )
+    });
   }
   editCourse(course: CourseViewModel) {
     this.isUpdate = true;

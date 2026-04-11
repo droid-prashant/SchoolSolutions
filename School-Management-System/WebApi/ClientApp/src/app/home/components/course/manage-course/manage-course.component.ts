@@ -6,6 +6,7 @@ import { ClassCreditCourseViewModel } from '../shared/models/classCourse.viewMod
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
 import { ClassCourseDto } from '../shared/models/classCourse.dto';
 import { MessageService } from 'primeng/api';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-manage-course',
@@ -25,6 +26,7 @@ export class ManageCourseComponent implements OnInit {
   isUpdateRow: boolean = false;
   constructor(
     private _apiService: ApiService,
+    private _lookupService: LookupService,
     private _formBuilder: FormBuilder,
     private _messageService: MessageService
   ) {
@@ -42,6 +44,9 @@ export class ManageCourseComponent implements OnInit {
     this.listAllClassCourse();
     this.listCourses();
     this.listClass();
+    this.classCourseForm.get('classRoomId')?.valueChanges.subscribe(classRoomId => {
+      this.onCourseChange(classRoomId);
+    });
   }
 
   onClassChange(event: any) {
@@ -52,8 +57,15 @@ export class ManageCourseComponent implements OnInit {
     }
   }
 
+  onCourseChange(event: any) {
+    const courseId = event;
+    if (courseId) {
+      this.classCourseForm.get('courseId')?.setValue(courseId);
+    }
+  }
+
   listClass() {
-    this._apiService.getClassRooms().subscribe({
+    this._lookupService.getClassRooms().subscribe({
       next: (response) => {
         this.classRooms = response;
       },
@@ -97,7 +109,7 @@ export class ManageCourseComponent implements OnInit {
   }
 
   listCourses() {
-    this._apiService.getCourses().subscribe(
+    this._lookupService.getCourses().subscribe(
       {
         next: (response) => {
           this.courses = response;

@@ -6,6 +6,7 @@ import { ResultViewModel } from '../shared/viewModels/result.viewModel';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
 import { StudentCertificateViewModel } from '../../certificate/model/studentCertificate.ViewModel';
 import { LookupService } from '../../../../shared/common/lookup.service';
+import { FilterSelection } from '../../student-filter/student-filter.component';
 
 @Component({
   selector: 'app-result',
@@ -25,7 +26,7 @@ export class ResultComponent implements OnInit {
   result!: ResultViewModel
   classSectionId: string = "";
   constructor(private _apiService: ApiService,
-    private lookupService: LookupService
+    private _lookupService: LookupService
   ) {
 
   }
@@ -34,15 +35,32 @@ export class ResultComponent implements OnInit {
   }
   previewResult(student: StudentViewModel) {
     this.student = student;
-    this.getResult(student.id);
+    this.getResult(student.studentEnrollmentId);
     this.students
   }
 
+  onLoadStudents(filter: FilterSelection) {
+    if (filter && filter.classSectionId) {
+      this.listStudentByClassSection(filter.classSectionId);
+    }
+  }
+
+  listStudentByClassSection(classSectionId: string) {
+    this._apiService.getStudentsByClassSectionId(classSectionId).subscribe(
+      {
+        next: (response) => {
+          this.students = response;
+        },
+        error: (err) => console.log(err)
+      }
+    );
+  }
+
   loadLookupData() {
-    this.lookupService.getProvinces().subscribe({
+    this._lookupService.getProvinces().subscribe({
       next: (response) => {
         let provinceDetails = response;
-        
+
       },
       error: (err) => console.log(err)
     });
@@ -78,13 +96,29 @@ export class ResultComponent implements OnInit {
   }
 
   getClassRoomName(classRoomId: string): string {
-    const classRoom = this.classRooms.find(x => x.id === classRoomId);
-    return classRoom ? classRoom.name : '';
+    let classRoom: string = '';
+    if (classRoomId) {
+      this._lookupService.getCLassRoomName(classRoomId).subscribe({
+        next: (response) => {
+          classRoom = response;
+        },
+        error: (err) => console.log(err)
+      });
+    }
+    return classRoom ? classRoom : '';
   }
 
   getSectionName(sectionId: string): string {
-    const section = this.sections.find(x => x.sectionId === sectionId);
-    return section ? section.name : '';
+    let section: string = '';
+    if (sectionId) {
+      this._lookupService.getSectionName(sectionId).subscribe({
+        next: (response) => {
+          section = response;
+        },
+        error: (err) => console.log(err)
+      });
+    }
+    return section ? section : '';
   }
   onClassRoomChange(event: any) {
     this.classId = event.value;

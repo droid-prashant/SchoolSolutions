@@ -42,7 +42,7 @@ namespace Infrastructure.Services.Students
             var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == studentId);
             if (student != null)
             {
-                student.isActive = false;
+                student.IsActive = false;
                 await _context.SaveChangesAsync(cancellationToken);
             }
         }
@@ -121,7 +121,7 @@ namespace Infrastructure.Services.Students
                     ContactNumber = addStudent.ContactNumber,
                     CreatedDate = DateTime.UtcNow,
                     CreatedBy = Guid.Parse(_userResolver.UserId),
-                    isActive = true
+                    IsActive = true
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -166,6 +166,17 @@ namespace Infrastructure.Services.Students
                 existingStudent.DateOfBirthEn = studentDto.DobEn;
                 existingStudent.ModifiedBy = Guid.Parse(_userResolver.UserId);
                 existingStudent.ModifiedDate = DateTime.UtcNow;
+                var existingStudentEnrollment = await _context.StudentEnrollments.FirstOrDefaultAsync(x => x.Student.Id == existingStudent.Id && x.AcademicYearId == Guid.Parse(_userResolver.AcademicYearId));
+                if (existingStudentEnrollment == null)
+                {
+                    throw new Exception("Student is not Enrolled");
+                }
+                else
+                {
+                    existingStudentEnrollment.RollNumber = studentDto.RollNumber;
+                    existingStudentEnrollment.ClassSectionId = Guid.Parse(studentDto.ClassSectionId);
+                }
+
             }
             await _context.SaveChangesAsync(cancellationToken);
         }
@@ -214,7 +225,7 @@ namespace Infrastructure.Services.Students
         {
             var students = await _context.StudentEnrollments.Include(x => x.Student).Include(x => x.ClassSection)
                                                             .ThenInclude(x => x.ClassRoom)
-                                                            .Where(x => x.Student.isActive == true)
+                                                            .Where(x => x.Student.IsActive == true)
                                                             .Select(x => new StudentViewModel
                                                             {
                                                                 Id = x.StudentId,
@@ -228,6 +239,7 @@ namespace Infrastructure.Services.Students
                                                                 MotherName = x.Student.MotherName,
                                                                 ClassRoomId = x.ClassSection.ClassRoom.Id.ToString(),
                                                                 SectionId = x.ClassSection.Section.Id.ToString(),
+                                                                ClassSectionId = x.ClassSection.Id.ToString(),
                                                                 ContactNumber = x.Student.ContactNumber,
                                                                 ParentContactNumber = x.Student.ParentContactNumber,
                                                                 ParentEmail = x.Student.ParentEmail,
@@ -258,7 +270,7 @@ namespace Infrastructure.Services.Students
                 var studentFirstEnrollment = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == enrolledStudent.StudentId);
                 var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                                 .ThenInclude(x => x.ClassRoom)
-                                                                .Where(x => x.Student.isActive == true && x.ClassSection.Id == Guid.Parse(classSectionId)).Select(x => new StudentCertificateViewModel
+                                                                .Where(x => x.Student.IsActive == true && x.ClassSection.Id == Guid.Parse(classSectionId)).Select(x => new StudentCertificateViewModel
                                                                 {
                                                                     Id = x.Id,
                                                                     StudentId = x.StudentId,
@@ -306,7 +318,7 @@ namespace Infrastructure.Services.Students
         {
             var result = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                           .Include(x => x.Student)
-                                                          .Where(x => x.Student.isActive == true &&
+                                                          .Where(x => x.Student.IsActive == true &&
                                                                       x.ClassSectionId == Guid.Parse(classSectionId) &&
                                                                      (x.ClassSection.ClassRoom.OrderNumber == 8 || x.ClassSection.ClassRoom.OrderNumber == 10))
                                                           .Select(x => new StudentEnrollmentViewModel
@@ -349,18 +361,40 @@ namespace Infrastructure.Services.Students
         {
             var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                             .ThenInclude(x => x.ClassRoom)
-                                                            .Where(x => x.Student.isActive == true &&
+                                                            .Where(x => x.Student.IsActive == true &&
                                                                    x.ClassSection.Id == Guid.Parse(classSectionId))
                                                             .Select(x => new StudentViewModel
                                                             {
-                                                                Id = x.Id,
+                                                                Id = x.StudentId,
+                                                                StudentEnrollmentId = x.Id,
                                                                 FirstName = x.Student.FirstName,
                                                                 LastName = x.Student.LastName,
-                                                                DateOfBirthNp = x.Student.DateOfBirthNp,
-                                                                DateOfBirthEn = x.Student.DateOfBirthEn,
+                                                                Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
+                                                                Age = x.Student.Age,
+                                                                GrandFatherName = x.Student.GrandFatherName,
+                                                                FatherName = x.Student.FatherName,
+                                                                MotherName = x.Student.MotherName,
                                                                 ClassRoomId = x.ClassSection.ClassRoom.Id.ToString(),
                                                                 SectionId = x.ClassSection.Section.Id.ToString(),
-                                                                Gender = x.Student.Gender
+                                                                ClassSectionId = x.ClassSection.Id.ToString(),
+                                                                ContactNumber = x.Student.ContactNumber,
+                                                                ParentContactNumber = x.Student.ParentContactNumber,
+                                                                ParentEmail = x.Student.ParentEmail,
+                                                                Gender = x.Student.Gender,
+                                                                ProvinceName = x.Student.Province.ProvinceName,
+                                                                ProvinceId = x.Student.ProvinceId,
+                                                                DistrictName = x.Student.District.DistrictName,
+                                                                DistrictId = x.Student.DistrictId,
+                                                                MunicipalityName = x.Student.Municipality.MunicipalityName,
+                                                                MunicipalityId = x.Student.MunicipalityId,
+                                                                WardNo = x.Student.WardNo,
+                                                                RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
+                                                                SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
+                                                                DateOfBirthNp = x.Student.DateOfBirthNp,
+                                                                DateOfBirthEn = x.Student.DateOfBirthEn,
+                                                                ClassRoomName = x.ClassSection.ClassRoom.Name,
+                                                                SectionName = x.ClassSection.Section.Name,
+                                                                RollNumber = (int)(x.RollNumber)
                                                             }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                    .ToListAsync(cancellationToken);
             return students;

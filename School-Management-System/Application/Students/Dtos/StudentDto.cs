@@ -26,6 +26,7 @@ namespace Application.Students.Dtos
         public int WardNo { get; set; }
         public string ContactNumber { get; set; }
         public string ClassRoomId { get; set; }
+        public string ClassSectionId { get; set; }
         public string SectionId { get; set; }
         public int? RollNumber { get; set; }
     }

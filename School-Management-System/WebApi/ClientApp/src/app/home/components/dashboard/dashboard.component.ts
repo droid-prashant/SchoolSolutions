@@ -3,6 +3,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { ApiService } from '../../../shared/api.service';
 import { StudentsByClassViewModel } from './model/studentsByClass.viewModel';
 import { ProvinceViewModel } from '../../../shared/common/models/master/master.ViewModel';
+import { MasterApiService } from '../../../shared/master-api.service';
+import { ClassRoomViewModel } from '../class-room/shared/models/viewModels/classRoom.viewModel';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,17 +20,19 @@ export class DashboardComponent implements OnInit {
   courseCount: number = 0;
   studentsByClass: StudentsByClassViewModel[] = []
   provinceDetails: ProvinceViewModel[] = [];
+  classRooms: ClassRoomViewModel[] = []
 
-  constructor(private _apiService: ApiService) { }
+  constructor(private _apiService: ApiService, private masterApiService: MasterApiService) { }
 
   ngOnInit(): void {
     this.studentCount();
     this.coursesCount();
     this.classVsStudents();
     this.getProvinceDetails();
+    this.getClassRooms();
   }
 
-   getProvinceDetails() {
+  getProvinceDetails() {
     this._apiService.getProvinceDetails().subscribe(
       {
         next: (response) => {
@@ -76,6 +80,19 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  getClassRooms() {
+    this.masterApiService.getClassRooms().subscribe({
+      next: (res) => {
+        this.classRooms = res;
+        localStorage.setItem('classRoomDetails', JSON.stringify(res));
+      },
+      error: (err) => {
+      }
+    });
+  }
+
+
+
   initializeBarChart() {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color');
@@ -83,11 +100,11 @@ export class DashboardComponent implements OnInit {
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
     const colors = [
-      'rgba(75, 192, 192, 0.7)', 
-      'rgba(255, 159, 64, 0.7)', 
+      'rgba(75, 192, 192, 0.7)',
+      'rgba(255, 159, 64, 0.7)',
       'rgba(153, 102, 255, 0.7)',
-      'rgba(255, 205, 86, 0.7)', 
-      'rgba(54, 162, 235, 0.7)'  
+      'rgba(255, 205, 86, 0.7)',
+      'rgba(54, 162, 235, 0.7)'
     ];
     const labels = this.studentsByClass.map(x => x.classRoom);
     const allSections = Array.from(

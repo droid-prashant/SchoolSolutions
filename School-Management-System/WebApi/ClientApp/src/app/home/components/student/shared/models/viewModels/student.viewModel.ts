@@ -1,6 +1,6 @@
 export interface StudentViewModel {
     id: string;
-    studentEntrollmentId: string;
+    studentEnrollmentId: string;
     firstName: string;
     lastName: string;
     gender: string;

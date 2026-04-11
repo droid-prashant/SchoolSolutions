@@ -26,6 +26,7 @@ import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from "@angular/forms";
 import { ChartModule } from 'primeng/chart';
+import { StudentFilterComponent } from "../home/components/student-filter/student-filter.component";
 
 @NgModule({
     declarations: [],
@@ -57,6 +58,7 @@ import { ChartModule } from 'primeng/chart';
         CheckboxModule,
         FormsModule,
         ChartModule,
+        StudentFilterComponent
         
     ],
     exports: [
@@ -86,6 +88,7 @@ import { ChartModule } from 'primeng/chart';
         PasswordModule,
         CheckboxModule,
         ChartModule,
+        StudentFilterComponent
     ]
 })
 export class SharedModule { }
