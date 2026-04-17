@@ -214,11 +214,7 @@
 }
 
 .col-point {
-  width: 11%;
-}
-
-.col-remarks {
-  width: 9%;
+  width: 13%;
 }
 
 .marks-table th,
@@ -293,6 +289,30 @@
   margin-top: 1mm;
   font-size: 14px;
   font-weight: 800;
+}
+
+.overall-remark {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2mm;
+  margin-top: 3mm;
+  padding: 3mm 3.5mm;
+  border: 1px solid #2a4e79;
+  background: rgba(233, 242, 255, 0.78);
+}
+
+.overall-remark-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #375173;
+}
+
+.overall-remark-value {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .footer {

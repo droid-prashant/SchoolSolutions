@@ -48,21 +48,19 @@
           <col class="col-subject">
           <col class="col-credit">
           <col class="col-credit">
-          <col class="col-grade">
-          <col class="col-grade">
-          <col class="col-final">
-          <col class="col-point">
-          <col class="col-remarks">
-        </colgroup>
-        <thead>
-          <tr>
+        <col class="col-grade">
+        <col class="col-grade">
+        <col class="col-final">
+        <col class="col-point">
+      </colgroup>
+      <thead>
+        <tr>
             <th rowspan="2" class="text-align-centre">S.N.</th>
             <th rowspan="2" class="text-align-centre">Subjects</th>
             <th colspan="2" class="text-align-centre">Credit Hour</th>
             <th colspan="2" class="text-align-centre">Obtained Grade</th>
             <th rowspan="2" class="text-align-centre">Final Grade</th>
             <th rowspan="2" class="text-align-centre">Grade Point</th>
-            <th rowspan="2" class="text-align-centre">Remarks</th>
           </tr>
           <tr>
             <th class="text-align-centre">Theory</th>
@@ -81,10 +79,9 @@
             <td class="text-align-centre">{{sub.gradePractical || '-'}}</td>
             <td class="text-align-centre">{{sub.finalGrade}}</td>
             <td class="text-align-centre">{{getFinalGradePoint(sub.finalGradePoint)}}</td>
-            <td class="text-align-centre"></td>
           </tr>
           <tr>
-            <td colspan="9" class="gpa">
+            <td colspan="8" class="gpa">
               Grade Point Average (GPA) : {{resultObj.gpa}}
             </td>
           </tr>
@@ -104,6 +101,11 @@
           <span class="summary-label">Result Status</span>
           <span class="summary-value">{{ resultObj.gpa >= 1.6 ? 'PASSED' : 'NEEDS IMPROVEMENT' }}</span>
         </div>
+      </div>
+
+      <div class="overall-remark">
+        <span class="overall-remark-label">General Remark</span>
+        <span class="overall-remark-value">{{overallRemark}}</span>
       </div>
 
       <div class="footer">

@@ -103,4 +103,30 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
 
     return this.resultObj?.wardNo ? `Ward ${this.resultObj.wardNo}` : '-';
   }
+
+  get overallRemark(): string {
+    const gpa = this.resultObj?.gpa ?? 0;
+
+    if (gpa >= 3.6) {
+      return 'Outstanding progress. The student has performed very well in all areas. Keep it up.';
+    }
+
+    if (gpa >= 3.2) {
+      return 'Very good progress. The student is doing well and should continue the same effort.';
+    }
+
+    if (gpa >= 2.8) {
+      return 'Good progress. With a little more focus and regular practice, the student can do even better.';
+    }
+
+    if (gpa >= 2.0) {
+      return 'Satisfactory progress. The student needs to work harder and improve consistency in studies.';
+    }
+
+    if (gpa >= 1.6) {
+      return 'Basic progress has been made, but much more effort is needed. Regular study and guidance are recommended.';
+    }
+
+    return 'The student needs significant improvement. More hard work, practice, and support from home and school are necessary.';
+  }
 }
