@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MenuItem, MessageService, PrimeIcons } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { ApiService } from '../../../../shared/api.service';
 import { StudentViewModel } from '../shared/models/viewModels/student.viewModel';
 import { StudentFilterComponent, FilterSelection } from '../../student-filter/student-filter.component';
@@ -26,18 +26,6 @@ export class ListStudentComponent implements OnInit {
   constructor(private _apiService: ApiService, private _messageService: MessageService, private _lookupService: LookupService) {
   }
   ngOnInit(): void {
-  }
-
-  getActionItems(student: StudentViewModel): MenuItem[] {
-    return [
-      {
-        icon: PrimeIcons.PENCIL,
-        tooltipOptions: { tooltipLabel: 'Edit', tooltipPosition: 'top' },
-        command: () => {
-          this.editStudent(student);
-        }
-      }
-    ];
   }
 
   editStudent(student: StudentViewModel) {

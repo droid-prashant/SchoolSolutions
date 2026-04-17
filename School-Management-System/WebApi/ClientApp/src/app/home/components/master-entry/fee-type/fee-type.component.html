@@ -1,4 +1,8 @@
-<h2 class="mb-4">Add Fee Type</h2>
+<app-page-header
+    section="Master Entry"
+    page="Fee Type Entry"
+    subtitle="Maintain reusable fee categories in the standard entry layout.">
+</app-page-header>
 <form [formGroup]="feeTypeForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
@@ -28,7 +32,8 @@
     </div>
 </form>
 <div class="card">
-    <p-table [value]="feeTypes" dataKey="id" editMode="row" [tableStyle]="{'min-width': '50rem'}">
+    <p-table [value]="feeTypes" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

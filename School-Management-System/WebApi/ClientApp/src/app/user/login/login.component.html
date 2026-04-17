@@ -1,5 +1,42 @@
 <p-toast></p-toast>
-<div class="login-container">
+<div class="login-shell">
+    <div class="login-stage">
+        <section class="login-brand-panel">
+            <div class="brand-topline">School Administration Portal</div>
+            <div class="brand-main">
+                <div class="brand-logo-wrap">
+                    <img src="assets/Om Pushpanjali logo.png" alt="Om Pushpanjali English School" class="brand-logo" />
+                </div>
+                <div>
+                    <h1>Om Pushpanjali English School</h1>
+                    <p>Unified academic operations for classes, students, exams, fees, and records.</p>
+                </div>
+            </div>
+
+            <div class="brand-feature-list">
+                <div class="brand-feature">
+                    <i class="pi pi-book"></i>
+                    <div>
+                        <strong>Academic Control</strong>
+                        <span>Manage classes, courses, and academic sessions from one workspace.</span>
+                    </div>
+                </div>
+                <div class="brand-feature">
+                    <i class="pi pi-users"></i>
+                    <div>
+                        <strong>Student Management</strong>
+                        <span>Track student records, sections, and administration smoothly.</span>
+                    </div>
+                </div>
+                <div class="brand-feature">
+                    <i class="pi pi-chart-line"></i>
+                    <div>
+                        <strong>Exam & Results</strong>
+                        <span>Prepare marks, publish results, and monitor academic progress.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
     <p-card class="login-card" header="Welcome Back 👋" subheader="Please login to your account">
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <div class="p-fluid">
@@ -15,7 +52,7 @@
 
                 <div class="field">
                     <label for="password">Password</label>
-                    <p-password id="password" formControlName="password" [feedback]="true" toggleMask="true"
+                    <p-password id="password" formControlName="password" [feedback]="false" toggleMask="true"
                         placeholder="Enter your password"></p-password>
                     <small *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
                         class="p-error">
@@ -40,9 +77,10 @@
                 </div>
 
                 <button pButton type="submit" label="Login" class="p-button-rounded p-button-lg w-full mt-3"
-                    [disabled]="!loginForm.valid">
+                    [disabled]="!loginForm.valid || isSubmitted">
                 </button>
             </div>
         </form>
     </p-card>
+    </div>
 </div>

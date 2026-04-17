@@ -17,12 +17,14 @@ namespace Application.SubjectMarks.Dtos
     public class StudentMarksList
     {
         public string ClassCourseId { get; set; }
-        public decimal TheoryCredit { get; set; }
-        public decimal PracticalCredit { get; set; }
-        public decimal TheoryFullMarks { get; set; }
-        public decimal PracticalFullMarks { get; set; }
-        public decimal ObtainedTheoryMarks { get; set; }
-        public decimal ObtainedPracticalMarks { get; set; }
+        public bool IsTheoryRequired { get; set; }
+        public bool IsPracticalRequired { get; set; }
+        public decimal? TheoryCredit { get; set; }
+        public decimal? PracticalCredit { get; set; }
+        public decimal? TheoryFullMarks { get; set; }
+        public decimal? PracticalFullMarks { get; set; }
+        public decimal? ObtainedTheoryMarks { get; set; }
+        public decimal? ObtainedPracticalMarks { get; set; }
     }
 }
 

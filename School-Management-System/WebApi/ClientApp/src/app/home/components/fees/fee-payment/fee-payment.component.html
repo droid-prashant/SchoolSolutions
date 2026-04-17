@@ -1,4 +1,9 @@
 <p-toast></p-toast>
+<app-page-header
+  section="Fees"
+  page="Fee Payment"
+  subtitle="Load fee summaries and collect payments using the standard workflow.">
+</app-page-header>
 
 <p-card header="Student Fees">
   <!-- 🔹 Class / Section / Student Dropdowns -->
@@ -58,8 +63,8 @@
       </div>
 
       <!-- 🔹 Fee Details Table -->
-      <p-table [value]="studentFeeSummary.feeDetails" [(selection)]="selectedFees" dataKey="id" [paginator]="true"
-        [rows]="5" [rowsPerPageOptions]="[5,10,20]" [scrollable]="true" [responsiveLayout]="'scroll'"
+      <p-table [value]="studentFeeSummary.feeDetails" styleClass="app-grid-table" [(selection)]="selectedFees" dataKey="id" [paginator]="true"
+        [rows]="15" [rowsPerPageOptions]="[15,30,50]" [scrollable]="true" scrollHeight="34rem" [responsiveLayout]="'scroll'"
         (selectionChange)="onSelectionChange($event)">
 
         <ng-template pTemplate="header">

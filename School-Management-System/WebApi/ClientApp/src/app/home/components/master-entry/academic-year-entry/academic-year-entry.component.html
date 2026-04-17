@@ -1,4 +1,9 @@
 <p-toast></p-toast>
+<app-page-header
+    section="Master Entry"
+    page="Academic Year Entry"
+    subtitle="Create and manage academic years in the shared entry format.">
+</app-page-header>
 <div class="card">
     <form [formGroup]="academicYearForm" (ngSubmit)="submit()" class="p-fluid">
         <div class="formgrid grid">
@@ -29,7 +34,8 @@
 </div>
 
 <div class="card">
-    <p-table [value]="academicYearList" dataKey="id" [tableStyle]="{'min-width': '50rem'}">
+    <p-table [value]="academicYearList" styleClass="app-grid-table" dataKey="id" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

@@ -1,5 +1,9 @@
 <p-toast></p-toast>
-<h2 class="mb-4">Register Course</h2>
+<app-page-header
+    section="Master Entry"
+    page="Course Entry"
+    subtitle="Add course definitions before mapping them to classes.">
+</app-page-header>
 <form [formGroup]="courseForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
@@ -15,8 +19,9 @@
 </form>
 
 <div class="card">
-    <p-table [value]="courses" [paginator]="true" [rows]="10" [tableStyle]="{ 'min-width': '50rem' }"
-        [rowsPerPageOptions]="[10, 20, 30]">
+    <p-table [value]="courses" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+        [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

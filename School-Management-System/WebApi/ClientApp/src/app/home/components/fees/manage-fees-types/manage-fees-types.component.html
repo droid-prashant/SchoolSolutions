@@ -1,14 +1,23 @@
 <p-toast></p-toast>
-<div class="classDropdown">
-    <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-        placeholder="Select Class"></p-dropdown>
-
-    <p-button severity="success" label="New" icon="pi pi-plus" class="mr-2 ml-5" pTooltip="Add New Row"
-        (click)="addNewRow()" [disabled]="!isClassSelected" />
-    <div class="card">
+<app-page-header
+    section="Fees"
+    page="Manage Fee Type"
+    subtitle="Configure fee structures class-wise in a consistent management grid.">
+</app-page-header>
+<div class="app-page-toolbar manage-fee-toolbar">
+    <div class="app-page-toolbar-left">
+        <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
+            placeholder="Select Class"></p-dropdown>
+    </div>
+    <div class="app-page-toolbar-right">
+        <p-button severity="success" label="New" icon="pi pi-plus" pTooltip="Add New Row"
+            (click)="addNewRow()" [disabled]="!isClassSelected" />
+    </div>
+</div>
+<div class="card app-page-table-card">
         <form [formGroup]="feeStructureForm">
-            <p-table [value]="feeStrucures" [paginator]="true" [rows]="10" [tableStyle]="{ 'min-width': '50rem' }"
-                [rowsPerPageOptions]="[10, 20, 30]">
+            <p-table [value]="feeStrucures" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+                [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{ 'min-width': '50rem' }">
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Id</th>
@@ -30,12 +39,14 @@
                             <input type="text" formControlName="description" pInputText placeholder="Description" />
                         </td>
                         <td>
-                            <button pButton pRipple type="button" icon="pi pi-check" (click)="onRowSubmit()"
-                                class="p-button-rounded p-button-text p-button-success mr-2">
-                            </button>
-                            <button pButton pRipple type="button" icon="pi pi-times" (click)="onRowCancel()"
-                                class="p-button-rounded p-button-text p-button-danger">
-                            </button>
+                            <div class="app-grid-actions">
+                                <button pButton pRipple type="button" icon="pi pi-check" (click)="onRowSubmit()"
+                                    class="p-button-text app-grid-action-btn app-grid-action-success">
+                                </button>
+                                <button pButton pRipple type="button" icon="pi pi-times" (click)="onRowCancel()"
+                                    class="p-button-text app-grid-action-btn app-grid-action-danger">
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </ng-template>
@@ -45,9 +56,13 @@
                         <td>{{ feeStructure.feeType }}</td>
                         <td>{{ feeStructure.amount }}</td>
                         <td>{{ feeStructure.description }}</td>
-                        <td> <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEdit(feeStructure)"
-                                class="p-button-rounded p-button-text">
-                            </button></td>
+                        <td>
+                            <div class="app-grid-actions">
+                                <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEdit(feeStructure)"
+                                    class="p-button-text app-grid-action-btn">
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 </ng-template>
             </p-table>

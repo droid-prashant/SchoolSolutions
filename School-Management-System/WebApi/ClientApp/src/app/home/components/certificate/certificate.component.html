@@ -1,4 +1,8 @@
-<h2 class="mb-4">Generate Certificate</h2>
+<app-page-header
+    section="Certificates"
+    page="Certificate"
+    subtitle="Load students and issue certificates with a uniform workflow.">
+</app-page-header>
 <div class="grid mb-3">
     <div class="col-6 md:col-4">
         <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
@@ -14,8 +18,9 @@
     </div>
 </div>
 <div class="card">
-    <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
-        [rowsPerPageOptions]="[5, 10, 20]">
+    <p-table [value]="students" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+        [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

@@ -1,23 +1,16 @@
-<h2 class="mb-4">Generate Result</h2>
-<div class="grid mb-3">
+<app-page-header
+    section="Exams"
+    page="Results"
+    subtitle="Load students by class and section to preview and print results.">
+</app-page-header>
+<p-card class="app-page-filter-card">
     <app-student-filter [showClassFilter]="true" [showSectionFilter]="true"
         (loadStudents)="onLoadStudents($event)"></app-student-filter>
-    <!-- <div class="col-6 md:col-4">
-        <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-            placeholder="Select Class" [style]="{ width: '100%' }">
-        </p-dropdown>
-    </div>
-
-    <div class="col-6 md:col-4">
-        <p-dropdown [options]="sections" optionLabel="name" optionValue="classSectionId"
-            (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected" placeholder="Select Section"
-            [style]="{ width: '100%' }">
-        </p-dropdown>
-    </div> -->
-</div>
-<div class="card">
-    <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
-        [rowsPerPageOptions]="[5, 10, 20]">
+</p-card>
+<div class="card app-page-table-card">
+    <p-table [value]="students" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+        [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

@@ -47,6 +47,14 @@ namespace WebApi.Controllers
             await _courseService.UpdateClassCourse(classCourseDto, cancellationToken);
         }
 
+        [HttpDelete]
+        [Route("DeleteClassCourse/{classCourseId}")]
+        public async Task DeleteClassCourse ([FromQuery] string classCourseId, CancellationToken cancellationToken)
+        {
+            await _courseService.DeleteClassCourse(classCourseId, cancellationToken);
+        }
+
+
         [HttpPost]
         [Route("AddCourse")]
         public async Task AddCourse([FromBody] CourseDto courseDto, CancellationToken cancellationToken)

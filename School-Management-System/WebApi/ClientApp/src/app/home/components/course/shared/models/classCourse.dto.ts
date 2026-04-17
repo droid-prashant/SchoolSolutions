@@ -2,8 +2,10 @@ export interface ClassCourseDto {
     classCourseId:string;
     classRoomId: string;
     courseId: string;
-    theoryCreditHour: number;
-    practicalCreditHour: number;
-    theoryFullMarks: number;
-    practicalFullMarks: number;
+    isTheoryRequired: boolean;
+    isPracticalRequired: boolean;
+    theoryCreditHour: number | null;
+    practicalCreditHour: number | null;
+    theoryFullMarks: number | null;
+    practicalFullMarks: number | null;
 }

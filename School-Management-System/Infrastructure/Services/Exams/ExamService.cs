@@ -42,32 +42,23 @@ namespace Infrastructure.Services.SubjectMarks
 
                 foreach (var subjectMarkObj in subjectMarkList)
                 {
-                    var theoryGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
-                    var practicalGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
-
-                    decimal totalCredit = subjectMarkObj.TheoryCredit + subjectMarkObj.PracticalCredit;
-                    decimal finalGradePointFloat = ((theoryGradeAndPoint.GradePoint * subjectMarkObj.TheoryCredit) + (practicalGradeAndPoint.GradePoint * subjectMarkObj.PracticalCredit)) / totalCredit;
-                    decimal finalGradePointCalculated = Math.Floor(finalGradePointFloat * 100) / 100;
-                    decimal finalGradePoint = GetFinalGradePoint(finalGradePointCalculated);
-                    string gradeTheory = calculateGrade(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
-                    string gradePractical = calculateGrade(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
-                    string finalGrade = calculateFinalGrade(finalGradePoint);
+                    var calculation = CalculateSubjectPerformance(subjectMarkObj);
 
                     var subjectMark = new SubjectMark
                     {
                         StudentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId),
                         ClassCourseId = Guid.Parse(subjectMarkObj.ClassCourseId),
                         ExamResultId = studentResult.Id,
-                        FullTheoryMarks = subjectMarkObj.TheoryFullMarks,
-                        FullPracticalMarks = subjectMarkObj.PracticalFullMarks,
-                        ObtainedTheoryMarks = subjectMarkObj.ObtainedTheoryMarks,
-                        ObtainedPracticalMarks = subjectMarkObj.ObtainedPracticalMarks,
-                        GradeTheory = gradeTheory,
-                        GradePointTheory = theoryGradeAndPoint.GradePoint,
-                        GradePractical = gradePractical,
-                        GradePointPractical = practicalGradeAndPoint.GradePoint,
-                        FinalGrade = finalGrade,
-                        FinalGradePoint = finalGradePoint
+                        FullTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.TheoryFullMarks ?? 0m) : 0m,
+                        FullPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.PracticalFullMarks ?? 0m) : 0m,
+                        ObtainedTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.ObtainedTheoryMarks ?? 0m) : 0m,
+                        ObtainedPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.ObtainedPracticalMarks ?? 0m) : 0m,
+                        GradeTheory = calculation.GradeTheory,
+                        GradePointTheory = calculation.TheoryGradePoint,
+                        GradePractical = calculation.GradePractical,
+                        GradePointPractical = calculation.PracticalGradePoint,
+                        FinalGrade = calculation.FinalGrade,
+                        FinalGradePoint = calculation.FinalGradePoint
                     };
                     await _context.SubjectMarks.AddAsync(subjectMark);
                 }
@@ -108,33 +99,23 @@ namespace Infrastructure.Services.SubjectMarks
                 foreach (var subjectMarkObj in subjectMarkList)
                 {
                     var classCourseId = Guid.Parse(subjectMarkObj.ClassCourseId);
-
-                    var theoryGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
-                    var practicalGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
-
-                    decimal totalCredit = subjectMarkObj.TheoryCredit + subjectMarkObj.PracticalCredit;
-                    decimal finalGradePointFloat = ((theoryGradeAndPoint.GradePoint * subjectMarkObj.TheoryCredit) + (practicalGradeAndPoint.GradePoint * subjectMarkObj.PracticalCredit)) / totalCredit;
-                    decimal finalGradePointCalculated = Math.Floor(finalGradePointFloat * 100) / 100;
-                    decimal finalGradePoint = GetFinalGradePoint(finalGradePointCalculated);
-                    string gradeTheory = calculateGrade(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
-                    string gradePractical = calculateGrade(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
-                    string finalGrade = calculateFinalGrade(finalGradePoint);
+                    var calculation = CalculateSubjectPerformance(subjectMarkObj);
 
                     var existingSubjectMark = existingSubjectMarks
                         .FirstOrDefault(x => x.ClassCourseId == classCourseId);
 
                     if (existingSubjectMark != null)
                     {
-                        existingSubjectMark.FullTheoryMarks = subjectMarkObj.TheoryFullMarks;
-                        existingSubjectMark.FullPracticalMarks = subjectMarkObj.PracticalFullMarks;
-                        existingSubjectMark.ObtainedTheoryMarks = subjectMarkObj.ObtainedTheoryMarks;
-                        existingSubjectMark.ObtainedPracticalMarks = subjectMarkObj.ObtainedPracticalMarks;
-                        existingSubjectMark.GradeTheory = gradeTheory;
-                        existingSubjectMark.GradePointTheory = theoryGradeAndPoint.GradePoint;
-                        existingSubjectMark.GradePractical = gradePractical;
-                        existingSubjectMark.GradePointPractical = practicalGradeAndPoint.GradePoint;
-                        existingSubjectMark.FinalGrade = finalGrade;
-                        existingSubjectMark.FinalGradePoint = finalGradePoint;
+                        existingSubjectMark.FullTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.TheoryFullMarks ?? 0m) : 0m;
+                        existingSubjectMark.FullPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.PracticalFullMarks ?? 0m) : 0m;
+                        existingSubjectMark.ObtainedTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.ObtainedTheoryMarks ?? 0m) : 0m;
+                        existingSubjectMark.ObtainedPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.ObtainedPracticalMarks ?? 0m) : 0m;
+                        existingSubjectMark.GradeTheory = calculation.GradeTheory;
+                        existingSubjectMark.GradePointTheory = calculation.TheoryGradePoint;
+                        existingSubjectMark.GradePractical = calculation.GradePractical;
+                        existingSubjectMark.GradePointPractical = calculation.PracticalGradePoint;
+                        existingSubjectMark.FinalGrade = calculation.FinalGrade;
+                        existingSubjectMark.FinalGradePoint = calculation.FinalGradePoint;
                     }
                     else
                     {
@@ -143,16 +124,16 @@ namespace Infrastructure.Services.SubjectMarks
                             StudentEnrollmentId = studentEnrollmentId,
                             ClassCourseId = classCourseId,
                             ExamResultId = existingExamResult.Id,
-                            FullTheoryMarks = subjectMarkObj.TheoryFullMarks,
-                            FullPracticalMarks = subjectMarkObj.PracticalFullMarks,
-                            ObtainedTheoryMarks = subjectMarkObj.ObtainedTheoryMarks,
-                            ObtainedPracticalMarks = subjectMarkObj.ObtainedPracticalMarks,
-                            GradeTheory = gradeTheory,
-                            GradePointTheory = theoryGradeAndPoint.GradePoint,
-                            GradePractical = gradePractical,
-                            GradePointPractical = practicalGradeAndPoint.GradePoint,
-                            FinalGrade = finalGrade,
-                            FinalGradePoint = finalGradePoint
+                            FullTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.TheoryFullMarks ?? 0m) : 0m,
+                            FullPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.PracticalFullMarks ?? 0m) : 0m,
+                            ObtainedTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.ObtainedTheoryMarks ?? 0m) : 0m,
+                            ObtainedPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.ObtainedPracticalMarks ?? 0m) : 0m,
+                            GradeTheory = calculation.GradeTheory,
+                            GradePointTheory = calculation.TheoryGradePoint,
+                            GradePractical = calculation.GradePractical,
+                            GradePointPractical = calculation.PracticalGradePoint,
+                            FinalGrade = calculation.FinalGrade,
+                            FinalGradePoint = calculation.FinalGradePoint
                         };
 
                         await _context.SubjectMarks.AddAsync(newSubjectMark, cancellationToken);
@@ -188,11 +169,13 @@ namespace Infrastructure.Services.SubjectMarks
                                                              StudentMarksLists = s.SubjectMarks.Select(sm => new StudentMarksList
                                                              {
                                                                  ClassCourseId = sm.ClassCourseId.ToString(),
-                                                                 ObtainedTheoryMarks = sm.ObtainedTheoryMarks,
-                                                                 ObtainedPracticalMarks = sm.ObtainedPracticalMarks,
+                                                                 IsTheoryRequired = sm.ClassCourse.IsTheoryRequired,
+                                                                 IsPracticalRequired = sm.ClassCourse.IsPracticalRequired,
+                                                                 ObtainedTheoryMarks = sm.ClassCourse.IsTheoryRequired ? sm.ObtainedTheoryMarks : null,
+                                                                 ObtainedPracticalMarks = sm.ClassCourse.IsPracticalRequired ? sm.ObtainedPracticalMarks : null,
                                                                  TheoryCredit = sm.ClassCourse.TheoryCreditHour,
-                                                                 PracticalFullMarks = sm.FullPracticalMarks,
-                                                                 TheoryFullMarks = sm.FullTheoryMarks,
+                                                                 PracticalFullMarks = sm.ClassCourse.IsPracticalRequired ? sm.FullPracticalMarks : null,
+                                                                 TheoryFullMarks = sm.ClassCourse.IsTheoryRequired ? sm.FullTheoryMarks : null,
                                                                  PracticalCredit = sm.ClassCourse.PracticalCreditHour
                                                              }).ToList()
                                                          }).FirstOrDefaultAsync();
@@ -206,20 +189,22 @@ namespace Infrastructure.Services.SubjectMarks
             decimal totalCreditHour = 0.00m;
             foreach (var subjectMarkObj in subjectMarkList)
             {
-                var theoryGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
-                var practicalGradeAndPoint = GetGradeAndPoint(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
+                var calculation = CalculateSubjectPerformance(subjectMarkObj);
 
-                decimal totalCredit = subjectMarkObj.TheoryCredit + subjectMarkObj.PracticalCredit;
-                decimal finalGradePoint = ((theoryGradeAndPoint.GradePoint * subjectMarkObj.TheoryCredit) + (practicalGradeAndPoint.GradePoint * subjectMarkObj.PracticalCredit)) / totalCredit;
+                if (calculation.TotalCredit <= 0m)
+                {
+                    continue;
+                }
 
-                string gradeTheory = calculateGrade(subjectMarkObj.ObtainedTheoryMarks, subjectMarkObj.TheoryFullMarks);
-                string gradePractical = calculateGrade(subjectMarkObj.ObtainedPracticalMarks, subjectMarkObj.PracticalFullMarks);
-                string finalGrade = calculateFinalGrade(finalGradePoint);
-
-                weightedGP += (totalCredit * finalGradePoint);
-                totalCreditHour += totalCredit;
+                weightedGP += (calculation.TotalCredit * calculation.FinalGradePoint);
+                totalCreditHour += calculation.TotalCredit;
 
             }
+            if (totalCreditHour <= 0m)
+            {
+                return (0m, 0m);
+            }
+
             var gpaFloat = weightedGP / totalCreditHour;
             var gpa = Math.Floor(gpaFloat * 100) / 100;
             return (gpa, totalCreditHour);
@@ -276,7 +261,7 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 40 => ("C", 2.0m),
                 >= 35 => ("D+", 1.6m),
                 >= 30 => ("D", 1.2m),
-                >= 0 => ("E", 0.8m),  // Fail
+                >= 0 => ("NQ", 0.8m),  // Fail
                 _ => ("N/A", 0.0m)  // Invalid safeguard
             };
         }
@@ -292,6 +277,74 @@ namespace Infrastructure.Services.SubjectMarks
             if (calculatedPoint >= 1.6m) return 1.6m;
             if (calculatedPoint >= 1.2m) return 1.2m;
             return 0.8m;
+        }
+
+        private SubjectCalculationResult CalculateSubjectPerformance(StudentMarksList subjectMarkObj)
+        {
+            var theory = CalculateComponentResult(
+                subjectMarkObj.IsTheoryRequired,
+                subjectMarkObj.ObtainedTheoryMarks,
+                subjectMarkObj.TheoryFullMarks,
+                subjectMarkObj.TheoryCredit);
+
+            var practical = CalculateComponentResult(
+                subjectMarkObj.IsPracticalRequired,
+                subjectMarkObj.ObtainedPracticalMarks,
+                subjectMarkObj.PracticalFullMarks,
+                subjectMarkObj.PracticalCredit);
+
+            var totalCredit = theory.Credit + practical.Credit;
+            if (totalCredit <= 0m)
+            {
+                return new SubjectCalculationResult
+                {
+                    GradeTheory = theory.Grade,
+                    TheoryGradePoint = theory.GradePoint,
+                    GradePractical = practical.Grade,
+                    PracticalGradePoint = practical.GradePoint,
+                    FinalGrade = "N/A",
+                    FinalGradePoint = 0m,
+                    TotalCredit = 0m
+                };
+            }
+
+            decimal finalGradePointFloat = ((theory.GradePoint * theory.Credit) + (practical.GradePoint * practical.Credit)) / totalCredit;
+            decimal finalGradePointCalculated = Math.Floor(finalGradePointFloat * 100) / 100;
+            decimal finalGradePoint = GetFinalGradePoint(finalGradePointCalculated);
+
+            return new SubjectCalculationResult
+            {
+                GradeTheory = theory.Grade,
+                TheoryGradePoint = theory.GradePoint,
+                GradePractical = practical.Grade,
+                PracticalGradePoint = practical.GradePoint,
+                FinalGrade = calculateFinalGrade(finalGradePoint),
+                FinalGradePoint = finalGradePoint,
+                TotalCredit = totalCredit
+            };
+        }
+
+        private SubjectComponentResult CalculateComponentResult(bool isRequired, decimal? obtainedMarks, decimal? fullMarks, decimal? credit)
+        {
+            if (!isRequired || !fullMarks.HasValue || !credit.HasValue || fullMarks.Value <= 0m || credit.Value <= 0m)
+            {
+                return new SubjectComponentResult
+                {
+                    Grade = string.Empty,
+                    GradePoint = 0m,
+                    Credit = 0m
+                };
+            }
+
+            var safeObtainedMarks = obtainedMarks ?? 0m;
+            var gradeAndPoint = GetGradeAndPoint(safeObtainedMarks, fullMarks.Value);
+
+            return new SubjectComponentResult
+            {
+                Grade = calculateGrade(safeObtainedMarks, fullMarks.Value),
+                GradePoint = gradeAndPoint.GradePoint,
+                Credit = credit.Value
+            };
         }
 
         public async Task<ResultViewModel> GetResult(Guid studentEnrollmentId, CancellationToken cancellationToken)
@@ -312,19 +365,37 @@ namespace Infrastructure.Services.SubjectMarks
                                                        Attendance = x.Attendance,
                                                        TotalSchoolDays = x.TotalSchoolDays,
                                                        StudentMarks = x.SubjectMarks.Where(x => x.ClassCourseId == x.ClassCourseId)
-                                                                                    .Select(s => new StudentMarksViewModel
+                                                                                   .Select(s => new StudentMarksViewModel
                                                                                     {
                                                                                         CourseName = s.ClassCourse.Course.Name,
                                                                                         TheoryCreditHour = s.ClassCourse.TheoryCreditHour,
                                                                                         PracticalCreditHour = s.ClassCourse.PracticalCreditHour,
                                                                                         FinalGrade = s.FinalGrade,
                                                                                         FinalGradePoint = s.FinalGradePoint,
-                                                                                        GradePractical = s.GradePractical,
-                                                                                        GradeTheory = s.GradeTheory
+                                                                                        GradePractical = s.ClassCourse.IsPracticalRequired ? s.GradePractical : string.Empty,
+                                                                                        GradeTheory = s.ClassCourse.IsTheoryRequired ? s.GradeTheory : string.Empty
                                                                                     }).ToList(),
                                                        IssueDate = DateTime.UtcNow
                                                    }).FirstOrDefaultAsync();
             return result;
+        }
+
+        private sealed class SubjectCalculationResult
+        {
+            public string GradeTheory { get; set; } = string.Empty;
+            public decimal TheoryGradePoint { get; set; }
+            public string GradePractical { get; set; } = string.Empty;
+            public decimal PracticalGradePoint { get; set; }
+            public string FinalGrade { get; set; } = string.Empty;
+            public decimal FinalGradePoint { get; set; }
+            public decimal TotalCredit { get; set; }
+        }
+
+        private sealed class SubjectComponentResult
+        {
+            public string Grade { get; set; } = string.Empty;
+            public decimal GradePoint { get; set; }
+            public decimal Credit { get; set; }
         }
     }
 }

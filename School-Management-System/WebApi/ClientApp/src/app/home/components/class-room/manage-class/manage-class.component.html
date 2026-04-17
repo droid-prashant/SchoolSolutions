@@ -1,18 +1,21 @@
 <p-toast></p-toast>
-<div>
-    <h2>Class Management</h2>
-</div>
+<app-page-header
+    section="Class Management"
+    page="Manage Class"
+    subtitle="Manage class-to-section mapping in a consistent grid layout.">
+</app-page-header>
 <form [formGroup]="classSectionFormGroup">
     <div class="card">
         <div class="table-container">
-            <p-table [value]="classList" dataKey="id" editMode="row" [paginator]="true" [rows]="5"
-                [rowsPerPageOptions]="[5,10,15]" [scrollable]="true" paginatorDropdownAppendTo="body" [tableStyle]="{'min-width': '50rem'}">
+            <p-table [value]="classList" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+                [rowsPerPageOptions]="[15,30,50]" [scrollable]="true" scrollHeight="34rem" paginatorDropdownAppendTo="body" [tableStyle]="{'min-width': '50rem'}">
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width:25%">Id</th>
-                        <th style="width:25%">Name</th>
-                        <th style="width:25%">Section</th>
-                        <th style="width:25%">Room Number</th>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Section</th>
+                        <th>Room Number</th>
+                        <th>Actions</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-class let-rowIndex="rowIndex" let-editing="editing">
@@ -33,18 +36,18 @@
                         </td>
                         <td>{{ class.roomNumber }}</td>
                         <td>
-                            <div class="flex align-items-center justify-content-center gap-2">
+                            <div class="app-grid-actions">
                                 <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow
                                     icon="pi pi-pencil" (click)="onRowEditInit(class.id, rowIndex)"
-                                    class="p-button-rounded p-button-text">
+                                    class="p-button-text app-grid-action-btn">
                                 </button>
                                 <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow
                                     icon="pi pi-check" (click)="onRowEditSave()"
-                                    class="p-button-rounded p-button-text p-button-success mr-2">
+                                    class="p-button-text app-grid-action-btn app-grid-action-success">
                                 </button>
                                 <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow
                                     icon="pi pi-times" (click)="onRowEditCancel()"
-                                    class="p-button-rounded p-button-text p-button-danger">
+                                    class="p-button-text app-grid-action-btn app-grid-action-danger">
                                 </button>
                             </div>
                         </td>

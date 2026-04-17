@@ -1,5 +1,9 @@
 <p-toast></p-toast>
-<h2 class="mb-4">Add Section</h2>
+<app-page-header
+    section="Master Entry"
+    page="Section Entry"
+    subtitle="Create section records using the shared page header style.">
+</app-page-header>
 <form [formGroup]="sectionForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
@@ -14,7 +18,8 @@
     </div>
 </form>
 <div class="card">
-    <p-table [value]="sections" dataKey="id" editMode="row" [tableStyle]="{'min-width': '50rem'}">
+    <p-table [value]="sections" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

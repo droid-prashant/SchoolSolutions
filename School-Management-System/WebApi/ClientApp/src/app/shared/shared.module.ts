@@ -24,9 +24,12 @@ import { InputSwitchModule } from 'primeng/inputswitch';
 import { DividerModule } from 'primeng/divider';
 import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { FormsModule } from "@angular/forms";
 import { ChartModule } from 'primeng/chart';
 import { StudentFilterComponent } from "../home/components/student-filter/student-filter.component";
+import { PageHeaderComponent } from "./page-header/page-header.component";
 
 @NgModule({
     declarations: [],
@@ -56,9 +59,12 @@ import { StudentFilterComponent } from "../home/components/student-filter/studen
         DividerModule,
         PasswordModule,
         CheckboxModule,
+        ConfirmDialogModule,
+        OverlayPanelModule,
         FormsModule,
         ChartModule,
-        StudentFilterComponent
+        StudentFilterComponent,
+        PageHeaderComponent
         
     ],
     exports: [
@@ -87,8 +93,11 @@ import { StudentFilterComponent } from "../home/components/student-filter/studen
         DividerModule,
         PasswordModule,
         CheckboxModule,
+        ConfirmDialogModule,
+        OverlayPanelModule,
         ChartModule,
-        StudentFilterComponent
+        StudentFilterComponent,
+        PageHeaderComponent
     ]
 })
 export class SharedModule { }

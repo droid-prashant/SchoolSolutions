@@ -1,19 +1,5 @@
-.speeddial-linear-demo{
-    display:flex;
-    justify-content: baseline;
-    height:0.9rem;
-}
-
-.card{
+.card {
     width: 100%;
-}
-
-::ng-deep .p-speeddial-button.p-button.p-button-icon-only {
-    color: black;
-    background-color: #ffffff;
-    border: none;
-    width: 2rem;
-    height: 2rem;
 }
 
 .no-records-card {
@@ -42,5 +28,9 @@
 .no-records-card p {
     margin: 0;
     color: #666;
+}
+
+:host ::ng-deep .app-page-table-card {
+    padding: 0;
 }
 

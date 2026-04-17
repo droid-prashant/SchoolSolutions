@@ -1,22 +1,33 @@
 <p-toast></p-toast>
-<p-card header="Filter Students" class="mb-4">
+<app-page-header
+    section="Student Section"
+    page="All Students"
+    subtitle="Load, search, and manage student records from one place.">
+</app-page-header>
+<p-card class="app-page-filter-card">
     <app-student-filter [showClassFilter]="true" [showSectionFilter]="true"
         (loadStudents)="onLoadStudents($event)"></app-student-filter>
 </p-card>
-<div class="mb-4 mt-2 text-right">
-    <button pButton type="button" label="Add Student" icon="pi pi-plus" class="p-button-success p-button-sm"
-        (click)="openAddStudentDialog()"></button>
+
+<div class="app-page-toolbar">
+    <div class="app-page-toolbar-left">
+        <span class="p-input-icon-left app-page-search" *ngIf="students.length > 0">
+            <i class="pi pi-search"></i>
+            <input type="text" pInputText placeholder="Search students..." [(ngModel)]="searchText"
+                (input)="onSearchChange()" />
+        </span>
+    </div>
+
+    <div class="app-page-toolbar-right">
+        <button pButton type="button" label="Add Student" icon="pi pi-plus" class="p-button-success p-button-sm"
+            (click)="openAddStudentDialog()"></button>
+    </div>
 </div>
-<div class="mb-4" *ngIf="students.length > 0">
-    <span class="p-input-icon-left">
-        <i class="pi pi-search"></i>
-        <input type="text" pInputText placeholder="Search students..." [(ngModel)]="searchText"
-            (input)="onSearchChange()" style="width: 300px;" />
-    </span>
-</div>
-<div *ngIf="students.length > 0; else noRecords" class="card">
-    <p-table [value]="filteredStudents" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
-        [rowsPerPageOptions]="[5, 10, 20]">
+
+<div *ngIf="students.length > 0; else noRecords" class="card app-page-table-card">
+    <p-table [value]="filteredStudents" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+        [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>
@@ -39,9 +50,17 @@
                 <td>{{ getGender(student.gender) }}</td>
                 <td>{{ student.address }}</td>
                 <td>
-                    <div class="speeddial-linear-demo">
-                        <p-speedDial [model]="getActionItems(student)" direction="left" showIcon="pi pi-bars"
-                            hideIcon="pi pi-times" class="font-medium mb-2" />
+                    <div class="app-grid-actions">
+                        <button
+                            pButton
+                            pRipple
+                            type="button"
+                            icon="pi pi-pencil"
+                            pTooltip="Edit student"
+                            tooltipPosition="top"
+                            class="p-button-text app-grid-action-btn"
+                            (click)="editStudent(student)">
+                        </button>
                     </div>
                 </td>
             </tr>

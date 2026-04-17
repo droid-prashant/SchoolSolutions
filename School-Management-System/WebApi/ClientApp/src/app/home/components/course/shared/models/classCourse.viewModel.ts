@@ -4,8 +4,10 @@ export interface ClassCreditCourseViewModel {
     courseId: string;
     courseName: string;
     className: string;
-    theoryFullMarks: number;
-    practicalFullMarks: number;
-    theoryCreditHour: number;
-    practicalCreditHour: number;
+    isTheoryRequired: boolean;
+    isPracticalRequired: boolean;
+    theoryFullMarks: number | null;
+    practicalFullMarks: number | null;
+    theoryCreditHour: number | null;
+    practicalCreditHour: number | null;
 }

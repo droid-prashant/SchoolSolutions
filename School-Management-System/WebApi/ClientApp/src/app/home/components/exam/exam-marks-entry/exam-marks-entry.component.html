@@ -1,100 +1,229 @@
 <p-toast></p-toast>
-<h2 class="mb-4">Exam Marks Entry</h2>
+
+<app-page-header
+    section="Exams"
+    page="Exam Marks Entry"
+    subtitle="Load students by class and section, then enter subject-wise marks.">
+</app-page-header>
+
 <form [formGroup]="studentMarks" class="p-fluid">
     <div class="formgrid grid">
         <div class="col-3">
             <div class="field">
-                <label>Exam Terminal</label>
-                <p-dropdown [options]="examTerminals" optionLabel="terminalName" optionValue="id"
-                    formControlName="examType" (onChange)="onExamTerminalChange()" placeholder="Select Terminal">
+                <label for="examType">
+                    Exam Terminal <span class="text-red-500">*</span>
+                </label>
+
+                <p-dropdown inputId="examType" [options]="examTerminals" optionLabel="terminalName" optionValue="id"
+                    formControlName="examType" placeholder="Select Terminal" [ngClass]="{
+                        'ng-invalid ng-dirty': isInvalid('examType')
+                    }">
                 </p-dropdown>
+
+                <small class="p-error" *ngIf="getControl('examType')?.errors?.['required'] && isInvalid('examType')">
+                    Exam terminal is required.
+                </small>
             </div>
         </div>
+
         <div class="field col-6">
             <app-student-filter [showClassFilter]="true" [showSectionFilter]="true"
-                (loadStudents)="onLoadStudents($event)"></app-student-filter>
+                (loadStudents)="onLoadStudents($event)">
+            </app-student-filter>
         </div>
     </div>
 
-    <!-- Subject Marks Entry Modal -->
-    <!-- Start -->
     <div class="card flex justify-content-center subject-marks-form">
-        <p-dialog header="Subject Marks Entry" [modal]="true" [(visible)]="isMarksEntryVisible">
+        <p-dialog header="Subject Marks Entry of {{studentName}}" [modal]="true" [(visible)]="isMarksEntryVisible"
+            (onHide)="onDialogClose()" [style]="{ width: '70vw' }">
+
             <div class="grid">
-                <div class="col-3">
+                <div class="col-6 md:col-3">
                     <div class="field">
-                        <label>Attendance</label>
-                        <input pInputText type="number" formControlName="attendance"
-                            class="p-inputtext p-component input-number" placeholder="Enter Attendance" [min]="0"
-                            [max]="365" required/>
+                        <label for="attendance">
+                            Attendance <span class="text-red-500">*</span>
+                        </label>
+
+                        <input id="attendance" pInputText type="number" formControlName="attendance"
+                            class="input-number w-full" placeholder="Enter Attendance" [min]="0" [max]="365" [ngClass]="{
+                                'ng-invalid ng-dirty': isInvalid('attendance')
+                            }" />
+
+                        <small class="p-error"
+                            *ngIf="getControl('attendance')?.errors?.['required'] && isInvalid('attendance')">
+                            Attendance is required.
+                        </small>
+
+                        <small class="p-error"
+                            *ngIf="getControl('attendance')?.errors?.['min'] && isInvalid('attendance')">
+                            Attendance cannot be less than 0.
+                        </small>
+
+                        <small class="p-error"
+                            *ngIf="getControl('attendance')?.errors?.['max'] && isInvalid('attendance')">
+                            Attendance cannot be greater than 365.
+                        </small>
                     </div>
                 </div>
 
-                <div class="col-3">
+                <div class="col-6 md:col-3">
                     <div class="field">
-                        <label>Total School Days</label>
-                        <input pInputText type="number" formControlName="totalSchoolDays"
-                            class="p-inputtext p-component input-number" placeholder="Enter Total School Days" [min]="0"
-                            [max]="365" required/>
+                        <label for="totalSchoolDays">
+                            Total School Days <span class="text-red-500">*</span>
+                        </label>
+
+                        <input id="totalSchoolDays" pInputText type="number" formControlName="totalSchoolDays"
+                            class="input-number w-full" placeholder="Enter Total School Days" [min]="0" [max]="365"
+                            [ngClass]="{
+                                'ng-invalid ng-dirty': isInvalid('totalSchoolDays')
+                            }" />
+
+                        <small class="p-error"
+                            *ngIf="getControl('totalSchoolDays')?.errors?.['required'] && isInvalid('totalSchoolDays')">
+                            Total school days is required.
+                        </small>
+
+                        <small class="p-error"
+                            *ngIf="getControl('totalSchoolDays')?.errors?.['min'] && isInvalid('totalSchoolDays')">
+                            Total school days cannot be less than 0.
+                        </small>
+
+                        <small class="p-error"
+                            *ngIf="getControl('totalSchoolDays')?.errors?.['max'] && isInvalid('totalSchoolDays')">
+                            Total school days cannot be greater than 365.
+                        </small>
                     </div>
                 </div>
             </div>
 
-            <!-- table -->
             <div formArrayName="studentMarksLists" class="Markscard">
-                <p-table [value]="courses">
+                <p-table [value]="courses" responsiveLayout="scroll">
                     <ng-template pTemplate="header">
                         <tr>
-                            <th style="width:25%">Id</th>
-                            <th style="width:25%">Subject Name</th>
-                            <th style="width:25%">Theory Marks</th>
-                            <th style="width:25%">Practical Marks</th>
+                            <th style="width: 10%">Id</th>
+                            <th style="width: 35%">Subject Name</th>
+                            <th style="width: 27%">Theory Marks</th>
+                            <th style="width: 28%">Practical Marks</th>
                         </tr>
                     </ng-template>
+
                     <ng-template pTemplate="body" let-course let-rowIndex="rowIndex">
                         <tr [formGroup]="getFormGroup(rowIndex)">
                             <td>{{ rowIndex + 1 }}</td>
-                            <td>{{course.courseName}} {{course.courseType}}</td>
+
+                            <td>
+                                {{ course.courseName }} {{ course.courseType }}
+                            </td>
+
                             <td>
                                 <input pInputText type="number" formControlName="obtainedTheoryMarks"
-                                    class="p-inputtext p-component input-number" placeholder="Enter Theory Marks"
-                                    [min]="0" [max]="100" />
+                                    class="input-number w-full" placeholder="Enter Theory Marks" [min]="0"
+                                    [max]="course.theoryFullMarks ?? 0" [disabled]="isTheoryDisabled(rowIndex)" [ngClass]="{
+                                        'ng-invalid ng-dirty': isRowControlInvalid(rowIndex, 'obtainedTheoryMarks')
+                                    }" />
+
+                                <small class="p-info" *ngIf="isTheoryDisabled(rowIndex)">
+                                    Theory marks not required.
+                                </small>
+
+                                <small class="p-error"
+                                    *ngIf="!isTheoryDisabled(rowIndex) && getRowControl(rowIndex, 'obtainedTheoryMarks')?.errors?.['required'] && isRowControlInvalid(rowIndex, 'obtainedTheoryMarks')">
+                                    Theory marks is required.
+                                </small>
+
+                                <small class="p-error"
+                                    *ngIf="!isTheoryDisabled(rowIndex) && getRowControl(rowIndex, 'obtainedTheoryMarks')?.errors?.['min'] && isRowControlInvalid(rowIndex, 'obtainedTheoryMarks')">
+                                    Theory marks cannot be less than 0.
+                                </small>
+
+                                <small class="p-error"
+                                    *ngIf="!isTheoryDisabled(rowIndex) && getRowControl(rowIndex, 'obtainedTheoryMarks')?.errors?.['max'] && isRowControlInvalid(rowIndex, 'obtainedTheoryMarks')">
+                                    Theory marks cannot be greater than {{ course.theoryFullMarks }}.
+                                </small>
                             </td>
+
                             <td>
                                 <input pInputText type="number" formControlName="obtainedPracticalMarks"
-                                    class="p-inputtext p-component input-number" placeholder="Enter Practical Marks"
-                                    [min]="0" [max]="100" />
+                                    class="input-number w-full" placeholder="Enter Practical Marks" [min]="0"
+                                    [max]="course.practicalFullMarks ?? 0" [disabled]="isPracticalDisabled(rowIndex)" [ngClass]="{
+                                        'ng-invalid ng-dirty': isRowControlInvalid(rowIndex, 'obtainedPracticalMarks')
+                                    }" />
+
+                                <small class="p-info" *ngIf="isPracticalDisabled(rowIndex)">
+                                    Practical marks not required.
+                                </small>
+
+                                <small class="p-error"
+                                    *ngIf="!isPracticalDisabled(rowIndex) && getRowControl(rowIndex, 'obtainedPracticalMarks')?.errors?.['required'] && isRowControlInvalid(rowIndex, 'obtainedPracticalMarks')">
+                                    Practical marks is required.
+                                </small>
+
+                                <small class="p-error"
+                                    *ngIf="!isPracticalDisabled(rowIndex) && getRowControl(rowIndex, 'obtainedPracticalMarks')?.errors?.['min'] && isRowControlInvalid(rowIndex, 'obtainedPracticalMarks')">
+                                    Practical marks cannot be less than 0.
+                                </small>
+
+                                <small class="p-error"
+                                    *ngIf="!isPracticalDisabled(rowIndex) && getRowControl(rowIndex, 'obtainedPracticalMarks')?.errors?.['max'] && isRowControlInvalid(rowIndex, 'obtainedPracticalMarks')">
+                                    Practical marks cannot be greater than {{ course.practicalFullMarks }}.
+                                </small>
                             </td>
                         </tr>
                     </ng-template>
                 </p-table>
             </div>
-            <!---->
-            <button pButton pRipple [label]="submitButtonLabel" class="p-button-success" (click)="save()">
-            </button>
+
+            <div class="mt-3 flex gap-2 justify-content-end">
+                <button pButton pRipple type="button" [label]="submitButtonLabel" class="p-button-success"
+                    (click)="save()">
+                </button>
+            </div>
         </p-dialog>
     </div>
-    <!-- End -->
 </form>
-<p-toast></p-toast>
+
 <div class="card">
-    <p-table [value]="students" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
-        [rowsPerPageOptions]="[5, 10, 20]">
+    <p-table [value]="students" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+        [tableStyle]="{ 'min-width': '50rem' }">
+
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>
-                <th style="width:25%">Name</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th style="width:25%">Action</th>
+
+                <th pSortableColumn="fullName" style="width:25%">
+                    Name
+                    <p-sortIcon field="fullName"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="classRoomId">
+                    Class
+                    <p-sortIcon field="classRoomId"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="sectionId">
+                    Section
+                    <p-sortIcon field="sectionId"></p-sortIcon>
+                </th>
+
+                <th pSortableColumn="rollNumber">
+                    Roll Number
+                    <p-sortIcon field="rollNumber"></p-sortIcon>
+                </th>
+
+                <th style="width:25%">
+                    Action
+                </th>
             </tr>
         </ng-template>
+
         <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
             <tr>
                 <td>{{ rowIndex + 1 }}</td>
                 <td>{{ student.firstName }} {{ student.lastName }}</td>
-                <td>{{getClassName(student.classRoomId) }}</td>
+                <td>{{ getClassName(student.classRoomId) }}</td>
                 <td>{{ getSectionName(student.sectionId) }}</td>
+                <td>{{ student.rollNumber }}</td>
                 <td>
                     <i class="pi pi-pencil pointer-icon" (click)="showDialog(student)"></i>
                 </td>

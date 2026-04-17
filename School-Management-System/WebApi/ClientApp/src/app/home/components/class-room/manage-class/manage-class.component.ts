@@ -5,6 +5,7 @@ import { SectionViewModel } from '../shared/models/viewModels/section.viewModel'
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ClassSectionDto } from '../shared/models/dtos/classSection.dto';
 import { MessageService } from 'primeng/api';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-manage-class',
@@ -19,12 +20,15 @@ export class ManageClassComponent implements OnInit {
   classSectionFormGroup: FormGroup
 
   rowIndex: number = 0;
+  editingClassRoomId: string | null = null;
+  originalSectionIds: string[] = [];
 
 
   constructor(
     private _apiService: ApiService,
     private _formBuilder: FormBuilder,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _lookupService: LookupService
   ) {
     let fb = _formBuilder;
     this.classSectionFormGroup = fb.group({
@@ -53,42 +57,46 @@ export class ManageClassComponent implements OnInit {
         classSection: [{ value: c.sections ? c.sections.map(s => s.sectionId) : [], disabled: true }, Validators.required]
       }));
     });
-    console.log(formArray.controls[0].get('classSection'));
-    console.log(this.sections);
   }
 
 
-  listClass() {
-    this._apiService.getClassRooms().subscribe({
+  listClass(forceRefresh = false) {
+    this._lookupService.getClassRooms(forceRefresh).subscribe({
       next: (response) => {
         this.classList = response;
         this.initClassSectionArray();
       },
       error: (err) => {
-
-      },
-      complete: () => console.log("Req Complete")
+        this._messageService.add({ severity: 'error', summary: 'Error', detail: 'failed to load class list' });
+      }
     })
+
   }
 
   listSections() {
-    this._apiService.getSections().subscribe({
+    this._lookupService.getAllSections().subscribe({
       next: (response) => {
         this.sections = response;
       },
       error: (error) => {
-      },
-      complete: () => console.log("request completed")
+        this._messageService.add({ severity: 'error', summary: 'Error', detail: 'failed to load section list' });
+      }
     });
   }
 
   onRowEditInit(classRoomId: string, rowIndex: number) {
     this.rowIndex = rowIndex;
+    this.editingClassRoomId = classRoomId;
     if (classRoomId) {
       const classRoomIdControl = this.classSectionFormGroup.get('classRoomId');
       classRoomIdControl?.patchValue(classRoomId);
 
       const classSectionControl = this.classSectionFormArray.at(this.rowIndex) as FormGroup;
+      const selectedClass = this.classList.find(x => x.id === classRoomId);
+      this.originalSectionIds = selectedClass?.sections?.map(x => x.sectionId) ?? [];
+      classSectionControl?.patchValue({
+        classSection: [...this.originalSectionIds]
+      });
       classSectionControl?.enable();
     }
   }
@@ -101,7 +109,7 @@ export class ManageClassComponent implements OnInit {
     };
     this._apiService.postClassSections(classSectionValues).subscribe({
       next: (response) => {
-        this.listClass();
+        this.listClass(true);
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'successfully mapped class and sections' });
         this.resetForm();
       },
@@ -114,14 +122,19 @@ export class ManageClassComponent implements OnInit {
   }
 
   onRowEditCancel() {
-    this.listClass();
+    const classSectionControl = this.classSectionFormArray.at(this.rowIndex) as FormGroup;
+    classSectionControl?.patchValue({
+      classSection: [...this.originalSectionIds]
+    });
     this.resetForm();
   }
 
   resetForm() {
-    this.classSectionFormGroup.reset();
+    this.classSectionFormGroup.get('classRoomId')?.reset();
     const classSectionControl = this.classSectionFormArray.at(this.rowIndex) as FormGroup;
     classSectionControl?.disable();
+    this.editingClassRoomId = null;
+    this.originalSectionIds = [];
     this.classSectionFormGroup.markAsPristine();
     this.classSectionFormGroup.markAsUntouched();
   }

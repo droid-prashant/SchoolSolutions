@@ -141,6 +141,10 @@ export class ApiService {
     return this._httpClient.post<void>(this.baseUrl + "api/Course/UpdateClassCourse", classCourseDto);
   }
 
+  deleteClassCourse(classCourseId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/Course/DeleteClassCourse/${classCourseId}?classCourseId=${classCourseId}`);
+  }
+
   getClassCourseByClassId(classId: string): Observable<ClassCreditCourseViewModel[]> {
     return this._httpClient.get<ClassCreditCourseViewModel[]>(this.baseUrl + `api/Course/GetClassCourseByClassId?classId=${classId}`);
   }

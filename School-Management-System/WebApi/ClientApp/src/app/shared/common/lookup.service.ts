@@ -20,6 +20,7 @@ export class LookupService {
   private provincesCache: ProvinceViewModel[] | null = null;
   private academicYearsCache: AcademicViewModel[] | null = null;
   private classRoomsCache: ClassRoomViewModel[] | null = null;
+  private sectionsCache: SectionViewModel[] | null = null;
   private coursesCache: CourseViewModel[] | null = null;
 
   constructor(private apiService: ApiService, private masterApiService: MasterApiService) { }
@@ -164,6 +165,27 @@ export class LookupService {
         error: (err) => observer.error(err)
       });
     });
+  }
+
+  getAllSections(forceRefresh = false): Observable<SectionViewModel[]> {
+    if (!forceRefresh) {
+      if (this.sectionsCache) {
+        return of(this.sectionsCache);
+      }
+
+      const stored = this.getFromStorage<SectionViewModel[]>('lookup_sections');
+      if (stored) {
+        this.sectionsCache = stored;
+        return of(stored);
+      }
+    }
+
+    return this.masterApiService.getAllSections().pipe(
+      tap((response: SectionViewModel[]) => {
+        this.sectionsCache = response ?? [];
+        this.saveToStorage('lookup_sections', this.sectionsCache);
+      })
+    );
   }
 
   getSectionsByClassRoom(

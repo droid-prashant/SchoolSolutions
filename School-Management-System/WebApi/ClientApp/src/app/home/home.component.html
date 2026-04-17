@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card topbar-card">
     <p-menubar [model]="items">
         <ng-template pTemplate="item" let-item let-root="root">
             <a pRipple class="flex align-items-center p-menuitem-link">
@@ -12,27 +12,109 @@
             </a>
         </ng-template>
         <ng-template pTemplate="end">
-            <div class="flex align-items-center gap-5">
+            <div class="topbar-actions flex align-items-center gap-4">
                 <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" />
-                <p-avatar image="assets/Om Pushpanjali logo.png" shape="circle">
-                </p-avatar>
+                <button
+                    type="button"
+                    class="avatar-trigger"
+                    (click)="avatarPanel.toggle($event)">
+                    <ng-container *ngIf="userAvatarImage; else topbarInitialAvatar">
+                        <p-avatar
+                            [image]="userAvatarImage"
+                            shape="circle"
+                            (imageError)="onAvatarImageError()"
+                            styleClass="topbar-avatar topbar-avatar-image">
+                        </p-avatar>
+                    </ng-container>
+                    <ng-template #topbarInitialAvatar>
+                        <p-avatar
+                            [label]="userInitials"
+                            shape="circle"
+                            styleClass="topbar-avatar">
+                        </p-avatar>
+                    </ng-template>
+                </button>
+                <p-overlayPanel #avatarPanel [dismissable]="true" styleClass="account-overlay">
+                    <div class="account-panel">
+                        <div class="account-summary">
+                            <ng-container *ngIf="userAvatarImage; else accountInitialAvatar">
+                                <p-avatar
+                                    [image]="userAvatarImage"
+                                    shape="circle"
+                                    size="large"
+                                    (imageError)="onAvatarImageError()"
+                                    styleClass="account-avatar account-avatar-image">
+                                </p-avatar>
+                            </ng-container>
+                            <ng-template #accountInitialAvatar>
+                                <p-avatar
+                                    [label]="userInitials"
+                                    shape="circle"
+                                    size="large"
+                                    styleClass="account-avatar">
+                                </p-avatar>
+                            </ng-template>
+                            <div class="account-meta">
+                                <h4>{{ currentUserName }}</h4>
+                                <p *ngIf="currentUserEmail">{{ currentUserEmail }}</p>
+                                <span>{{ currentUserRole }}</span>
+                            </div>
+                        </div>
+
+                        <div class="account-actions">
+                            <ng-container *ngFor="let item of avatarMenuItems">
+                                <p-divider *ngIf="item.separator"></p-divider>
+                                <button
+                                    *ngIf="!item.separator"
+                                    pButton
+                                    pRipple
+                                    type="button"
+                                    [icon]="item.icon || ''"
+                                    [label]="item.label || ''"
+                                    class="p-button-text account-action-btn"
+                                    (click)="onAvatarActionClick(item); avatarPanel.hide()"
+                                    [ngClass]="{ 'account-action-logout': item.label === 'Logout' }">
+                                </button>
+                            </ng-container>
+                        </div>
+                    </div>
+                </p-overlayPanel>
             </div>
         </ng-template>
     </p-menubar>
 </div>
 
-<!-- app.component.html or main layout component -->
-<div class="card">
-    <div class="min-h-screen flex surface-ground">
+<div class="card shell-card">
+    <div class="app-shell flex surface-ground">
 
         <!-- Sidebar Section -->
-        <div class="w-18rem bg-white shadow-2 p-3">
-            <p-panelMenu [model]="sidebarItems" styleClass="w-full" />
+        <div class="sidebar-panel w-18rem">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-top">
+                    <img src="assets/Om Pushpanjali logo.png" alt="School Logo" class="sidebar-logo" />
+                    <div class="sidebar-brand-copy">
+                        <h3>Om Pushpanjali English School</h3>
+                        <p>Administration Workspace</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-nav-label">Navigation</div>
+
+            <div class="sidebar-menu-wrap">
+                <p-panelMenu [model]="sidebarItems" styleClass="w-full app-sidebar-menu" />
+            </div>
         </div>
 
         <!-- Body / Main Content Section -->
-        <div class="flex-1 p-4">
-            <router-outlet></router-outlet>
+        <div class="content-panel flex-1">
+            <div class="content-body">
+                <router-outlet></router-outlet>
+            </div>
+            <footer class="app-footer">
+                <span>Developed by IntelliSync-360</span>
+                <span>Copyright © 2026. All rights reserved.</span>
+            </footer>
         </div>
     </div>
 </div>

@@ -8,10 +8,12 @@ export interface SubjectMarksViewModel {
 
 export interface StudentMarksList {
   classCourseId: string;
-  theoryCredit: number;
-  practicalCredit: number;
-  theoryFullMarks: number;
-  practicalFullMarks: number;
-  obtainedTheoryMarks: number;
-  obtainedPracticalMarks: number;
+  isTheoryRequired: boolean;
+  isPracticalRequired: boolean;
+  theoryCredit: number | null;
+  practicalCredit: number | null;
+  theoryFullMarks: number | null;
+  practicalFullMarks: number | null;
+  obtainedTheoryMarks: number | null;
+  obtainedPracticalMarks: number | null;
 }

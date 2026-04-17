@@ -18,8 +18,8 @@ export interface ResultViewModel {
 
 export interface StudentMarksViewModel {
   courseName: string;
-  theoryCreditHour: number;
-  practicalCreditHour: number;
+  theoryCreditHour: number | null;
+  practicalCreditHour: number | null;
   gradeTheory: string;
   gradePractical: string;
   finalGrade: string;

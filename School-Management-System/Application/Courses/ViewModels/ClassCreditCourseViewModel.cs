@@ -14,9 +14,11 @@ namespace Application.Courses.ViewModels
         public Guid CourseId { get; set; }
         public string CourseName { get; set; }
         public string ClassName { get; set; }
-        public decimal TheoryFullMarks { get; set; }
-        public decimal PracticalFullMarks { get; set; }
-        public decimal TheoryCreditHour { get; set; }
-        public decimal PracticalCreditHour { get; set; }
+        public bool IsTheoryRequired { get; set; }
+        public bool IsPracticalRequired { get; set; }
+        public decimal? TheoryFullMarks { get; set; }
+        public decimal? PracticalFullMarks { get; set; }
+        public decimal? TheoryCreditHour { get; set; }
+        public decimal? PracticalCreditHour { get; set; }
     }
 }

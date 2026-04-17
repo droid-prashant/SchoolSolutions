@@ -29,8 +29,8 @@ namespace Application.Exams.ViewModels
     public class StudentMarksViewModel
     {
         public string CourseName { get; set; }
-        public decimal TheoryCreditHour { get; set; }
-        public decimal PracticalCreditHour { get; set; }
+        public decimal? TheoryCreditHour { get; set; }
+        public decimal? PracticalCreditHour { get; set; }
         public string GradeTheory { get; set; }
         public string GradePractical { get; set; }
         public string FinalGrade { get; set; }

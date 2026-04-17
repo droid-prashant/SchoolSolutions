@@ -1,5 +1,9 @@
 <p-toast></p-toast>
-<h2 class="mb-4">Add Class</h2>
+<app-page-header
+    section="Master Entry"
+    page="Class Entry"
+    subtitle="Create and maintain class records with a shared form pattern.">
+</app-page-header>
 <form [formGroup]="classForm" (ngSubmit)="submit()" class="p-fluid">
     <div class="formgrid grid">
 
@@ -19,7 +23,8 @@
     </div>
 </form>
 <div class="card">
-    <p-table [value]="classList" dataKey="id" editMode="row" [tableStyle]="{'min-width': '50rem'}">
+    <p-table [value]="classList" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

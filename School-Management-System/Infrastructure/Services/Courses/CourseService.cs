@@ -56,8 +56,10 @@ namespace Infrastructure.Services.Courses
                 ClassRoomId = x.ClassRoomId,
                 ClassName = x.ClassRoom.Name,
                 ClassCreditCourseId = x.Id,
+                IsTheoryRequired = x.IsTheoryRequired,
+                IsPracticalRequired = x.IsPracticalRequired,
                 TheoryCreditHour = x.TheoryCreditHour,
-                PracticalCreditHour = x.TheoryCreditHour,
+                PracticalCreditHour = x.PracticalCreditHour,
                 TheoryFullMarks = x.TheoryFullMarks,
                 PracticalFullMarks = x.PracticalFullMarks,
             }).ToListAsync(cancellationToken);
@@ -74,8 +76,10 @@ namespace Infrastructure.Services.Courses
                                                                   ClassRoomId = x.ClassRoomId,
                                                                   ClassName = x.ClassRoom.Name,
                                                                   ClassCreditCourseId = x.Id,
+                                                                  IsTheoryRequired = x.IsTheoryRequired,
+                                                                  IsPracticalRequired = x.IsPracticalRequired,
                                                                   TheoryCreditHour = x.TheoryCreditHour,
-                                                                  PracticalCreditHour = x.TheoryCreditHour,
+                                                                  PracticalCreditHour = x.PracticalCreditHour,
                                                                   TheoryFullMarks = x.TheoryFullMarks,
                                                                   PracticalFullMarks = x.PracticalFullMarks,
                                                               }).ToListAsync(cancellationToken);
@@ -84,14 +88,21 @@ namespace Infrastructure.Services.Courses
         }
         public async Task AddClassCourse(ClassCourseDto classCourseDto, CancellationToken cancellationToken)
         {
+            var existingClassCourse = await _context.ClassCourses.FirstOrDefaultAsync(x => x.CourseId == Guid.Parse(classCourseDto.CourseId) && x.ClassRoomId == Guid.Parse(classCourseDto.ClassRoomId));
+            if(existingClassCourse != null)
+            {
+                throw new Exception("Course already mapped");
+            }
             var classCourse = new ClassCourse
             {
                 ClassRoomId = Guid.Parse(classCourseDto.ClassRoomId),
                 CourseId = Guid.Parse(classCourseDto.CourseId),
-                PracticalCreditHour = classCourseDto.TheoryCreditHour,
-                TheoryCreditHour = classCourseDto.TheoryCreditHour,
-                TheoryFullMarks = classCourseDto.TheoryFullMarks,
-                PracticalFullMarks = classCourseDto.PracticalFullMarks,
+                IsTheoryRequired = classCourseDto.IsTheoryRequired,
+                IsPracticalRequired = classCourseDto.IsPracticalRequired,
+                TheoryCreditHour = classCourseDto.IsTheoryRequired ? classCourseDto.TheoryCreditHour : null,
+                PracticalCreditHour = classCourseDto.IsPracticalRequired ? classCourseDto.PracticalCreditHour : null,
+                TheoryFullMarks = classCourseDto.IsTheoryRequired ? classCourseDto.TheoryFullMarks : null,
+                PracticalFullMarks = classCourseDto.IsPracticalRequired ? classCourseDto.PracticalFullMarks : null,
                 CreatedDate = DateTime.UtcNow
             };
 
@@ -100,20 +111,53 @@ namespace Infrastructure.Services.Courses
         }
         public async Task UpdateClassCourse(ClassCourseDto classCourseDto, CancellationToken cancellationToken)
         {
-            var existingData = new ClassCourse();
-            if (classCourseDto.ClassCourseId != null)
+            if (string.IsNullOrWhiteSpace(classCourseDto.ClassCourseId))
             {
-                existingData = _context.ClassCourses.Where(x => x.Id == Guid.Parse(classCourseDto.ClassCourseId)).FirstOrDefault();
+                throw new ArgumentException("ClassCourseId is required.");
             }
 
+            var existingData = await _context.ClassCourses
+                .FirstOrDefaultAsync(x => x.Id == Guid.Parse(classCourseDto.ClassCourseId), cancellationToken);
+
+            if (existingData == null)
+            {
+                throw new KeyNotFoundException("Class course not found.");
+            }
 
             existingData.ClassRoomId = Guid.Parse(classCourseDto.ClassRoomId);
             existingData.CourseId = Guid.Parse(classCourseDto.CourseId);
-            existingData.PracticalCreditHour = classCourseDto.TheoryCreditHour;
-            existingData.TheoryCreditHour = classCourseDto.TheoryCreditHour;
-            existingData.TheoryFullMarks = classCourseDto.TheoryFullMarks;
-            existingData.PracticalFullMarks = classCourseDto.PracticalFullMarks;
+            existingData.IsTheoryRequired = classCourseDto.IsTheoryRequired;
+            existingData.IsPracticalRequired = classCourseDto.IsPracticalRequired;
+            existingData.TheoryCreditHour = classCourseDto.IsTheoryRequired ? classCourseDto.TheoryCreditHour : null;
+            existingData.PracticalCreditHour = classCourseDto.IsPracticalRequired ? classCourseDto.PracticalCreditHour : null;
+            existingData.TheoryFullMarks = classCourseDto.IsTheoryRequired ? classCourseDto.TheoryFullMarks : null;
+            existingData.PracticalFullMarks = classCourseDto.IsPracticalRequired ? classCourseDto.PracticalFullMarks : null;
             existingData.CreatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteClassCourse(string classCourseId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(classCourseId))
+            {
+                throw new ArgumentException("ClassCourseId is required.");
+            }
+
+            if (!Guid.TryParse(classCourseId, out var parsedId))
+            {
+                throw new ArgumentException("Invalid ClassCourseId.");
+            }
+
+            var existingData = await _context.ClassCourses
+                .FirstOrDefaultAsync(x => x.Id == parsedId, cancellationToken);
+
+            if (existingData == null)
+            {
+                throw new KeyNotFoundException("Class course not found.");
+            }
+
+            _context.ClassCourses.Remove(existingData);
 
             await _context.SaveChangesAsync(cancellationToken);
         }

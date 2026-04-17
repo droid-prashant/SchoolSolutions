@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MenuItem, PrimeNGConfig } from 'primeng/api';
 import { PrimeIcons } from 'primeng/api';
+import { AuthService } from '../shared/auth.service';
 
 
 @Component({
@@ -14,11 +15,21 @@ import { PrimeIcons } from 'primeng/api';
 export class HomeComponent implements OnInit {
   items: MenuItem[] | undefined;
   sidebarItems: MenuItem[] | undefined;
+  avatarMenuItems: MenuItem[] | undefined;
+  currentUserName = 'User';
+  currentUserEmail = '';
+  currentUserRole = '';
+  userInitials = 'U';
+  userAvatarImage = 'assets/Om Pushpanjali logo.png';
 
-  constructor(private _router: Router) {
+  constructor(
+    private _router: Router,
+    private _authService: AuthService
+  ) {
 
   }
   ngOnInit(): void {
+    this.loadCurrentUser();
     this.items = [
       {
         label: 'Dashboard',
@@ -111,9 +122,63 @@ export class HomeComponent implements OnInit {
         ]
       }
     ];
+
+    this.avatarMenuItems = [
+      {
+        label: 'Dashboard',
+        icon: PrimeIcons.HOME,
+        command: () => this.redirectToDashboard()
+      },
+      {
+        label: 'Academic Year Entry',
+        icon: PrimeIcons.CALENDAR,
+        command: () => this._router.navigateByUrl('/home/master-entry/add-academic-year')
+      },
+      {
+        label: 'Manage Courses',
+        icon: PrimeIcons.BOOKMARK,
+        command: () => this._router.navigateByUrl('/home/course/manage-course')
+      },
+      {
+        separator: true
+      },
+      {
+        label: 'Logout',
+        icon: PrimeIcons.SIGN_OUT,
+        command: () => this.logout()
+      }
+    ];
+  }
+
+  loadCurrentUser(): void {
+    const decodedToken = this._authService.decodeToken();
+    this.currentUserName = decodedToken?.name || 'User';
+    this.currentUserEmail = decodedToken?.email || '';
+    this.currentUserRole = decodedToken?.permission || 'Staff';
+
+    this.userInitials = this.currentUserName
+      .split(' ')
+      .filter(x => !!x)
+      .slice(0, 2)
+      .map(x => x.charAt(0).toUpperCase())
+      .join('') || 'U';
+  }
+
+  onAvatarImageError(): void {
+    this.userAvatarImage = '';
   }
 
   redirectToDashboard() {
     this._router.navigateByUrl('/home/dashboard');
+  }
+
+  logout(): void {
+    this._authService.logout();
+  }
+
+  onAvatarActionClick(item: MenuItem): void {
+    if (item.command) {
+      item.command({ item, originalEvent: new Event('click') });
+    }
   }
 }
