@@ -20,97 +20,118 @@
           <p class="address">{{student.address}}</p>
           <p class="province">{{student.province}}</p>
         </div>
+        <div class="logo-spacer" aria-hidden="true"></div>
       </div>
+      <div class="report-card-title">ACADEMIC REPORT CARD</div>
       <div class="statement-container">
         <div class="statement">{{student.statement}} {{currentYearNp}} BS ({{currentYearEn}} AD)</div>
       </div>
     </div>
 
-    <div class="student-info">
-      <p>The grade secured by : <b>{{resultObj.studentName}}</b> <span class="tab-space-parent"></span><span>Section :
-          {{resultObj.section}}</span></p>
-      <p>
-        <span>Father : {{resultObj.fatherName}}</span>
-        <span class="tab-space-parent"></span>
-        <span>Mother : {{resultObj.motherName}}</span>
-      </p>
-      <p>
-        <span>Date of birth : {{studentObj.dateOfBirthNp}} B.S</span>
-        <span class="tab-space"></span>
-        <span>Roll No : {{resultObj.rollNo}}</span>
-        <span class="tab-space"></span>
-        <span>Class : {{resultObj.classRoom}}</span>
-        <span class="tab-space"></span>
-        <span>Ward No : {{resultObj.wardNo}}</span>
-      </p>
-    </div>
-
-    <table class="marks-table">
-      <thead>
-        <tr>
-          <th rowspan="2" class="text-align-centre">S.N.</th>
-          <th rowspan="2" class="text-align-centre">Subjects</th>
-          <th colspan="2" class="text-align-centre">Credit Hour</th>
-          <th colspan="2" class="text-align-centre">Obtained Grade</th>
-          <th rowspan="2" class="text-align-centre">Final Grade</th>
-          <th rowspan="2" class="text-align-centre">Grade Point</th>
-          <th rowspan="2" class="text-align-centre">Remarks</th>
-        </tr>
-        <tr>
-          <th class="text-align-centre">Theory</th>
-          <th class="text-align-centre">Practical</th>
-          <th class="text-align-centre">Theory</th>
-          <th class="text-align-centre">Practical</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let sub of resultObj.studentMarks; let i = index">
-          <td class="text-align-centre">{{ i + 1 }}</td>
-          <td class="subject-name">{{sub.courseName}}</td>
-          <td class="text-align-centre">{{sub.theoryCreditHour ?? '-'}}</td>
-          <td class="text-align-centre">{{sub.practicalCreditHour ?? '-'}}</td>
-          <td class="grade-shift-theory">{{sub.gradeTheory || '-'}}</td>
-          <td class="grade-shift-practical">{{sub.gradePractical || '-'}}</td>
-          <td class="grade-shift-final-grade">{{sub.finalGrade}}</td>
-          <td class="text-align-centre">{{getFinalGradePoint(sub.finalGradePoint)}}</td>
-          <td class="text-align-centre"></td>
-        </tr>
-        <tr>
-          <td colspan="9" class="gpa">
-            Grade Point Average (GPA) : {{resultObj.gpa}}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="footer">
-      <div class="notes">
-        <div class="left-note">
-          <p>Note:</p>
-          <p>a. One credit hour = 32 clock hours</p>
-          <p>b. TH = Theory, PR = Practical</p>
-          <p>c. * = Absent</p>
-          <p>d. Below 1.6 GPA indicates failure</p>
-        </div>
-
-        <div class="right-note">
-          <p>Attendance : {{resultObj.attendance}}/{{resultObj.totalSchoolDays}}</p>
+    <div class="result-body">
+      <div class="student-info">
+        <div class="student-info-grid">
+          <div class="info-item info-item-wide"><span class="info-label">Student</span><span class="info-value">{{resultObj.studentName}}</span></div>
+          <div class="info-item info-item-no-right-border"><span class="info-label">Section</span><span class="info-value">{{resultObj.section}}</span></div>
+          <div class="info-item"><span class="info-label">Father</span><span class="info-value">{{resultObj.fatherName}}</span></div>
+          <div class="info-item"><span class="info-label">Mother</span><span class="info-value">{{resultObj.motherName}}</span></div>
+          <div class="info-item"><span class="info-label">Date of Birth</span><span class="info-value">{{studentObj.dateOfBirthNp}} B.S</span></div>
+          <div class="info-item info-item-no-right-border"><span class="info-label">Roll No</span><span class="info-value">{{resultObj.rollNo}}</span></div>
+          <div class="info-item info-item-half-row"><span class="info-label">Class</span><span class="info-value">{{resultObj.classRoom}}</span></div>
+          <div class="info-item info-item-half-row info-item-no-right-border"><span class="info-label">Ward No</span><span class="info-value">{{resultObj.wardNo}}</span></div>
         </div>
       </div>
-      <div class="notes">
+
+      <table class="marks-table">
+        <colgroup>
+          <col class="col-sn">
+          <col class="col-subject">
+          <col class="col-credit">
+          <col class="col-credit">
+          <col class="col-grade">
+          <col class="col-grade">
+          <col class="col-final">
+          <col class="col-point">
+          <col class="col-remarks">
+        </colgroup>
+        <thead>
+          <tr>
+            <th rowspan="2" class="text-align-centre">S.N.</th>
+            <th rowspan="2" class="text-align-centre">Subjects</th>
+            <th colspan="2" class="text-align-centre">Credit Hour</th>
+            <th colspan="2" class="text-align-centre">Obtained Grade</th>
+            <th rowspan="2" class="text-align-centre">Final Grade</th>
+            <th rowspan="2" class="text-align-centre">Grade Point</th>
+            <th rowspan="2" class="text-align-centre">Remarks</th>
+          </tr>
+          <tr>
+            <th class="text-align-centre">Theory</th>
+            <th class="text-align-centre">Practical</th>
+            <th class="text-align-centre">Theory</th>
+            <th class="text-align-centre">Practical</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sub of resultObj.studentMarks; let i = index">
+            <td class="text-align-centre">{{ i + 1 }}</td>
+            <td class="subject-name">{{sub.courseName}}</td>
+            <td class="text-align-centre">{{sub.theoryCreditHour ?? '-'}}</td>
+            <td class="text-align-centre">{{sub.practicalCreditHour ?? '-'}}</td>
+            <td class="text-align-centre">{{sub.gradeTheory || '-'}}</td>
+            <td class="text-align-centre">{{sub.gradePractical || '-'}}</td>
+            <td class="text-align-centre">{{sub.finalGrade}}</td>
+            <td class="text-align-centre">{{getFinalGradePoint(sub.finalGradePoint)}}</td>
+            <td class="text-align-centre"></td>
+          </tr>
+          <tr>
+            <td colspan="9" class="gpa">
+              Grade Point Average (GPA) : {{resultObj.gpa}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="summary-strip">
+        <div class="summary-box">
+          <span class="summary-label">GPA</span>
+          <span class="summary-value">{{resultObj.gpa}}</span>
+        </div>
+        <div class="summary-box">
+          <span class="summary-label">Attendance</span>
+          <span class="summary-value">{{resultObj.attendance}} / {{resultObj.totalSchoolDays}}</span>
+        </div>
+        <div class="summary-box">
+          <span class="summary-label">Result Status</span>
+          <span class="summary-value">{{ resultObj.gpa >= 1.6 ? 'PASSED' : 'NEEDS IMPROVEMENT' }}</span>
+        </div>
       </div>
-      <div class="signatures">
-        <div>
-          <p>..............................................</p>
-          <p>Prepared by</p>
+
+      <div class="footer">
+        <div class="notes">
+          <div class="left-note">
+            <p>Note:</p>
+            <p>a. One credit hour = 32 clock hours</p>
+            <p>b. TH = Theory, PR = Practical</p>
+            <p>c. * = Absent</p>
+            <p>d. Below 1.6 GPA indicates failure</p>
+          </div>
+          <div class="right-note">
+            <p>This grade-sheet is generated by the school administration and is valid with official signature and seal.</p>
+          </div>
         </div>
-        <div>
-          <p>..............................................</p>
-          <p>Issue Date : {{issueDateNp}}</p>
-        </div>
-        <div>
-          <p>..............................................</p>
-          <p>Head Teacher</p>
+        <div class="signatures">
+          <div>
+            <p>..............................................</p>
+            <p>Prepared by</p>
+          </div>
+          <div>
+            <p>..............................................</p>
+            <p>Issue Date : {{issueDateNp}}</p>
+          </div>
+          <div>
+            <p>..............................................</p>
+            <p>Head Teacher</p>
+          </div>
         </div>
       </div>
     </div>
