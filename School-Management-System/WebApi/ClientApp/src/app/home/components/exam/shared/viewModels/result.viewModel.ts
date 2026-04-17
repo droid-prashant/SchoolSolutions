@@ -6,6 +6,7 @@ export interface ResultViewModel {
   fatherName: string;
   motherName: string;
   dateOfBirth: string;
+  address: string;
   rollNo: number;
   wardNo: number;
   attendance: number;

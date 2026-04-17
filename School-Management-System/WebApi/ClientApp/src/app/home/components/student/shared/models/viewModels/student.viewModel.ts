@@ -18,4 +18,6 @@ export interface StudentViewModel {
     provinceId: number;
     districtId: number;
     municipalityId: number;
+    municipalityName: string;
+    wardNo: number;
 }

@@ -79,4 +79,28 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     }
     return gradePoint.toString();
   }
+
+  get displayDateOfBirth(): string {
+    const dateOfBirth = this.resultObj?.dateOfBirth || this.studentObj?.dateOfBirthNp;
+    return dateOfBirth ? `${dateOfBirth} B.S` : '-';
+  }
+
+  get displayAddress(): string {
+    if (this.resultObj?.address?.trim()) {
+      return this.resultObj.address.trim();
+    }
+
+    if (this.studentObj?.address?.trim()) {
+      return this.studentObj.address.trim();
+    }
+
+    const municipality = this.studentObj?.municipalityName?.trim();
+    const wardNo = this.studentObj?.wardNo;
+
+    if (municipality) {
+      return wardNo ? `${municipality} - ${wardNo}` : municipality;
+    }
+
+    return this.resultObj?.wardNo ? `Ward ${this.resultObj.wardNo}` : '-';
+  }
 }

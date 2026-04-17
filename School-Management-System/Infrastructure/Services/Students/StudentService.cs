@@ -369,7 +369,7 @@ namespace Infrastructure.Services.Students
                                                                 StudentEnrollmentId = x.Id,
                                                                 FirstName = x.Student.FirstName,
                                                                 LastName = x.Student.LastName,
-                                                                Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
+                                                                Address = x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
                                                                 Age = x.Student.Age,
                                                                 GrandFatherName = x.Student.GrandFatherName,
                                                                 FatherName = x.Student.FatherName,
