@@ -1,6 +1,6 @@
 .a4-page {
-  width: 210mm;
-  min-height: 297mm;
+  width: 190mm;
+  min-height: 275mm;
   margin: 0 auto;
   background: #edf4ff;
   color: #10233d;
@@ -10,10 +10,13 @@
 
 .content-container {
   width: 100%;
-  min-height: 297mm;
-  padding: 8mm 8mm 7mm;
+  min-height: 275mm;
+  padding: 8mm 8mm 5mm;
   background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
   border: 1.5px solid #16324f;
+  box-shadow:
+    0 0 0 2mm #edf4ff,
+    inset 0 0 0 1.5px #16324f;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -41,9 +44,9 @@
 
 .school-header {
   display: grid;
-  grid-template-columns: 34mm minmax(0, 1fr) 34mm;
+  grid-template-columns: 30mm minmax(0, 1fr) 18mm;
   align-items: center;
-  gap: 5mm;
+  gap: 4mm;
   margin-bottom: 2.5mm;
 }
 
@@ -54,13 +57,13 @@
 }
 
 .logo-spacer {
-  width: 34mm;
-  height: 34mm;
+  width: 18mm;
+  height: 30mm;
 }
 
 .school-logo {
-  width: 34mm;
-  height: 34mm;
+  width: 30mm;
+  height: 30mm;
   object-fit: contain;
   mix-blend-mode: multiply;
 }
@@ -73,7 +76,6 @@
 .school-name h1 {
   margin: 0;
   font-size: 28px;
-  margin-left: 60px;
   font-weight: 800;
   line-height: 1.1;
   white-space: nowrap;
@@ -126,13 +128,13 @@
 }
 
 .student-info {
-  margin-bottom: 4mm;
+  margin-bottom: 3mm;
   font-size: 14px;
 }
 
 .student-info-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   border: 1px solid #2a4e79;
   border-bottom: 0;
   background: rgba(226, 236, 250, 0.42);
@@ -140,10 +142,10 @@
 
 .info-item {
   display: flex;
-  flex-direction: column;
-  gap: 1mm;
-  min-height: 15mm;
-  padding: 2.2mm 2.4mm;
+  align-items: center;
+  gap: 1.6mm;
+  min-height: 10mm;
+  padding: 1.8mm 2.4mm;
   border-right: 1px solid #2a4e79;
   border-bottom: 1px solid #2a4e79;
 }
@@ -152,12 +154,26 @@
   border-right: 0;
 }
 
-.info-item-wide {
-  grid-column: span 3;
+.info-item-student {
+  grid-column: span 7;
 }
 
-.info-item-half-row {
+.info-item-dob {
+  grid-column: span 5;
+}
+
+.info-item-parent {
+  grid-column: span 6;
+}
+
+.info-item-class,
+.info-item-section,
+.info-item-roll {
   grid-column: span 2;
+}
+
+.info-item-address {
+  grid-column: span 6;
 }
 
 .info-label {
@@ -166,25 +182,20 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: #375173;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.info-label::after {
+  content: ":";
+  margin-left: 1mm;
 }
 
 .info-value {
   font-size: 14px;
   font-weight: 700;
-}
-
-.student-info p {
-  margin: 0 0 2mm;
-}
-
-.tab-space-parent {
-  display: inline-block;
-  width: 18mm;
-}
-
-.tab-space {
-  display: inline-block;
-  width: 8mm;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .marks-table {
@@ -259,18 +270,20 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
-  margin-top: 4mm;
+  margin-top: 3mm;
   border: 1px solid #2a4e79;
   background: linear-gradient(180deg, #edf4ff 0%, #e1ecfb 100%);
 }
 
 .summary-box {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 15mm;
-  padding: 2.5mm 3mm;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2mm;
+  min-height: 12mm;
+  padding: 2mm 3mm;
   border-right: 1px solid #2a4e79;
+  white-space: nowrap;
 }
 
 .summary-box:last-child {
@@ -285,8 +298,11 @@
   color: #375173;
 }
 
+.summary-label::after {
+  content: ":";
+}
+
 .summary-value {
-  margin-top: 1mm;
   font-size: 14px;
   font-weight: 800;
 }
@@ -294,9 +310,9 @@
 .overall-remark {
   display: flex;
   flex-direction: column;
-  gap: 1.2mm;
-  margin-top: 3mm;
-  padding: 3mm 3.5mm;
+  gap: 1mm;
+  margin-top: 2.5mm;
+  padding: 2.4mm 3mm;
   border: 1px solid #2a4e79;
   background: rgba(233, 242, 255, 0.78);
 }
@@ -317,8 +333,16 @@
 
 .footer {
   margin-top: auto;
-  padding-top: 4mm;
+  padding-top: 3mm;
+  padding-bottom: 6mm;
   font-size: 11.5px;
+}
+
+.footer::after {
+  content: "";
+  display: block;
+  margin-top: 3mm;
+  border-bottom: 1.5px solid #16324f;
 }
 
 .notes {
@@ -332,8 +356,8 @@
 .left-note,
 .right-note {
   flex: 1;
-  min-height: 24mm;
-  padding: 2.5mm 3mm;
+  min-height: 20mm;
+  padding: 2.2mm 3mm;
 }
 
 .left-note p,
@@ -353,7 +377,7 @@
   display: flex;
   justify-content: space-between;
   gap: 6mm;
-  margin-top: 8mm;
+  margin-top: 5mm;
   font-size: 11.5px;
   text-align: center;
 }
@@ -362,26 +386,106 @@
   flex: 1;
 }
 
+.signature-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.signature-line {
+  min-height: 1.5em;
+}
+
 .signatures p {
   margin: 0 0 1.5mm;
 }
 
+.issue-date-signature .issue-date-value {
+  margin-bottom: auto;
+  font-weight: 700;
+}
+
 @page {
   size: A4;
-  margin: 0;
+  margin: 14mm;
 }
 
 @media print {
-  html,
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #edf4ff;
+  .a4-page {
+    width: 178mm !important;
+    min-height: auto !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
   }
 
-  .a4-page {
-    width: 210mm;
-    min-height: 297mm;
-    page-break-after: always;
+  .content-container {
+    min-height: auto !important;
+    height: auto !important;
+    padding: 6mm 6mm 8mm !important;
+    border: 1.5px solid #16324f !important;
+    box-shadow: inset 0 0 0 1.5px #16324f;
+    overflow: visible !important;
+  }
+
+  .result-body {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  .student-info {
+    margin-bottom: 2mm;
+  }
+
+  .marks-table th,
+  .marks-table td {
+    padding: 1.6mm 1.4mm;
+  }
+
+  .summary-strip {
+    margin-top: 1.8mm;
+  }
+
+  .overall-remark {
+    margin-top: 1.5mm;
+    padding: 1.6mm 2.3mm;
+  }
+
+  .footer {
+    margin-top: 1.8mm;
+    padding-top: 1.8mm;
+    padding-bottom: 7mm;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .footer::after {
+    margin-top: 3.5mm;
+    border-bottom: 1.5px solid #16324f;
+  }
+
+  .notes,
+  .signatures,
+  .signature-block {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .left-note,
+  .right-note {
+    min-height: 14mm;
+    padding: 1.5mm 2.2mm;
+    font-size: 10.8px;
+  }
+
+  .signatures {
+    margin-top: 2.5mm;
+    font-size: 10.8px;
+  }
+
+  .signatures p {
+    margin: 0 0 1mm;
   }
 }

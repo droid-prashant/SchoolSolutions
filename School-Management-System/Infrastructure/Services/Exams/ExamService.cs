@@ -222,7 +222,6 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 50 => "C+",
                 >= 40 => "C",
                 >= 35 => "D+",
-                >= 30 => "D",
                 >= 0 => "NQ",   // Fail
                 _ => "N/A"      // Invalid safeguard
             };
@@ -240,7 +239,6 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 2.4m => "C+",
                 >= 2.0m => "C",
                 >= 1.6m => "D+",
-                >= 1.2m => "D",
                 >= 0.8m => "NQ",   // Fail
                 _ => "N/A"
             };
@@ -260,7 +258,6 @@ namespace Infrastructure.Services.SubjectMarks
                 >= 50 => ("C+", 2.4m),
                 >= 40 => ("C", 2.0m),
                 >= 35 => ("D+", 1.6m),
-                >= 30 => ("D", 1.2m),
                 >= 0 => ("NQ", 0.8m),  // Fail
                 _ => ("N/A", 0.0m)  // Invalid safeguard
             };
@@ -347,9 +344,16 @@ namespace Infrastructure.Services.SubjectMarks
             };
         }
 
-        public async Task<ResultViewModel> GetResult(Guid studentEnrollmentId, CancellationToken cancellationToken)
+        public async Task<ResultViewModel> GetResult(Guid studentEnrollmentId, int? examType, CancellationToken cancellationToken)
         {
-            var result = await _context.ExamResults.Where(x => x.StudentEnrollmentId == studentEnrollmentId)
+            var resultQuery = _context.ExamResults.Where(x => x.StudentEnrollmentId == studentEnrollmentId);
+
+            if (examType.HasValue)
+            {
+                resultQuery = resultQuery.Where(x => x.ExamType == examType.Value);
+            }
+
+            var result = await resultQuery.OrderByDescending(x => x.CreatedDate)
                                                    .Select(x => new ResultViewModel
                                                    {
                                                        ExamType = x.ExamType,
@@ -362,11 +366,16 @@ namespace Infrastructure.Services.SubjectMarks
                                                         Address = x.StudentEnrollment.Student.Municipality.MunicipalityName + " - " + x.StudentEnrollment.Student.WardNo,
                                                         ClassRoom = x.StudentEnrollment.ClassSection.ClassRoom.Name,
                                                         Section = x.StudentEnrollment.ClassSection.Section.Name,
-                                                        RollNo = (int)(x.StudentEnrollment.RollNumber != null ? x.StudentEnrollment.RollNumber : 0),
+                                                       RollNo = (int)(x.StudentEnrollment.RollNumber != null ? x.StudentEnrollment.RollNumber : 0),
                                                        WardNo = x.StudentEnrollment.Student.WardNo,
                                                        Attendance = x.Attendance,
                                                        TotalSchoolDays = x.TotalSchoolDays,
                                                        StudentMarks = x.SubjectMarks.Where(x => x.ClassCourseId == x.ClassCourseId)
+                                                                                   .OrderBy(s => s.ClassCourse.Course.Name == "English" ? 0 :
+                                                                                                 s.ClassCourse.Course.Name == "Nepali" ? 1 :
+                                                                                                 s.ClassCourse.Course.Name == "Mathematics" ? 2 :
+                                                                                                 s.ClassCourse.Course.Name == "Science" ? 3 : 4)
+                                                                                   .ThenBy(s => s.ClassCourse.Course.Name)
                                                                                    .Select(s => new StudentMarksViewModel
                                                                                     {
                                                                                         CourseName = s.ClassCourse.Course.Name,
@@ -377,7 +386,7 @@ namespace Infrastructure.Services.SubjectMarks
                                                                                         GradePractical = s.ClassCourse.IsPracticalRequired ? s.GradePractical : string.Empty,
                                                                                         GradeTheory = s.ClassCourse.IsTheoryRequired ? s.GradeTheory : string.Empty
                                                                                     }).ToList(),
-                                                       IssueDate = DateTime.UtcNow
+                                                       IssueDate = x.CreatedDate
                                                    }).FirstOrDefaultAsync();
             return result;
         }

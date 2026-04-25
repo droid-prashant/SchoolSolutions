@@ -2,5 +2,5 @@ export class Login {
     userName: string = "";
     password: string = "";
     academicYear: string = "";
-    remember: string = "";
+    remember?: boolean;
 }

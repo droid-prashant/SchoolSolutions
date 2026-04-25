@@ -357,12 +357,20 @@ namespace Infrastructure.Services.Students
                                                     .ToListAsync(cancellationToken);
             return students;
         }
-        public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, CancellationToken cancellationToken)
         {
-            var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
-                                                            .ThenInclude(x => x.ClassRoom)
-                                                            .Where(x => x.Student.IsActive == true &&
-                                                                   x.ClassSection.Id == Guid.Parse(classSectionId))
+            var classSectionGuid = Guid.Parse(classSectionId);
+            var studentQuery = _context.StudentEnrollments.Include(x => x.ClassSection)
+                                                          .ThenInclude(x => x.ClassRoom)
+                                                          .Where(x => x.Student.IsActive == true &&
+                                                                 x.ClassSection.Id == classSectionGuid);
+
+            if (examType.HasValue)
+            {
+                studentQuery = studentQuery.Where(x => x.ExamResults.Any(e => e.ExamType == examType.Value));
+            }
+
+            var students = await studentQuery
                                                             .Select(x => new StudentViewModel
                                                             {
                                                                 Id = x.StudentId,

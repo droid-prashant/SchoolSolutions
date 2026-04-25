@@ -1,0 +1,51 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% + 0.6rem);
+  margin-bottom: -0.6rem;
+  min-height: 0;
+}
+
+.manage-class-form {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.manage-class-card {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.table-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+:host ::ng-deep .manage-class-card p-table,
+:host ::ng-deep .manage-class-card .p-datatable,
+:host ::ng-deep .manage-class-card .p-datatable-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+:host ::ng-deep .manage-class-card p-table,
+:host ::ng-deep .manage-class-card .p-datatable {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+:host ::ng-deep .manage-class-card .p-datatable-wrapper {
+  max-height: none !important;
+}
+
+:host ::ng-deep .manage-class-card .p-paginator {
+  flex: 0 0 auto;
+}

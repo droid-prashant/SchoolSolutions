@@ -20,5 +20,23 @@ namespace Domain.Enums
 
         [Display(GroupName = "Role Management", Name = "userMgmt:view-role", Description = "Can View Role.")]
         ViewRoles = 4,
+
+        [Display(GroupName = "Teacher Management", Name = "teacher:view", Description = "Can view teachers.")]
+        ViewTeachers = 20,
+
+        [Display(GroupName = "Teacher Management", Name = "teacher:create", Description = "Can create teachers.")]
+        CreateTeachers = 21,
+
+        [Display(GroupName = "Teacher Management", Name = "teacher:update", Description = "Can update teachers.")]
+        UpdateTeachers = 22,
+
+        [Display(GroupName = "Teacher Management", Name = "teacher:delete", Description = "Can delete teachers.")]
+        DeleteTeachers = 23,
+
+        [Display(GroupName = "Teacher Management", Name = "teacher:assign", Description = "Can assign teachers to classes, sections, and courses.")]
+        AssignTeachers = 24,
+
+        [Display(GroupName = "Teacher Management", Name = "teacher:reports", Description = "Can view teacher reports.")]
+        ViewTeacherReports = 25,
     }
 }

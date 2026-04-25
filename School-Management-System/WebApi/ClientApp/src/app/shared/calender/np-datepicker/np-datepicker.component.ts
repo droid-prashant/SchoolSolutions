@@ -44,6 +44,7 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
   @Input() unicodeDate = true;
   @Input() calendarVariant: CalendarVariant = 'both';
   @Input() defaultCalendar: CalendarMode = 'bs';
+  @Input() selectTodayOnInit = true;
 
   /**
    * Parent can pass either BS or AD date here.
@@ -51,7 +52,7 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
    * 2082-07-04  -> BS
    * 2026-03-17  -> AD
    */
-  @Input() selectedDate: string | null = null;
+  @Input() selectedDate: string | Date | null = null;
 
   /**
    * Optional explicit hint from parent.
@@ -110,7 +111,7 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
     // If parent already provided selectedDate, use it.
     if (this.selectedDate) {
       this.applyIncomingDate(this.selectedDate, this.selectedDateType);
-    } else {
+    } else if (this.selectTodayOnInit) {
       const today = new Date();
       const todayBs = this.converter.adToBsParts(today);
 
@@ -128,6 +129,17 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
 
       this.onChange(this.selectedBS);
       this.dateChange.emit({ bs: this.selectedBS, ad: this.selectedAD });
+    } else {
+      const today = new Date();
+      const todayBs = this.converter.adToBsParts(today);
+
+      if (this.calendarMode === 'bs') {
+        this.currentYear = todayBs.year;
+        this.currentMonth = todayBs.month;
+      } else {
+        this.currentYear = today.getFullYear();
+        this.currentMonth = today.getMonth() + 1;
+      }
     }
 
     this.generateYears();
@@ -154,7 +166,7 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
     }
 
     // Keep CVA behavior, but now handle both BS and AD safely.
-    this.applyIncomingDate(String(obj), null, false);
+    this.applyIncomingDate(obj, null, false);
   }
 
   registerOnChange(fn: (value: string | null) => void): void {
@@ -459,17 +471,22 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
   }
 
   private applyIncomingDate(
-    value: string,
+    value: string | Date,
     forcedType: CalendarMode | null = null,
     emit = true
   ): void {
-    const detectedType = forcedType ?? this.detectDateType(value);
+    const normalizedValue = this.normalizeIncomingDate(value);
+    if (!normalizedValue) {
+      return;
+    }
+
+    const detectedType = value instanceof Date ? 'ad' : forcedType ?? this.detectDateType(normalizedValue);
 
     if (detectedType === 'ad') {
-      this.selectedAD = value;
-      this.selectedBS = this.converter.adToBs(value);
+      this.selectedAD = normalizedValue;
+      this.selectedBS = this.converter.adToBs(normalizedValue);
 
-      const [y, m] = value.split('-').map(Number);
+      const [y, m] = normalizedValue.split('-').map(Number);
       if (this.calendarMode === 'ad') {
         this.currentYear = y;
         this.currentMonth = m;
@@ -479,10 +496,10 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
         this.currentMonth = bsM;
       }
     } else {
-      this.selectedBS = value;
-      this.selectedAD = this.converter.bsToAd(value);
+      this.selectedBS = normalizedValue;
+      this.selectedAD = this.converter.bsToAd(normalizedValue);
 
-      const [y, m] = value.split('-').map(Number);
+      const [y, m] = normalizedValue.split('-').map(Number);
       if (this.calendarMode === 'bs') {
         this.currentYear = y;
         this.currentMonth = m;
@@ -500,6 +517,19 @@ export class NpDatepickerComponent implements ControlValueAccessor, OnInit, OnCh
       this.onChange(this.selectedBS);
       this.dateChange.emit({ bs: this.selectedBS, ad: this.selectedAD });
     }
+  }
+
+  private normalizeIncomingDate(value: string | Date): string | null {
+    if (value instanceof Date) {
+      return this.converter.formatAd(value);
+    }
+
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const trimmedValue = value.trim();
+    return trimmedValue ? trimmedValue : null;
   }
 
   private detectDateType(value: string): CalendarMode {

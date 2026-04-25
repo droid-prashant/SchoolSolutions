@@ -21,10 +21,10 @@ namespace WebApi.Controllers
 
         [HttpGet()]
         [Route("GetResult")]
-        public async Task<ResultViewModel> GetResult([FromQuery] string studentEnrollmentId, CancellationToken cancellationToken)
+        public async Task<ResultViewModel> GetResult([FromQuery] string studentEnrollmentId, [FromQuery] int? examType, CancellationToken cancellationToken)
         {
             var studentEnrollmentIdGuid = Guid.Parse(studentEnrollmentId);
-            var result = await _examService.GetResult(studentEnrollmentIdGuid, cancellationToken);
+            var result = await _examService.GetResult(studentEnrollmentIdGuid, examType, cancellationToken);
             return result;
         }
 

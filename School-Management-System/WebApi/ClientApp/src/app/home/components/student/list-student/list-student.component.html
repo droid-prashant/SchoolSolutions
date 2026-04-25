@@ -24,7 +24,7 @@
     </div>
 </div>
 
-<div *ngIf="students.length > 0; else noRecords" class="card app-page-table-card">
+<div class="card app-page-table-card">
     <p-table [value]="filteredStudents" styleClass="app-grid-table" [paginator]="true" [rows]="15"
         [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
         [tableStyle]="{ 'min-width': '50rem' }">
@@ -65,19 +65,13 @@
                 </td>
             </tr>
         </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="8" class="text-center">No records found</td>
+            </tr>
+        </ng-template>
     </p-table>
 </div>
-<ng-template #noRecords>
-    <div class="card no-records-card">
-        <div class="no-records-content">
-            <i class="pi pi-info-circle no-records-icon"></i>
-            <div>
-                <h3>No student records found</h3>
-                <p>Please adjust your filter criteria or click Load to refresh the list.</p>
-            </div>
-        </div>
-    </div>
-</ng-template>
 
 <!-- Add Student Dialog -->
 <p-dialog header="Add Student" [modal]="true" [(visible)]="isAddDialogVisible" [style]="{ width: '70vw' }">

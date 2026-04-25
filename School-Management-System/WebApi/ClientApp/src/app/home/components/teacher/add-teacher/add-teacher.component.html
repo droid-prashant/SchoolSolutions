@@ -1,0 +1,315 @@
+<form [formGroup]="teacherForm" (ngSubmit)="saveTeacher()" class="p-fluid teacher-form">
+  <p-card header="Profile">
+    <div class="formgrid grid">
+      <div class="field col-12 md:col-3" *ngIf="isEditMode">
+        <label>Employee Code</label>
+        <input type="text" pInputText formControlName="employeeCode" readonly />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>First Name <span class="text-danger">*</span></label>
+        <input type="text" pInputText formControlName="firstName" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Middle Name</label>
+        <input type="text" pInputText formControlName="middleName" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Last Name <span class="text-danger">*</span></label>
+        <input type="text" pInputText formControlName="lastName" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Gender <span class="text-danger">*</span></label>
+        <p-dropdown [options]="genders" optionLabel="label" optionValue="value" formControlName="gender"
+          placeholder="Select Gender"></p-dropdown>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Age</label>
+        <input type="number" pInputText formControlName="age" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Date Of Birth</label>
+        <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+          [selectedDate]="teacherForm.get('dateOfBirthNp')?.value" [selectedDateType]="'bs'"
+          [selectTodayOnInit]="false"
+          [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+          (dateChange)="onDateOfBirthChange($event)">
+        </app-np-datepicker>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Contact Number <span class="text-danger">*</span></label>
+        <input type="text" pInputText formControlName="contactNumber" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Alternate Contact</label>
+        <input type="text" pInputText formControlName="alternateContactNumber" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Email</label>
+        <input type="email" pInputText formControlName="email" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Designation</label>
+        <input type="text" pInputText formControlName="designation" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Father Name</label>
+        <input type="text" pInputText formControlName="fatherName" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Mother Name</label>
+        <input type="text" pInputText formControlName="motherName" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Joining Date</label>
+        <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+          [selectedDate]="teacherForm.get('joiningDateNp')?.value" [selectedDateType]="'bs'"
+          [selectTodayOnInit]="false"
+          [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+          (dateChange)="onJoiningDateChange($event)">
+        </app-np-datepicker>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Province</label>
+        <p-dropdown [options]="provinceDetails" optionLabel="name" optionValue="id" formControlName="provinceId"
+          placeholder="Select Province"></p-dropdown>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>District</label>
+        <p-dropdown [options]="selectedDistricts" optionLabel="name" optionValue="id" formControlName="districtId"
+          placeholder="Select District"></p-dropdown>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Municipality</label>
+        <p-dropdown [options]="selectedMunicipalities" optionLabel="name" optionValue="id"
+          formControlName="municipalityId" placeholder="Select Municipality"></p-dropdown>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Ward No</label>
+        <input type="number" pInputText formControlName="wardNo" />
+      </div>
+    </div>
+  </p-card>
+
+  <p-card header="Teacher Login" class="mt-3" *ngIf="!isEditMode || !teacherToEdit?.userId">
+    <div class="formgrid grid">
+      <div class="field col-12 md:col-3 teacher-checkbox-field">
+        <label>Login Access</label>
+        <div class="teacher-checkbox-row">
+          <p-checkbox inputId="createUser" formControlName="createUser" [binary]="true"></p-checkbox>
+          <label for="createUser">Create application user</label>
+        </div>
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Username</label>
+        <input type="text" pInputText formControlName="userName" [readonly]="isEditMode && !!teacherToEdit?.userId" />
+      </div>
+      <div class="field col-12 md:col-3">
+        <label>Password</label>
+        <input type="password" pInputText formControlName="password" [readonly]="isEditMode && !!teacherToEdit?.userId" />
+      </div>
+    </div>
+  </p-card>
+
+  <p-card header="Qualifications" class="mt-3">
+    <div formArrayName="qualifications">
+      <div class="teacher-repeat" *ngFor="let qualification of qualifications.controls; let i = index" [formGroupName]="i">
+        <div class="formgrid grid">
+          <div class="field col-12 md:col-3">
+            <label>Degree <span class="text-danger">*</span></label>
+            <input type="text" pInputText formControlName="degreeName" />
+          </div>
+          <div class="field col-12 md:col-3">
+            <label>Institution <span class="text-danger">*</span></label>
+            <input type="text" pInputText formControlName="institutionName" />
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Board/University</label>
+            <input type="text" pInputText formControlName="boardOrUniversity" />
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Passed Year</label>
+            <input type="text" pInputText formControlName="passedYear" />
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Major Subject</label>
+            <input type="text" pInputText formControlName="majorSubject" />
+          </div>
+          <div class="field col-12">
+            <button pButton type="button" icon="pi pi-trash" label="Remove" class="p-button-text p-button-danger"
+              (click)="removeQualification(i)" *ngIf="qualifications.length > 1"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button pButton type="button" icon="pi pi-plus" label="Add Qualification" class="p-button-text"
+      (click)="addQualification()"></button>
+  </p-card>
+
+  <p-card header="Experience" class="mt-3">
+    <div formArrayName="experiences">
+      <div class="teacher-repeat" *ngFor="let experience of experiences.controls; let i = index" [formGroupName]="i">
+        <div class="formgrid grid">
+          <div class="field col-12 md:col-3">
+            <label>Organization</label>
+            <input type="text" pInputText formControlName="organizationName" />
+          </div>
+          <div class="field col-12 md:col-3">
+            <label>Designation</label>
+            <input type="text" pInputText formControlName="designation" />
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Department</label>
+            <input type="text" pInputText formControlName="subjectOrDepartment" />
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Start Date</label>
+            <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+              [selectedDate]="experience.get('startDateNp')?.value" [selectedDateType]="'bs'"
+              [selectTodayOnInit]="false"
+              [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+              (dateChange)="onExperienceStartDateChange(i, $event)">
+            </app-np-datepicker>
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>End Date</label>
+            <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+              [selectedDate]="experience.get('endDateNp')?.value" [selectedDateType]="'bs'"
+              [selectTodayOnInit]="false"
+              [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+              (dateChange)="onExperienceEndDateChange(i, $event)">
+            </app-np-datepicker>
+          </div>
+          <div class="field col-12">
+            <button pButton type="button" icon="pi pi-trash" label="Remove" class="p-button-text p-button-danger"
+              (click)="removeExperience(i)"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button pButton type="button" icon="pi pi-plus" label="Add Experience" class="p-button-text"
+      (click)="addExperience()"></button>
+  </p-card>
+
+  <p-card header="Class, Section, and Course Assignments" class="mt-3">
+    <div formArrayName="assignments">
+      <div class="teacher-repeat" *ngFor="let assignment of assignments.controls; let i = index" [formGroupName]="i">
+        <div class="formgrid grid">
+          <div class="field col-12 md:col-2">
+            <label>Academic Year</label>
+            <p-dropdown [options]="academicYears" optionLabel="yearName" optionValue="id"
+              formControlName="academicYearId" placeholder="Academic Year"></p-dropdown>
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Class</label>
+            <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" formControlName="classRoomId"
+              placeholder="Class" (onChange)="onClassRoomChange(i)"></p-dropdown>
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Section</label>
+            <p-dropdown [options]="getSections(i)" optionLabel="name" optionValue="sectionId"
+              formControlName="sectionId" placeholder="Section" (onChange)="onSectionChange(i)"></p-dropdown>
+          </div>
+          <div class="field col-12 md:col-2">
+            <label>Course</label>
+            <p-dropdown [options]="courses" optionLabel="name" optionValue="id" formControlName="courseId"
+              placeholder="Course"></p-dropdown>
+          </div>
+          <div class="field col-12 md:col-2 teacher-checkbox-field">
+            <label>Role</label>
+            <div class="teacher-checkbox-row">
+              <p-checkbox [inputId]="'classTeacher' + i" formControlName="isClassTeacher" [binary]="true"></p-checkbox>
+              <label [for]="'classTeacher' + i">Class Teacher</label>
+            </div>
+          </div>
+          <div class="field col-12 md:col-2">
+            <button pButton type="button" icon="pi pi-trash" label="Remove" class="p-button-text p-button-danger"
+              (click)="removeAssignment(i)" *ngIf="assignments.length > 1"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button pButton type="button" icon="pi pi-plus" label="Add Assignment" class="p-button-text"
+      (click)="addAssignment()"></button>
+  </p-card>
+
+  <p-card header="Documents" class="mt-3" *ngIf="isEditMode && teacherToEdit?.id">
+    <div class="teacher-document-panel">
+      <div class="formgrid grid">
+        <div class="field col-12 md:col-3">
+          <label>Document Type <span class="text-danger">*</span></label>
+          <p-dropdown [options]="documentTypes" optionLabel="label" optionValue="value"
+            [(ngModel)]="documentType" [ngModelOptions]="{ standalone: true }"
+            placeholder="Select Document Type" appendTo="body">
+          </p-dropdown>
+        </div>
+        <div class="field col-12 md:col-3">
+          <label>Document Title <span class="text-danger">*</span></label>
+          <input type="text" pInputText [(ngModel)]="documentTitle" [ngModelOptions]="{ standalone: true }"
+            placeholder="Example: Citizenship front copy" />
+        </div>
+        <div class="field col-12 md:col-4">
+          <label>File <span class="text-danger">*</span></label>
+          <div class="teacher-file-picker">
+            <input #documentFileInput type="file" class="teacher-file-native" (change)="onDocumentSelected($event)"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+            <button pButton type="button" icon="pi pi-paperclip" label="Choose File"
+              class="p-button-outlined teacher-file-trigger" (click)="documentFileInput.click()"></button>
+            <span class="teacher-file-name" [title]="selectedDocument?.name || ''">
+              {{ selectedDocument?.name || 'No file selected' }}
+            </span>
+          </div>
+        </div>
+        <div class="field col-12 md:col-2 teacher-upload-action">
+          <label>Action</label>
+          <button pButton type="button" icon="pi pi-upload" label="Upload" class="teacher-upload-btn"
+            [loading]="isUploadingDocument" [disabled]="isUploadingDocument"
+            (click)="uploadDocument(documentFileInput)"></button>
+        </div>
+      </div>
+    </div>
+
+    <p-table [value]="teacherToEdit?.documents || []" styleClass="app-grid-table teacher-document-table"
+      [tableStyle]="{ 'min-width': '48rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Type</th>
+          <th>Title</th>
+          <th>File</th>
+          <th>Size</th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-document>
+        <tr>
+          <td>{{ document.documentType }}</td>
+          <td>{{ document.documentTitle }}</td>
+          <td>
+            <button pButton type="button" icon="pi pi-eye" [label]="document.originalFileName"
+              class="p-button-text teacher-file-link" (click)="viewDocument(document)">
+            </button>
+          </td>
+          <td>{{ formatFileSize(document.fileSize) }}</td>
+          <td>
+            <div class="teacher-document-actions">
+              <button pButton type="button" icon="pi pi-eye" pTooltip="View document" tooltipPosition="top"
+                class="p-button-text app-grid-action-btn" (click)="viewDocument(document)"></button>
+              <button pButton type="button" icon="pi pi-trash" pTooltip="Remove document" tooltipPosition="top"
+                class="p-button-text p-button-danger app-grid-action-btn"
+                (click)="deleteDocument(document.id)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center">No documents uploaded</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <div class="teacher-actions">
+    <button type="submit" pButton [label]="isEditMode ? 'Update Teacher' : 'Add Teacher'" icon="pi pi-save"
+      class="p-button-success" [disabled]="teacherForm.invalid || isSaving"></button>
+  </div>
+</form>

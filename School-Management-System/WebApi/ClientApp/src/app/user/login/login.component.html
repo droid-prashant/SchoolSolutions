@@ -63,7 +63,7 @@
                 <div class="field">
                     <label for="academicYear">Academic Year</label>
                     <p-dropdown [options]="academicYearList" optionLabel="yearName" optionValue="id"
-                        formControlName="academicYear" placeholder="Select Academic Year"></p-dropdown>
+                        formControlName="academicYear" placeholder="Select Academic Year" appendTo="body"></p-dropdown>
                     <small *ngIf="loginForm.get('academicYear')?.invalid && loginForm.get('academicYear')?.touched"
                         class="p-error">
                         Academic Year is required
@@ -71,8 +71,10 @@
                 </div>
 
                 <div class="remember-forgot">
-                    <p-checkbox inputId="remember" formControlName="remember"></p-checkbox>
-                    <label for="remember">Remember me</label>
+                    <div class="remember-control">
+                        <p-checkbox inputId="remember" formControlName="remember" [binary]="true"></p-checkbox>
+                        <label for="remember">Remember me</label>
+                    </div>
                     <a class="forgot-link" routerLink="/forgot-password">Forgot Password?</a>
                 </div>
 

@@ -10,9 +10,12 @@ namespace Domain
     {
         public Guid Id { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
+        public DateTime? DeletedOn { get; set; }
         public Guid CreatedBy { get; set; }
         public Guid ModifiedBy { get; set; }
+        public Guid? DeletedBy { get; set; }
     }
 }

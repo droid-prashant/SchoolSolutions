@@ -2,8 +2,10 @@ export interface AcademicViewModel {
     id: string;
     yearName: string;
     isActive: boolean;
-    startDate: Date;
-    endDate: Date;
+    startDateNp: string;
+    endDateNp: string;
+    startDateEn: string;
+    endDateEn: string;
     startDateFormatted: string;
     endDateFormatted: string;
 }

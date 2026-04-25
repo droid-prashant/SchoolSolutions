@@ -47,6 +47,11 @@
                 </td>
             </tr>
         </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="7" class="text-center">No records found</td>
+            </tr>
+        </ng-template>
     </p-table>
 </div>
 <p-dialog header="Report Preview" [(visible)]="showResult" [draggable]="false" [closable]="true"

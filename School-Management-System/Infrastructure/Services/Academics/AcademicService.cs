@@ -28,8 +28,10 @@ namespace Infrastructure.Services.Academics
                 var academicYear = new AcademicYear
                 {
                     YearName = academicYearDto.YearName,
-                    StartDate = academicYearDto.StartDate,
-                    EndDate = academicYearDto.EndDate,
+                    StartDateNp = academicYearDto.StartDateNp,
+                    EndDateNp = academicYearDto.EndDateNp,
+                    StartDateEn = academicYearDto.StartDateEn,
+                    EndDateEn = academicYearDto.EndDateEn,
                     IsActive = academicYearDto.IsActive,
                     CreatedDate = DateTime.UtcNow
                 };
@@ -48,10 +50,11 @@ namespace Infrastructure.Services.Academics
             {
                 Id = x.Id.ToString(),
                 YearName = x.YearName,
-                StartDate = x.StartDate,
-                EndDate = x.EndDate,
-                StartDateFormatted = x.StartDate.ToString("yyyy-MM-dd"),
-                EndDateFormatted = x.EndDate.ToString("yyyy-MM-dd")
+                StartDateNp = x.StartDateNp,
+                EndDateNp = x.EndDateNp,
+                StartDateEn = x.StartDateEn,
+                EndDateEn = x.EndDateEn, 
+                IsActive = x.IsActive,
             }).ToListAsync(cancellationToken);
 
             return result;
@@ -63,8 +66,10 @@ namespace Infrastructure.Services.Academics
             if (existingAcademicYearDetail != null)
             {
                 existingAcademicYearDetail.YearName = academicYearDto.YearName;
-                existingAcademicYearDetail.StartDate = academicYearDto.StartDate;
-                existingAcademicYearDetail.EndDate = academicYearDto.EndDate;
+                existingAcademicYearDetail.StartDateNp = academicYearDto.StartDateNp;
+                existingAcademicYearDetail.EndDateNp = academicYearDto.EndDateNp;
+                existingAcademicYearDetail.StartDateEn = academicYearDto.StartDateEn;
+                existingAcademicYearDetail.EndDateEn = academicYearDto.EndDateEn;
                 existingAcademicYearDetail.IsActive = academicYearDto.IsActive;
 
                 await _context.SaveChangesAsync(cancellationToken);

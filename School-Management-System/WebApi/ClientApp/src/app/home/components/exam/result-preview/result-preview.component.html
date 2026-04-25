@@ -24,21 +24,21 @@
       </div>
       <div class="report-card-title">ACADEMIC REPORT CARD</div>
       <div class="statement-container">
-        <div class="statement">{{student.statement}} {{currentYearNp}} BS ({{currentYearEn}} AD)</div>
+        <div class="statement">{{student.statement}} {{statementAcademicYear}}</div>
       </div>
     </div>
 
     <div class="result-body">
       <div class="student-info">
         <div class="student-info-grid">
-          <div class="info-item info-item-wide"><span class="info-label">Student</span><span class="info-value">{{resultObj.studentName}}</span></div>
-          <div class="info-item info-item-no-right-border"><span class="info-label">Date of Birth</span><span class="info-value">{{displayDateOfBirth}}</span></div>
-          <div class="info-item info-item-half-row"><span class="info-label">Father</span><span class="info-value">{{resultObj.fatherName}}</span></div>
-          <div class="info-item info-item-half-row info-item-no-right-border"><span class="info-label">Mother</span><span class="info-value">{{resultObj.motherName}}</span></div>
-          <div class="info-item"><span class="info-label">Class</span><span class="info-value">{{resultObj.classRoom}}</span></div>
-          <div class="info-item"><span class="info-label">Section</span><span class="info-value">{{resultObj.section}}</span></div>
-          <div class="info-item"><span class="info-label">Roll No</span><span class="info-value">{{resultObj.rollNo}}</span></div>
-          <div class="info-item info-item-no-right-border"><span class="info-label">Address</span><span class="info-value">{{displayAddress}}</span></div>
+          <div class="info-item info-item-student"><span class="info-label">Student</span><span class="info-value">{{resultObj.studentName}}</span></div>
+          <div class="info-item info-item-dob info-item-no-right-border"><span class="info-label">Date of Birth</span><span class="info-value">{{displayDateOfBirth}}</span></div>
+          <div class="info-item info-item-parent"><span class="info-label">Father</span><span class="info-value">{{resultObj.fatherName}}</span></div>
+          <div class="info-item info-item-parent info-item-no-right-border"><span class="info-label">Mother</span><span class="info-value">{{resultObj.motherName}}</span></div>
+          <div class="info-item info-item-class"><span class="info-label">Class</span><span class="info-value">{{resultObj.classRoom}}</span></div>
+          <div class="info-item info-item-section"><span class="info-label">Section</span><span class="info-value">{{resultObj.section}}</span></div>
+          <div class="info-item info-item-roll"><span class="info-label">Roll No</span><span class="info-value">{{resultObj.rollNo}}</span></div>
+          <div class="info-item info-item-address info-item-no-right-border"><span class="info-label">Address</span><span class="info-value">{{displayAddress}}</span></div>
         </div>
       </div>
 
@@ -82,7 +82,7 @@
           </tr>
           <tr>
             <td colspan="8" class="gpa">
-              Grade Point Average (GPA) : {{resultObj.gpa}}
+              Grade Point Average (GPA) : {{displayGpa}}
             </td>
           </tr>
         </tbody>
@@ -91,7 +91,7 @@
       <div class="summary-strip">
         <div class="summary-box">
           <span class="summary-label">GPA</span>
-          <span class="summary-value">{{resultObj.gpa}}</span>
+          <span class="summary-value">{{displayGpa}}</span>
         </div>
         <div class="summary-box">
           <span class="summary-label">Attendance</span>
@@ -99,7 +99,7 @@
         </div>
         <div class="summary-box">
           <span class="summary-label">Result Status</span>
-          <span class="summary-value">{{ resultObj.gpa >= 1.6 ? 'PASSED' : 'NEEDS IMPROVEMENT' }}</span>
+          <span class="summary-value">{{ resultStatus }}</span>
         </div>
       </div>
 
@@ -122,16 +122,17 @@
           </div>
         </div>
         <div class="signatures">
-          <div>
-            <p>..............................................</p>
+          <div class="signature-block">
+            <p class="signature-line">..............................................</p>
             <p>Prepared by</p>
           </div>
-          <div>
-            <p>..............................................</p>
-            <p>Issue Date : {{issueDateNp}}</p>
+          <div class="signature-block issue-date-signature">
+            <p class="issue-date-value">{{issueDateNp}}</p>
+            <p class="signature-line">..............................................</p>
+            <p>Issue Date</p>
           </div>
-          <div>
-            <p>..............................................</p>
+          <div class="signature-block">
+            <p class="signature-line">..............................................</p>
             <p>Head Teacher</p>
           </div>
         </div>

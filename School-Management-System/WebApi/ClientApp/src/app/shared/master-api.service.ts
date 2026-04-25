@@ -66,4 +66,8 @@ export class MasterApiService {
     return this._httpClient.get<CourseViewModel[]>(this.baseUrl + "api/MasterData/GetAllCourses")
   }
 
+  getAcademicYears(): Observable<AcademicViewModel[]> {
+    return this._httpClient.get<AcademicViewModel[]>(this.baseUrl + "api/MasterData/GetAllAcademicYear")
+  }
+
 }

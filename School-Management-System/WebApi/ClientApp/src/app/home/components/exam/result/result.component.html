@@ -4,7 +4,7 @@
     subtitle="Load students by class and section to preview and print results.">
 </app-page-header>
 <p-card class="app-page-filter-card">
-    <app-student-filter [showClassFilter]="true" [showSectionFilter]="true"
+    <app-student-filter [showClassFilter]="true" [showSectionFilter]="true" [showExamTerminalFilter]="true"
         (loadStudents)="onLoadStudents($event)"></app-student-filter>
 </p-card>
 <div class="card app-page-table-card">
@@ -27,6 +27,11 @@
                 <td>{{ getClassRoomName(student.classRoomId) }}</td>
                 <td>{{ getSectionName(student.sectionId) }}</td>
                 <td><i pTooltip="view result" class="pi pi-eye" (click)="previewResult(student)"></i></td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5" class="text-center">No records found</td>
             </tr>
         </ng-template>
     </p-table>

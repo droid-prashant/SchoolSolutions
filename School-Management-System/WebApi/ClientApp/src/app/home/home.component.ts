@@ -82,8 +82,7 @@ export class HomeComponent implements OnInit {
         label: 'Teacher Section',
         icon: PrimeIcons.USER_EDIT,
         items: [
-          { label: 'All Teachers', icon: PrimeIcons.USERS, routerLink: ['/home/teachers'] },
-          { label: 'Add Teacher', icon: PrimeIcons.PLUS, routerLink: ['/home/teachers/add'] }
+          { label: 'All Teachers', icon: PrimeIcons.USERS, routerLink: ['/home/teacher/list-teacher'] }
         ]
       },
       {

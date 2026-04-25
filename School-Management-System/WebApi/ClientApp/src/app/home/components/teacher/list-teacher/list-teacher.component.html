@@ -1,0 +1,210 @@
+<p-toast></p-toast>
+<app-page-header
+  section="Teacher Section"
+  page="All Teachers"
+  subtitle="Load, search, assign, and manage teacher records from one place.">
+</app-page-header>
+
+<p-card class="app-page-filter-card">
+  <div class="formgrid grid p-fluid">
+    <div class="field col-12 md:col-4">
+      <label>Academic Year</label>
+      <p-dropdown [options]="academicYears" optionLabel="yearName" optionValue="id"
+        [(ngModel)]="selectedAcademicYearId" placeholder="Select Academic Year"
+        (onChange)="loadTeachers()"></p-dropdown>
+    </div>
+    <div class="field col-12 md:col-4 teacher-inline-control">
+      <p-checkbox inputId="includeInactive" [(ngModel)]="includeInactive" [binary]="true"
+        (onChange)="loadTeachers()"></p-checkbox>
+      <label for="includeInactive">Include inactive teachers</label>
+    </div>
+  </div>
+</p-card>
+
+<div class="app-page-toolbar">
+  <div class="app-page-toolbar-left">
+    <span class="p-input-icon-left app-page-search">
+      <i class="pi pi-search"></i>
+      <input type="text" pInputText placeholder="Search teachers..." [(ngModel)]="searchText"
+        (input)="onSearchChange()" />
+    </span>
+  </div>
+
+  <div class="app-page-toolbar-right">
+    <button pButton type="button" label="Export" icon="pi pi-download" class="p-button-secondary p-button-sm"
+      (click)="exportTeachers()"></button>
+    <button pButton type="button" label="Add Teacher" icon="pi pi-plus" class="p-button-success p-button-sm"
+      (click)="openAddTeacherDialog()"></button>
+  </div>
+</div>
+
+<div class="card app-page-table-card">
+  <p-table #teacherTable [value]="filteredTeachers" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+    [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+    [tableStyle]="{ 'min-width': '70rem' }">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Contact</th>
+        <th>Email</th>
+        <th>Gender</th>
+        <th>Assignments</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-teacher let-rowIndex="rowIndex">
+      <tr>
+        <td>{{ rowIndex + 1 }}</td>
+        <td>
+          <strong>{{ teacher.fullName }}</strong>
+          <div class="teacher-muted">{{ teacher.designation || 'Teacher' }}</div>
+        </td>
+        <td>{{ teacher.employeeCode || '-' }}</td>
+        <td>{{ teacher.contactNumber }}</td>
+        <td>{{ teacher.email || '-' }}</td>
+        <td>{{ getGender(teacher.gender) }}</td>
+        <td>{{ getAssignmentSummary(teacher) }}</td>
+        <td>
+          <p-tag [value]="teacher.isActive ? 'Active' : 'Inactive'"
+            [severity]="teacher.isActive ? 'success' : 'danger'"></p-tag>
+        </td>
+        <td>
+          <div class="app-grid-actions">
+            <button pButton pRipple type="button" icon="pi pi-eye" pTooltip="View teacher detail"
+              tooltipPosition="top" class="p-button-text app-grid-action-btn"
+              (click)="viewTeacher(teacher)"></button>
+            <button pButton pRipple type="button" icon="pi pi-pencil" pTooltip="Edit teacher"
+              tooltipPosition="top" class="p-button-text app-grid-action-btn"
+              (click)="editTeacher(teacher)"></button>
+            <button pButton pRipple type="button" [icon]="teacher.isActive ? 'pi pi-ban' : 'pi pi-check'"
+              [pTooltip]="teacher.isActive ? 'Deactivate teacher' : 'Activate teacher'"
+              tooltipPosition="top" class="p-button-text app-grid-action-btn"
+              (click)="toggleTeacherStatus(teacher)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center">No teachers found</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog header="Add Teacher" [modal]="true" [(visible)]="isAddDialogVisible" [style]="{ width: '82vw' }">
+  <app-add-teacher *ngIf="isAddDialogVisible" [isEditMode]="false" [academicYearId]="selectedAcademicYearId"
+    (teacherSaved)="onTeacherSaved()">
+  </app-add-teacher>
+</p-dialog>
+
+<p-dialog header="Edit Teacher" [modal]="true" [(visible)]="isEditDialogVisible" [style]="{ width: '82vw' }">
+  <app-add-teacher *ngIf="isEditDialogVisible" [isEditMode]="true" [teacherToEdit]="selectedTeacher"
+    [academicYearId]="selectedAcademicYearId" (teacherSaved)="onTeacherSaved()">
+  </app-add-teacher>
+</p-dialog>
+
+<p-dialog header="Teacher Detail" [modal]="true" [(visible)]="isViewDialogVisible" [style]="{ width: '78vw' }">
+  <ng-container *ngIf="detailTeacher as teacher">
+    <div class="teacher-detail-header">
+      <div>
+        <h2>{{ teacher.fullName }}</h2>
+        <p>{{ teacher.employeeCode || '-' }} · {{ teacher.designation || 'Teacher' }}</p>
+      </div>
+      <div class="teacher-detail-actions">
+        <p-tag [value]="teacher.isActive ? 'Active' : 'Inactive'"
+          [severity]="teacher.isActive ? 'success' : 'danger'"></p-tag>
+        <button pButton type="button" icon="pi pi-print" label="Print" class="p-button-outlined p-button-sm"
+          (click)="printTeacherDetail()"></button>
+      </div>
+    </div>
+
+    <div class="teacher-detail-grid">
+      <div><span>Contact</span><strong>{{ teacher.contactNumber || '-' }}</strong></div>
+      <div><span>Email</span><strong>{{ teacher.email || '-' }}</strong></div>
+      <div><span>Gender</span><strong>{{ getGender(teacher.gender) }}</strong></div>
+      <div><span>Age</span><strong>{{ teacher.age || '-' }}</strong></div>
+      <div><span>Date of Birth</span><strong>{{ teacher.dateOfBirthNp || '-' }}</strong></div>
+      <div><span>Joining Date</span><strong>{{ teacher.joiningDateNp || '-' }}</strong></div>
+      <div><span>Father Name</span><strong>{{ teacher.fatherName || '-' }}</strong></div>
+      <div><span>Mother Name</span><strong>{{ teacher.motherName || '-' }}</strong></div>
+      <div><span>Address</span><strong>{{ getAddressSummary(teacher) }}</strong></div>
+      <div><span>Application User</span><strong>{{ teacher.userId ? 'Created' : 'Not created' }}</strong></div>
+    </div>
+
+    <h3 class="teacher-detail-section-title">Assignments</h3>
+    <p-table [value]="teacher.assignments || []" styleClass="app-grid-table teacher-detail-table"
+      [tableStyle]="{ 'min-width': '52rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Academic Year</th>
+          <th>Class / Section</th>
+          <th>Course</th>
+          <th>Class Teacher</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-assignment>
+        <tr>
+          <td>{{ assignment.academicYearName }}</td>
+          <td>{{ assignment.classRoomName }}-{{ assignment.sectionName }}</td>
+          <td>{{ assignment.courseName }}</td>
+          <td>{{ assignment.isClassTeacher ? 'Yes' : 'No' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="4" class="text-center">No assignments</td></tr>
+      </ng-template>
+    </p-table>
+
+    <h3 class="teacher-detail-section-title">Qualifications</h3>
+    <p-table [value]="teacher.qualifications || []" styleClass="app-grid-table teacher-detail-table"
+      [tableStyle]="{ 'min-width': '52rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Degree</th>
+          <th>Institution</th>
+          <th>Board/University</th>
+          <th>Passed Year</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-qualification>
+        <tr>
+          <td>{{ qualification.degreeName }}</td>
+          <td>{{ qualification.institutionName }}</td>
+          <td>{{ qualification.boardOrUniversity || '-' }}</td>
+          <td>{{ qualification.passedYear || '-' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="4" class="text-center">No qualifications</td></tr>
+      </ng-template>
+    </p-table>
+
+    <h3 class="teacher-detail-section-title">Experience</h3>
+    <p-table [value]="teacher.experiences || []" styleClass="app-grid-table teacher-detail-table"
+      [tableStyle]="{ 'min-width': '52rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Organization</th>
+          <th>Designation</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-experience>
+        <tr>
+          <td>{{ experience.organizationName }}</td>
+          <td>{{ experience.designation }}</td>
+          <td>{{ experience.startDateNp || '-' }}</td>
+          <td>{{ experience.endDateNp || '-' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="4" class="text-center">No experience records</td></tr>
+      </ng-template>
+    </p-table>
+  </ng-container>
+</p-dialog>

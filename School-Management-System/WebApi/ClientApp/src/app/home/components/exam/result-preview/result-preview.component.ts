@@ -4,6 +4,7 @@ import { StudentViewModel } from '../../student/shared/models/viewModels/student
 import { formatDate } from '@angular/common';
 import { DateConverterService } from '../../../../shared/calender/date-convertor.service';
 import DateConverter from '@remotemerge/nepali-date-converter';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-result-preview',
@@ -20,6 +21,8 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
   issueDateNp: string = "";
   currentYearNp: string = "";
   currentYearEn: string = "";
+  academicYearNameNp: string = "";
+  academicYearNameEn: string = "";
 
   student = {
     schoolName: 'OM PUSHPANJALI ENGLISH SCHOOL',
@@ -29,7 +32,7 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     statement: 'STATEMENT OF GRADE-SHEET'
   };
 
-  constructor(private dateConverter: DateConverterService) {
+  constructor(private dateConverter: DateConverterService, private lookupService: LookupService) {
 
   }
   ngOnInit(): void {
@@ -37,6 +40,7 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     const todaysDateBs = this.dateConverter.adToBsParts(todaysDateAd);
     this.currentYearNp = todaysDateBs.year.toString();
     this.currentYearEn = formatDate(todaysDateAd, 'yyyy', 'en-US');
+    this.setAcademicYear();
     console.log(this.studentObj);
   }
   ngOnChanges(changes: SimpleChanges): void {
@@ -45,13 +49,30 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     }
   }
 
+  private setAcademicYear(): void {
+    this.lookupService.getActiveAcademicYear().subscribe({
+      next: (academicYear) => {
+        this.academicYearNameNp = academicYear?.yearName ?? this.currentYearNp;
+      },
+      error: () => {
+      }
+    });
+  }
+
   private convertStudentDates(result: ResultViewModel): void {
 
     if (result.issueDate) {
       const issue = this.formatDate(result.issueDate, false);
       this.issueDateEn = issue.ad;
       this.issueDateNp = issue.bs;
+      this.academicYearNameEn = formatDate(result.issueDate, 'yyyy', 'en-US');
     }
+  }
+
+  get statementAcademicYear(): string {
+    const nepaliYear = this.academicYearNameNp || this.currentYearNp;
+    const englishYear = this.academicYearNameEn || this.currentYearEn;
+    return `${nepaliYear} B.S (${englishYear} A.D)`;
   }
 
   formatDate(inputDate: Date, isYearOnlyRequired: boolean = false): { ad: string, bs: string } {
@@ -74,10 +95,54 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
   }
 
   getFinalGradePoint(gradePoint: number): string {
-    if (gradePoint === 4) {
-      return '4.0';
+    return this.formatSubjectGradePoint(gradePoint);
+  }
+
+  get resultStatus(): string {
+    const nonGradedStatus = this.nonGradedStatus;
+    if (nonGradedStatus) {
+      return nonGradedStatus;
     }
-    return gradePoint.toString();
+
+    return (this.resultObj?.gpa ?? 0) >= 1.6 ? 'PASSED' : 'NEEDS IMPROVEMENT';
+  }
+
+  get displayGpa(): string {
+    return this.resultStatus === 'PASSED' ? this.formatGpa(this.resultObj?.gpa) : '-';
+  }
+
+  private formatSubjectGradePoint(value: number | null | undefined): string {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+      return '-';
+    }
+
+    return Number.isInteger(value) ? value.toFixed(1) : value.toString();
+  }
+
+  private formatGpa(value: number | null | undefined): string {
+    return typeof value === 'number' && !Number.isNaN(value) ? value.toFixed(2) : '-';
+  }
+
+  private get nonGradedStatus(): string {
+    let hasNg = false;
+
+    for (const mark of this.resultObj?.studentMarks ?? []) {
+      const grades = [mark.finalGrade, mark.gradeTheory, mark.gradePractical];
+
+      if (grades.some(grade => this.normalizeGrade(grade) === 'NQ')) {
+        return 'NQ';
+      }
+
+      if (grades.some(grade => this.normalizeGrade(grade) === 'NG')) {
+        hasNg = true;
+      }
+    }
+
+    return hasNg ? 'NG' : '';
+  }
+
+  private normalizeGrade(grade: string | null | undefined): string {
+    return grade?.trim().toUpperCase().replace(/[^A-Z]/g, '') ?? '';
   }
 
   get displayDateOfBirth(): string {

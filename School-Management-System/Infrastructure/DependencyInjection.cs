@@ -9,6 +9,7 @@ using Application.Identity.Interfaces;
 using Application.Master.Interface;
 using Application.Students.Interfaces;
 using Application.SubjectMarks.Interfaces;
+using Application.Teachers;
 using Infrastructure.Identity;
 using Infrastructure.Persistance;
 using Infrastructure.Services.Academics;
@@ -19,6 +20,7 @@ using Infrastructure.Services.Fees;
 using Infrastructure.Services.MasterData;
 using Infrastructure.Services.Students;
 using Infrastructure.Services.SubjectMarks;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +52,7 @@ namespace Infrastructure
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IFeeService, FeeService>();
+            services.AddScoped<ITeacherService, TeacherService>();
             return services;
         }
     }

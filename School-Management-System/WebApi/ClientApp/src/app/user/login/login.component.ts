@@ -17,8 +17,11 @@ import { Router } from '@angular/router';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
+  private readonly rememberedLoginKey = 'rememberedLogin';
+
   loginForm!: FormGroup;
   academicYearList: AcademicViewModel[] = [];
+  rememberedLogin: { username: string; academicYear: string } | null = null;
 
   isSubmitted: boolean = false;
 
@@ -29,10 +32,11 @@ export class LoginComponent implements OnInit {
       username: ['', Validators.required],
       password: ['', Validators.required],
       academicYear: ['', Validators.required],
-      remember: ['']
+      remember: [false]
     });
   }
   ngOnInit(): void {
+    this.loadRememberedLogin();
     this.listAcademicYear();
   }
 
@@ -40,10 +44,16 @@ export class LoginComponent implements OnInit {
     this._apiService.getAcademicYear().subscribe({
       next: (res) => {
         this.academicYearList = res;
+        const rememberedAcademicYear = this.rememberedLogin?.academicYear;
+        const isRememberedAcademicYearAvailable = this.academicYearList.some(x => x.id === rememberedAcademicYear);
         const activeAcademicYear = this.academicYearList.find(x => x.isActive === true);
-        if (activeAcademicYear) {
-          this.loginForm.get('academicYear')?.setValue(activeAcademicYear);
-        }
+        const selectedAcademicYear = isRememberedAcademicYearAvailable ? rememberedAcademicYear : activeAcademicYear?.id;
+
+        this.loginForm.patchValue({
+          username: this.rememberedLogin?.username ?? this.loginForm.get('username')?.value,
+          academicYear: selectedAcademicYear ?? '',
+          remember: !!this.rememberedLogin
+        });
       },
       error: (res) => {
         this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load Academic Year list' });
@@ -56,16 +66,24 @@ export class LoginComponent implements OnInit {
     if (!this.loginForm.valid) {
       return;
     }
-    const loginCred: Login = this.loginForm.value;
+    const formValue = this.loginForm.value;
+    const loginCred: Login = {
+      userName: formValue.username,
+      password: formValue.password,
+      academicYear: formValue.academicYear
+    };
+
     this._authService.login(loginCred).subscribe({
       next: (res) => {
         let token = res.token;
         if (token) {
           window.localStorage.setItem("token", token);
+          this.saveRememberedLogin();
           this._router.navigateByUrl("/home");
         }
       },
       error: () => {
+        this.isSubmitted = false;
         this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to Login' });
       },
       complete: () => {
@@ -73,5 +91,35 @@ export class LoginComponent implements OnInit {
         this.loginForm.reset();
       }
     })
+  }
+
+  private loadRememberedLogin(): void {
+    const rememberedLogin = window.localStorage.getItem(this.rememberedLoginKey);
+    if (!rememberedLogin) {
+      return;
+    }
+
+    try {
+      this.rememberedLogin = JSON.parse(rememberedLogin);
+      this.loginForm.patchValue({
+        username: this.rememberedLogin?.username ?? '',
+        remember: true
+      });
+    } catch {
+      window.localStorage.removeItem(this.rememberedLoginKey);
+    }
+  }
+
+  private saveRememberedLogin(): void {
+    const formValue = this.loginForm.value;
+    if (!formValue.remember) {
+      window.localStorage.removeItem(this.rememberedLoginKey);
+      return;
+    }
+
+    window.localStorage.setItem(this.rememberedLoginKey, JSON.stringify({
+      username: formValue.username,
+      academicYear: formValue.academicYear
+    }));
   }
 }

@@ -1,24 +1,22 @@
-﻿using Application.ClassSections.VieModels;
+using Application.Academic.ViewModels;
+using Application.ClassSections.VieModels;
 using Application.Common.Interfaces;
 using Application.Courses.ViewModels;
 using Application.Master.Interface;
 using Application.Master.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Services.MasterData
 {
     public class MasterDataService : IMasterDataService
     {
         private readonly IApplicationDbContext _dbContext;
+
         public MasterDataService(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public async Task<List<ProvinceViewModel>> GetAllProvince(CancellationToken cancellationToken)
         {
             var result = await _dbContext.Provinces.Select(x => new ProvinceViewModel
@@ -56,10 +54,10 @@ namespace Infrastructure.Services.MasterData
                     ClassSectionId = x.Id.ToString()
                 }).ToList()
             }).OrderBy(x => x.OrderNumber)
-              .ToListAsync();
+              .ToListAsync(cancellationToken);
+
             return result;
         }
-
 
         public async Task<List<SectionViewModel>> GetAllSections(CancellationToken cancellationToken)
         {
@@ -67,9 +65,9 @@ namespace Infrastructure.Services.MasterData
             {
                 SectionId = x.Id.ToString(),
                 Name = x.Name
-
             }).OrderBy(x => x.Name)
-              .ToListAsync();
+              .ToListAsync(cancellationToken);
+
             return result;
         }
 
@@ -78,10 +76,40 @@ namespace Infrastructure.Services.MasterData
             var courseList = await _dbContext.Courses.Select(x => new CourseViewModel
             {
                 Id = x.Id,
-                Name = x.Name,
+                Name = x.Name
             }).ToListAsync(cancellationToken);
 
             return courseList;
+        }
+
+        public async Task<List<AcademicViewModels>> GetAllAcademicYears(CancellationToken cancellationToken)
+        {
+            var academicYears = await _dbContext.AcademicYears.Select(x => new
+            {
+                x.Id,
+                x.YearName,
+                x.IsActive,
+                x.StartDateNp,
+                x.EndDateNp,
+                x.StartDateEn,
+                x.EndDateEn
+            }).OrderByDescending(x => x.StartDateEn)
+              .ToListAsync(cancellationToken);
+
+            var result = academicYears.Select(x => new AcademicViewModels
+            {
+                Id = x.Id.ToString(),
+                YearName = x.YearName,
+                IsActive = x.IsActive,
+                StartDateNp = x.StartDateNp,
+                EndDateNp = x.EndDateNp,
+                StartDateEn = x.StartDateEn,
+                EndDateEn = x.EndDateEn,
+                StartDateFormatted = x.StartDateEn,
+                EndDateFormatted = x.EndDateEn
+            }).ToList();
+
+            return result;
         }
     }
 }

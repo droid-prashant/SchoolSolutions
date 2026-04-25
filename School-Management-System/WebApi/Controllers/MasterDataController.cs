@@ -1,9 +1,10 @@
-﻿using Application.Master.Interface;
-using Application.Master.ViewModels;
+using Application.Academic.ViewModels;
 using Application.ClassSections.Interfaces;
 using Application.ClassSections.VieModels;
 using Application.Courses.Interfaces;
 using Application.Courses.ViewModels;
+using Application.Master.Interface;
+using Application.Master.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
@@ -53,6 +54,14 @@ namespace WebApi.Controllers
         public async Task<List<CourseViewModel>> GetAllCourses(CancellationToken cancellationToken)
         {
             var result = await _masterDataService.GetAllCourse(cancellationToken);
+            return result;
+        }
+
+        [HttpGet]
+        [Route("GetAllAcademicYear")]
+        public async Task<List<AcademicViewModels>> GetAllAcademicYear(CancellationToken cancellationToken)
+        {
+            var result = await _masterDataService.GetAllAcademicYears(cancellationToken);
             return result;
         }
     }

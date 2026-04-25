@@ -14,6 +14,10 @@ namespace Application.Common.Interfaces
         DbSet<AcademicYear> AcademicYears { get; }
         DbSet<StudentEnrollment> StudentEnrollments { get; }
         DbSet<Teacher> Teachers { get; }
+        DbSet<TeacherClassSection> TeacherClassSections { get; }
+        DbSet<TeacherQualification> TeacherQualifications { get; }
+        DbSet<TeacherExperience> TeacherExperiences { get; }
+        DbSet<TeacherDocument> TeacherDocuments { get; }
         DbSet<Student> Students { get; }
         DbSet<Course> Courses { get; }
         DbSet<ClassRoom> ClassRooms { get; }

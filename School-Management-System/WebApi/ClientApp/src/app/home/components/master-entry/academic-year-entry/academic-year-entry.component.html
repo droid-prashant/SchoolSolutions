@@ -1,7 +1,5 @@
 <p-toast></p-toast>
-<app-page-header
-    section="Master Entry"
-    page="Academic Year Entry"
+<app-page-header section="Master Entry" page="Academic Year Entry"
     subtitle="Create and manage academic years in the shared entry format.">
 </app-page-header>
 <div class="card">
@@ -17,13 +15,30 @@
                 </div>
                 <p-inputSwitch formControlName="isActive"></p-inputSwitch>
             </div>
-            <div class="field col-6">
+            <!-- <div class="field col-6">
                 <label>Start Date</label>
                 <p-calendar formControlName="startDate" />
             </div>
             <div class="field col-6">
                 <label>End Date</label>
                 <p-calendar formControlName="endDate" />
+            </div> -->
+            <div class="field col-3">
+                <label>Start Date <span class="text-danger">*</span></label>
+                <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+                    [selectedDate]="academicYearForm.get('startDateNp')?.value" [selectedDateType]="'bs'"
+                    [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+                    (dateChange)="onStartDateChange($event)">
+                </app-np-datepicker>
+            </div>
+
+            <div class="field col-3">
+                <label>End Date <span class="text-danger">*</span></label>
+                <app-np-datepicker [language]="'ne'" [unicodeDate]="false"
+                    [selectedDate]="academicYearForm.get('endDateNp')?.value" [selectedDateType]="'bs'"
+                    [minDate]="{ year: 2050, month: 1, day: 1 }" [maxDate]="{ year: 2099, month: 12, day: 30 }"
+                    (dateChange)="onEndDateChange($event)">
+                </app-np-datepicker>
             </div>
         </div>
         <div class="col-12 text-right mt-2">
@@ -35,7 +50,8 @@
 
 <div class="card">
     <p-table [value]="academicYearList" styleClass="app-grid-table" dataKey="id" [paginator]="true" [rows]="15"
-        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
+        [tableStyle]="{'min-width': '50rem'}">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>
@@ -54,6 +70,11 @@
                 <td>{{ academic.endDateFormatted }}</td>
                 <td>{{ academic.isActive }}</td>
                 <td><i pTooltip="edit" class="pi pi-pencil" (click)="editAcademicYear(academic)"></i></td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="6" class="text-center">No records found</td>
             </tr>
         </ng-template>
     </p-table>

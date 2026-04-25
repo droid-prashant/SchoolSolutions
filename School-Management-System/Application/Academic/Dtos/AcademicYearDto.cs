@@ -10,7 +10,9 @@ namespace Application.Academic.Dtos
     {
         public string YearName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public string StartDateNp { get; set; }
+        public string EndDateNp { get; set; }
+        public string StartDateEn { get; set; }
+        public string EndDateEn { get; set; }
     }
 }

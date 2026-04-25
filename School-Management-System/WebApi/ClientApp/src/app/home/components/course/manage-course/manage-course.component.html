@@ -30,7 +30,7 @@
   </div>
 </div>
 
-<div *ngIf="classCourses.length > 0; else noRecords" class="card app-page-table-card manage-course-card">
+<div class="card app-page-table-card manage-course-card">
   <form [formGroup]="classCourseForm">
     <p-table
       styleClass="manage-course-table"
@@ -213,18 +213,11 @@
           </td>
         </tr>
       </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="10" class="text-center">No records found</td>
+        </tr>
+      </ng-template>
     </p-table>
   </form>
 </div>
-
-<ng-template #noRecords>
-  <div class="card no-records-card">
-    <div class="no-records-content">
-      <i class="pi pi-info-circle no-records-icon"></i>
-      <div>
-        <h3>No class course records found</h3>
-        <p>Please select a class and click Load, or add a new course mapping for the selected class.</p>
-      </div>
-    </div>
-  </div>
-</ng-template>

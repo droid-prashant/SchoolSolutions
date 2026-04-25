@@ -14,6 +14,6 @@ namespace Application.SubjectMarks.Interfaces
         Task AddSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken);
         Task UpdateSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken);
         Task<SubjectMarksViewModel> GetStudentMarks(string studentEnrollmentId, int examType, CancellationToken cancellationToken);
-        Task<ResultViewModel> GetResult(Guid studentEnrollmentId, CancellationToken cancellationToken);
+        Task<ResultViewModel> GetResult(Guid studentEnrollmentId, int? examType, CancellationToken cancellationToken);
     }
 }

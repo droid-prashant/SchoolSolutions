@@ -31,6 +31,8 @@ import { StudentCertificateLogViewModel } from '../home/components/certificate/m
 import { CertificateType } from '../home/components/certificate/model/certificateType.enum';
 import { StudentsByClassViewModel } from '../home/components/dashboard/model/studentsByClass.viewModel';
 import { SubjectMarksViewModel } from '../home/components/exam/shared/viewModels/student-marks.viewModel';
+import { TeacherDto, TeacherStatusDto } from '../home/components/teacher/shared/models/dtos/teacher.dto';
+import { TeacherDashboardViewModel, TeacherDocumentViewModel, TeacherViewModel } from '../home/components/teacher/shared/models/viewModels/teacher.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +53,11 @@ export class ApiService {
     return this._httpClient.get<StudentsByClassViewModel[]>(this.baseUrl + "api/Dashboard/GetStudentsByClass");
   }
 
+  getTeacherDashboard(academicYearId?: string): Observable<TeacherDashboardViewModel> {
+    const academicYearQuery = academicYearId ? `?academicYearId=${academicYearId}` : '';
+    return this._httpClient.get<TeacherDashboardViewModel>(this.baseUrl + `api/Teacher/GetTeacherDashboard${academicYearQuery}`);
+  }
+
   postAcademicYear(academicYearDetail: AcademicYearDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Academic/AddAcademicYear", academicYearDetail);
   }
@@ -60,7 +67,7 @@ export class ApiService {
   }
 
   putAcademicYear(academicYearDetail: AcademicYearDto, academicYearId: string): Observable<void> {
-    return this._httpClient.put<void>(this.baseUrl + `api/Academic/UpdateAcademicYear?academicYearId?${academicYearId}`, academicYearDetail);
+    return this._httpClient.put<void>(this.baseUrl + `api/Academic/UpdateAcademicYear?academicYearId=${academicYearId}`, academicYearDetail);
   }
 
   getProvinceDetails(): Observable<ProvinceViewModel[]> {
@@ -75,6 +82,35 @@ export class ApiService {
     return this._httpClient.put<void>(this.baseUrl + "api/Student/UpdateStudent", student);
   }
 
+  postTeacher(teacher: TeacherDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Teacher/AddTeacher", teacher);
+  }
+
+  updateTeacher(teacher: TeacherDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + "api/Teacher/UpdateTeacher", teacher);
+  }
+
+  getTeachers(academicYearId?: string, includeInactive = false): Observable<TeacherViewModel[]> {
+    const academicYearQuery = academicYearId ? `academicYearId=${academicYearId}&` : '';
+    return this._httpClient.get<TeacherViewModel[]>(this.baseUrl + `api/Teacher/GetTeachers?${academicYearQuery}includeInactive=${includeInactive}`);
+  }
+
+  updateTeacherStatus(teacherId: string, status: TeacherStatusDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Teacher/UpdateTeacherStatus?teacherId=${teacherId}`, status);
+  }
+
+  deleteTeacher(teacherId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/Teacher/DeleteTeacher?teacherId=${teacherId}`);
+  }
+
+  uploadTeacherDocument(formData: FormData): Observable<TeacherDocumentViewModel> {
+    return this._httpClient.post<TeacherDocumentViewModel>(this.baseUrl + "api/Teacher/UploadTeacherDocument", formData);
+  }
+
+  deleteTeacherDocument(documentId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/Teacher/DeleteTeacherDocument?documentId=${documentId}`);
+  }
+
   getStudents(): Observable<StudentViewModel[]> {
     return this._httpClient.get<StudentViewModel[]>(this.baseUrl + "api/Student/GetStudent");
   }
@@ -82,8 +118,9 @@ export class ApiService {
     return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassId?classId=${classId}`);
   }
 
-  getStudentsByClassSectionId(classSectionId: string): Observable<StudentViewModel[]> {
-    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}`);
+  getStudentsByClassSectionId(classSectionId: string, examType?: number | null): Observable<StudentViewModel[]> {
+    const examTypeQuery = examType ? `&examType=${examType}` : '';
+    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}${examTypeQuery}`);
   }
   getStudentCertificateDataByClassSectionId(classSectionId: string): Observable<StudentCertificateViewModel[]> {
     return this._httpClient.get<StudentCertificateViewModel[]>(this.baseUrl + `api/Student/GetStudentCertificateData?classSectionId=${classSectionId}`);
@@ -159,8 +196,9 @@ export class ApiService {
     return this._httpClient.get<SubjectMarksViewModel>(this.baseUrl + `api/Exam/GetStudentMarks?studentEnrollmentId=${studentEnrollmentId}&examType=${examType}`);
   }
 
-  getResult(studentEnrollmentId: string): Observable<ResultViewModel> {
-    return this._httpClient.get<ResultViewModel>(this.baseUrl + `api/Exam/GetResult?studentEnrollmentId=${studentEnrollmentId}`);
+  getResult(studentEnrollmentId: string, examType?: number | null): Observable<ResultViewModel> {
+    const examTypeQuery = examType ? `&examType=${examType}` : '';
+    return this._httpClient.get<ResultViewModel>(this.baseUrl + `api/Exam/GetResult?studentEnrollmentId=${studentEnrollmentId}${examTypeQuery}`);
   }
 
   postFeeType(feeTypeData: FeeTypeDto): Observable<void> {

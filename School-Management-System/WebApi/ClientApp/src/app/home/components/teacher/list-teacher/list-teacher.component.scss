@@ -1,0 +1,95 @@
+.teacher-inline-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.55rem;
+  padding-top: 1.45rem;
+}
+
+.teacher-inline-control label {
+  margin: 0;
+  line-height: 1;
+}
+
+.teacher-muted {
+  margin-top: 0.2rem;
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.84rem;
+}
+
+:host ::ng-deep .app-page-table-card {
+  padding: 0;
+}
+
+.teacher-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--app-border, #dbe5f0);
+}
+
+.teacher-detail-header h2 {
+  margin: 0;
+  color: var(--app-text, #1f2937);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.teacher-detail-header p {
+  margin: 0.25rem 0 0;
+  color: var(--app-text-muted, #64748b);
+}
+
+.teacher-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.teacher-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.teacher-detail-grid div {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border, #dbe5f0);
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.teacher-detail-grid span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.teacher-detail-grid strong {
+  display: block;
+  overflow: hidden;
+  color: var(--app-text, #1f2937);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacher-detail-section-title {
+  margin: 1rem 0 0.5rem;
+  color: var(--app-text, #1f2937);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+@media screen and (max-width: 960px) {
+  .teacher-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

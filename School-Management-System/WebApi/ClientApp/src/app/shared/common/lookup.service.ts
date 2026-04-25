@@ -92,7 +92,7 @@ export class LookupService {
       }
     }
 
-    return this.apiService.getAcademicYear().pipe(
+    return this.masterApiService.getAcademicYears().pipe(
       tap((response: AcademicViewModel[]) => {
         this.academicYearsCache = response ?? [];
         this.saveToStorage('lookup_academic_years', this.academicYearsCache);
@@ -229,15 +229,17 @@ export class LookupService {
     this.provincesCache = null;
     this.academicYearsCache = null;
     this.classRoomsCache = null;
+    this.sectionsCache = null;
     this.coursesCache = null;
 
     localStorage.removeItem('lookup_provinces');
     localStorage.removeItem('lookup_academic_years');
     localStorage.removeItem('lookup_class_rooms');
+    localStorage.removeItem('lookup_sections');
     localStorage.removeItem('lookup_courses');
   }
 
-  clearCacheByKey(key: 'provinces' | 'academicYears' | 'classRooms' | 'courses'): void {
+  clearCacheByKey(key: 'provinces' | 'academicYears' | 'classRooms' | 'sections' | 'courses'): void {
     switch (key) {
       case 'provinces':
         this.provincesCache = null;
@@ -250,6 +252,10 @@ export class LookupService {
       case 'classRooms':
         this.classRoomsCache = null;
         localStorage.removeItem('lookup_class_rooms');
+        break;
+      case 'sections':
+        this.sectionsCache = null;
+        localStorage.removeItem('lookup_sections');
         break;
       case 'courses':
         this.coursesCache = null;

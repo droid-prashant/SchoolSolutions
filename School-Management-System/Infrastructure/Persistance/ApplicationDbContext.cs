@@ -17,6 +17,10 @@ namespace Infrastructure.Persistance
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<School> Schools => Set<School>();
         public DbSet<Teacher> Teachers => Set<Teacher>();
+        public DbSet<TeacherClassSection> TeacherClassSections => Set<TeacherClassSection>();
+        public DbSet<TeacherQualification> TeacherQualifications => Set<TeacherQualification>();
+        public DbSet<TeacherExperience> TeacherExperiences => Set<TeacherExperience>();
+        public DbSet<TeacherDocument> TeacherDocuments => Set<TeacherDocument>();
         public DbSet<Student> Students => Set<Student>();
         public DbSet<Course> Courses => Set<Course>();
 

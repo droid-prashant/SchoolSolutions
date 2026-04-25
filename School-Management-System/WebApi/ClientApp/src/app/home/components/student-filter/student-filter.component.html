@@ -37,8 +37,23 @@
       (onChange)="onAcademicYearChange()">
     </p-dropdown>
   </div>
+
+  <div *ngIf="showExamTerminalFilter" class="filter-item mr-5">
+    <label for="examTerminalDropdown">Exam Terminal:</label>
+    <p-dropdown
+      id="examTerminalDropdown"
+      [options]="examTerminalOptions"
+      optionLabel="terminalName"
+      optionValue="id"
+      [(ngModel)]="selectedExamType"
+      [ngModelOptions]="{ standalone: true }"
+      [style]="{ width: '200px' }"
+      placeholder="Select Terminal">
+    </p-dropdown>
+  </div>
   
   <div class="filter-item filter-action">
-    <button pButton type="button" label="Load" icon="pi pi-search" class="p-button-success p-button-sm" (click)="onLoadStudents()"></button>
+    <button pButton type="button" label="Load" icon="pi pi-search" class="p-button-success p-button-sm"
+      [disabled]="showExamTerminalFilter && !selectedExamType" (click)="onLoadStudents()"></button>
   </div>
 </div>

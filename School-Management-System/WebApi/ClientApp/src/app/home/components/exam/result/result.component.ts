@@ -25,6 +25,7 @@ export class ResultComponent implements OnInit {
   isClassSelected: boolean = false;
   result!: ResultViewModel
   classSectionId: string = "";
+  selectedExamType: number | null = null;
   constructor(private _apiService: ApiService,
     private _lookupService: LookupService
   ) {
@@ -35,18 +36,20 @@ export class ResultComponent implements OnInit {
   }
   previewResult(student: StudentViewModel) {
     this.student = student;
-    this.getResult(student.studentEnrollmentId);
+    this.getResult(student.studentEnrollmentId, this.selectedExamType);
     this.students
   }
 
   onLoadStudents(filter: FilterSelection) {
+    this.selectedExamType = filter.examType ?? null;
+
     if (filter && filter.classSectionId) {
-      this.listStudentByClassSection(filter.classSectionId);
+      this.listStudentByClassSection(filter.classSectionId, this.selectedExamType);
     }
   }
 
-  listStudentByClassSection(classSectionId: string) {
-    this._apiService.getStudentsByClassSectionId(classSectionId).subscribe(
+  listStudentByClassSection(classSectionId: string, examType?: number | null) {
+    this._apiService.getStudentsByClassSectionId(classSectionId, examType).subscribe(
       {
         next: (response) => {
           this.students = response;
@@ -66,8 +69,8 @@ export class ResultComponent implements OnInit {
     });
   }
 
-  getResult(studentEnrollmentId: string) {
-    this._apiService.getResult(studentEnrollmentId).subscribe(
+  getResult(studentEnrollmentId: string, examType?: number | null) {
+    this._apiService.getResult(studentEnrollmentId, examType).subscribe(
       {
         next: (response) => {
           this.result = response;

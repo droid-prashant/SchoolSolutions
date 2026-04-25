@@ -4,6 +4,7 @@ import { MessageService } from 'primeng/api';
 import { AcademicYearDto } from '../model/dtos/academicYear.dto';
 import { ApiService } from '../../../../shared/api.service';
 import { AcademicViewModel } from '../model/viewModels/academicYear.ViewModel';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-academic-year-entry',
@@ -20,16 +21,19 @@ export class AcademicYearEntryComponent implements OnInit {
   isSubmitted: boolean = false;
   isUpdate: boolean = false;
 
-  constructor(private _apiService: ApiService, private _fb: FormBuilder, private _messageService: MessageService) {
+  constructor(private _lookupService: LookupService, private _apiService: ApiService, private _fb: FormBuilder, private _messageService: MessageService) {
     this.academicYearForm = this._fb.group({
+      
       yearName: ['', Validators.required],
       isActive: [false, Validators.required],
-      startDate: [new Date(), Validators.required],
-      endDate: [new Date(), Validators.required]
+      startDateNp: ['', Validators.required],
+      endDateNp: ['', Validators.required],
+      startDateEn: ['', Validators.required],
+      endDateEn: ['', Validators.required]
     });
   }
   ngOnInit(): void {
-    this.listAcademicYear();
+    this.listAcademicYear(true);
   }
 
   submit() {
@@ -41,15 +45,33 @@ export class AcademicYearEntryComponent implements OnInit {
     }
   }
 
-  listAcademicYear() {
-    this._apiService.getAcademicYear().subscribe({
+  onStartDateChange(event: { bs: string; ad: string }) {
+    if (event.bs && event.ad) {
+      this.academicYearForm.patchValue({
+        startDateNp: event.bs,
+        startDateEn: event.ad
+      });
+    }
+  }
+
+  onEndDateChange(event: { bs: string; ad: string }) {
+    if (event.bs && event.ad) {
+      this.academicYearForm.patchValue({
+        endDateNp: event.bs,
+        endDateEn: event.ad
+      });
+    }
+  }
+
+  listAcademicYear(forceRefresh = false) {
+    this._lookupService.getAcademicYears(forceRefresh).subscribe({
       next: (res) => {
         this.academicYearList = res;
       },
       error: (res) => {
         this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load Academic Year list' });
       }
-    })
+    });
   }
 
   onSave() {
@@ -61,6 +83,7 @@ export class AcademicYearEntryComponent implements OnInit {
     this._apiService.postAcademicYear(academicYearFormValue).subscribe({
       next: (res) => {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Academic Year added Successfully' });
+        this.listAcademicYear(true);
       },
       error: (err) => {
         this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add Academic Year' });
@@ -81,6 +104,7 @@ export class AcademicYearEntryComponent implements OnInit {
     this._apiService.putAcademicYear(academicYearFormValue, this.academicYearId).subscribe({
       next: (res) => {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Academic Year updated Successfully' });
+        this.listAcademicYear(true);
       },
       error: (err) => {
         this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update Academic Year' });
@@ -104,8 +128,10 @@ export class AcademicYearEntryComponent implements OnInit {
     this.academicYearForm.reset({
       yearName: '',
       isActive: false,
-      startDate: new Date(),
-      endDate: new Date()
+      startDateNp: '',
+      endDateNp: '',
+      startDateEn: '',
+      endDateEn: ''
     });
   }
 }

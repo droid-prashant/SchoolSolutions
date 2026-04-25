@@ -7,12 +7,14 @@ import { LookupService } from '../../../shared/common/lookup.service';
 import { ClassRoomViewModel } from '../class-room/shared/models/viewModels/classRoom.viewModel';
 import { SectionViewModel } from '../class-room/shared/models/viewModels/section.viewModel';
 import { AcademicViewModel } from '../master-entry/model/viewModels/academicYear.ViewModel';
+import { ExamTerminal } from '../exam/shared/models/examTerminal.dto';
 
 export interface FilterSelection {
   classId?: string;
   sectionId?: string;
   classSectionId?: string;
   academicYearId?: string;
+  examType?: number;
 }
 
 @Component({
@@ -26,15 +28,23 @@ export class StudentFilterComponent implements OnInit {
   @Input() showClassFilter: boolean = false;
   @Input() showSectionFilter: boolean = false
   @Input() showAcademicYearFilter: boolean = false;
+  @Input() showExamTerminalFilter: boolean = false;
   @Output() loadStudents = new EventEmitter<FilterSelection>();
 
   classOptions: ClassRoomViewModel[] = [];
   sectionOptions: SectionViewModel[] = [];
   academicYearOptions: AcademicViewModel[] = [];
+  examTerminalOptions: ExamTerminal[] = [
+    { id: 1, terminalName: 'First Terminal' },
+    { id: 2, terminalName: 'Second Terminal' },
+    { id: 3, terminalName: 'Third Terminal' },
+    { id: 4, terminalName: 'Final Terminal' }
+  ];
 
   selectedClass: ClassRoomViewModel | null = null;
   selectedSection: SectionViewModel | null = null;
   selectedAcademicYear: AcademicViewModel | null = null;
+  selectedExamType: number | null = null;
 
   constructor(private lookupService: LookupService) { }
 
@@ -88,7 +98,8 @@ export class StudentFilterComponent implements OnInit {
       classId: this.selectedClass?.id,
       sectionId: this.selectedSection?.sectionId,
       classSectionId: this.selectedSection?.classSectionId,
-      academicYearId: this.selectedAcademicYear?.id
+      academicYearId: this.selectedAcademicYear?.id,
+      examType: this.selectedExamType ?? undefined
     };
     this.loadStudents.emit(selection);
   }

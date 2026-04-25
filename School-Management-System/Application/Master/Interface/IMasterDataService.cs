@@ -1,11 +1,7 @@
-﻿using Application.ClassSections.VieModels;
+using Application.Academic.ViewModels;
+using Application.ClassSections.VieModels;
 using Application.Courses.ViewModels;
 using Application.Master.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Master.Interface
 {
@@ -15,5 +11,6 @@ namespace Application.Master.Interface
         Task<List<ClassRoomViewModel>> GetAllClassRooms(CancellationToken cancellationToken);
         Task<List<SectionViewModel>> GetAllSections(CancellationToken cancellationToken);
         Task<List<CourseViewModel>> GetAllCourse(CancellationToken cancellationToken);
+        Task<List<AcademicViewModels>> GetAllAcademicYears(CancellationToken cancellationToken);
     }
 }

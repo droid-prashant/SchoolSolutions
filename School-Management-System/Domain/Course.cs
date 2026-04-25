@@ -11,5 +11,6 @@ namespace Domain
         public Guid Id { get; set; }
         public string Name { get; set; }
         public ICollection<ClassCourse> ClassCourses { get; set; }
+        public ICollection<TeacherClassSection> TeacherClassSections { get; set; } = new List<TeacherClassSection>();
     }
 }

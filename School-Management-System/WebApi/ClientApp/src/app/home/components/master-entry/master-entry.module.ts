@@ -9,6 +9,7 @@ import { CourseEntryComponent } from "./course-entry/course-entry.component";
 import { SectionEntryComponent } from "./section-entry/section-entry.component";
 import { FeeTypeComponent } from "./fee-type/fee-type.component";
 import { AcademicYearEntryComponent } from "./academic-year-entry/academic-year-entry.component";
+import { NpDatepickerComponent } from "../../../shared/calender/np-datepicker/np-datepicker.component";
 
 
 @NgModule({
@@ -17,7 +18,7 @@ import { AcademicYearEntryComponent } from "./academic-year-entry/academic-year-
         CourseEntryComponent,
         SectionEntryComponent,
         FeeTypeComponent,
-        AcademicYearEntryComponent
+        AcademicYearEntryComponent,
     ],
     imports: [
         CommonModule,
@@ -25,7 +26,8 @@ import { AcademicYearEntryComponent } from "./academic-year-entry/academic-year-
         FormsModule,
         ReactiveFormsModule,
         RouterOutlet,
-        SharedModule
+        SharedModule,
+        NpDatepickerComponent
     ],
     exports: [],
 })
