@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MenuItem, PrimeNGConfig } from 'primeng/api';
 import { PrimeIcons } from 'primeng/api';
 import { AuthService } from '../shared/auth.service';
+import { LookupService } from '../shared/common/lookup.service';
 
 
 @Component({
@@ -19,12 +20,14 @@ export class HomeComponent implements OnInit {
   currentUserName = 'User';
   currentUserEmail = '';
   currentUserRole = '';
+  currentAcademicYearName = '';
   userInitials = 'U';
   userAvatarImage = 'assets/Om Pushpanjali logo.png';
 
   constructor(
     private _router: Router,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _lookupService: LookupService
   ) {
 
   }
@@ -154,6 +157,7 @@ export class HomeComponent implements OnInit {
     this.currentUserName = decodedToken?.name || 'User';
     this.currentUserEmail = decodedToken?.email || '';
     this.currentUserRole = decodedToken?.permission || 'Staff';
+    const academicYearId = this._authService.getCurrentAcademicYearId();
 
     this.userInitials = this.currentUserName
       .split(' ')
@@ -161,6 +165,14 @@ export class HomeComponent implements OnInit {
       .slice(0, 2)
       .map(x => x.charAt(0).toUpperCase())
       .join('') || 'U';
+
+    if (academicYearId) {
+      this._lookupService.getAcademicYearById(academicYearId).subscribe({
+        next: (academicYear) => {
+          this.currentAcademicYearName = academicYear?.yearName ?? '';
+        }
+      });
+    }
   }
 
   onAvatarImageError(): void {

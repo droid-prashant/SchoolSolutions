@@ -27,6 +27,11 @@ namespace Infrastructure.Services.Students
             _context = context;
             _userResolver = userResolver;
         }
+
+        private Guid GetCurrentAcademicYearId()
+        {
+            return _userResolver.GetAcademicYearGuidOrThrow();
+        }
         private bool CheckCharacterCertificateTaken(Guid studentId)
         {
             var isCertificateTaken = _context.studentCharacterCertificateLogs.Any(x => x.StudentId == studentId);
@@ -83,7 +88,7 @@ namespace Infrastructure.Services.Students
             var studentEnrollment = new StudentEnrollment
             {
                 StudentId = student.Id,
-                AcademicYearId = Guid.Parse(_userResolver.AcademicYearId),
+                AcademicYearId = GetCurrentAcademicYearId(),
                 ClassSectionId = classSectionId,
                 RegistrationNumber = null,
                 SymbolNumber = null,
@@ -166,7 +171,8 @@ namespace Infrastructure.Services.Students
                 existingStudent.DateOfBirthEn = studentDto.DobEn;
                 existingStudent.ModifiedBy = Guid.Parse(_userResolver.UserId);
                 existingStudent.ModifiedDate = DateTime.UtcNow;
-                var existingStudentEnrollment = await _context.StudentEnrollments.FirstOrDefaultAsync(x => x.Student.Id == existingStudent.Id && x.AcademicYearId == Guid.Parse(_userResolver.AcademicYearId));
+                var currentAcademicYearId = GetCurrentAcademicYearId();
+                var existingStudentEnrollment = await _context.StudentEnrollments.FirstOrDefaultAsync(x => x.Student.Id == existingStudent.Id && x.AcademicYearId == currentAcademicYearId);
                 if (existingStudentEnrollment == null)
                 {
                     throw new Exception("Student is not Enrolled");
@@ -186,7 +192,7 @@ namespace Infrastructure.Services.Students
             try
             {
                 var classGuid = Guid.Parse(classSectionId);
-                var yearGuid = Guid.Parse(_userResolver.AcademicYearId);
+                var yearGuid = GetCurrentAcademicYearId();
 
                 var enrollments = await _context.StudentEnrollments
                     .Include(x => x.Student)
@@ -212,7 +218,8 @@ namespace Infrastructure.Services.Students
         }
         public async Task AssignRegistrationAndSymbolNumber(StudentEnrollmentDto studentEnrollmentDto, string studentEnrollmentId, CancellationToken cancellationToken)
         {
-            var studentEnrollment = await _context.StudentEnrollments.FirstOrDefaultAsync(x => x.Id == Guid.Parse(studentEnrollmentId));
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var studentEnrollment = await _context.StudentEnrollments.FirstOrDefaultAsync(x => x.Id == Guid.Parse(studentEnrollmentId) && x.AcademicYearId == currentAcademicYearId);
             if (studentEnrollment != null)
             {
                 studentEnrollment.RegistrationNumber = studentEnrollmentDto.RegistrationNumber;
@@ -223,9 +230,10 @@ namespace Infrastructure.Services.Students
         }
         public async Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken)
         {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
             var students = await _context.StudentEnrollments.Include(x => x.Student).Include(x => x.ClassSection)
                                                             .ThenInclude(x => x.ClassRoom)
-                                                            .Where(x => x.Student.IsActive == true)
+                                                            .Where(x => x.Student.IsActive == true && x.AcademicYearId == currentAcademicYearId)
                                                             .Select(x => new StudentViewModel
                                                             {
                                                                 Id = x.StudentId,
@@ -266,11 +274,24 @@ namespace Infrastructure.Services.Students
         {
             try
             {
-                var enrolledStudent = await _context.StudentEnrollments.Include(x => x.ClassSection).FirstOrDefaultAsync(x => x.ClassSection.Id == Guid.Parse(classSectionId));
+                var currentAcademicYearId = GetCurrentAcademicYearId();
+                var classSectionGuid = Guid.Parse(classSectionId);
+                var enrolledStudent = await _context.StudentEnrollments
+                    .Include(x => x.ClassSection)
+                    .FirstOrDefaultAsync(x => x.ClassSection.Id == classSectionGuid && x.AcademicYearId == currentAcademicYearId, cancellationToken);
+
+                if (enrolledStudent == null)
+                {
+                    return new List<StudentCertificateViewModel>();
+                }
+
                 var studentFirstEnrollment = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == enrolledStudent.StudentId);
                 var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                                 .ThenInclude(x => x.ClassRoom)
-                                                                .Where(x => x.Student.IsActive == true && x.ClassSection.Id == Guid.Parse(classSectionId)).Select(x => new StudentCertificateViewModel
+                                                                .Where(x => x.Student.IsActive == true &&
+                                                                            x.ClassSection.Id == classSectionGuid &&
+                                                                            x.AcademicYearId == currentAcademicYearId)
+                                                                .Select(x => new StudentCertificateViewModel
                                                                 {
                                                                     Id = x.Id,
                                                                     StudentId = x.StudentId,
@@ -316,9 +337,11 @@ namespace Infrastructure.Services.Students
         }
         public async Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents(string classSectionId, CancellationToken cancellationToken)
         {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
             var result = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                           .Include(x => x.Student)
                                                           .Where(x => x.Student.IsActive == true &&
+                                                                      x.AcademicYearId == currentAcademicYearId &&
                                                                       x.ClassSectionId == Guid.Parse(classSectionId) &&
                                                                      (x.ClassSection.ClassRoom.OrderNumber == 8 || x.ClassSection.ClassRoom.OrderNumber == 10))
                                                           .Select(x => new StudentEnrollmentViewModel
@@ -337,9 +360,10 @@ namespace Infrastructure.Services.Students
         }
         public async Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRooomId, CancellationToken cancellationToken)
         {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
             var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                    .ThenInclude(x => x.ClassRoom)
-                                                  .Where(x => x.ClassSection.ClassId == classRooomId)
+                                                  .Where(x => x.ClassSection.ClassId == classRooomId && x.AcademicYearId == currentAcademicYearId)
                                                   .Select(x => new StudentViewModel
                                                   {
                                                       Id = x.Id,
@@ -360,9 +384,11 @@ namespace Infrastructure.Services.Students
         public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, CancellationToken cancellationToken)
         {
             var classSectionGuid = Guid.Parse(classSectionId);
+            var currentAcademicYearId = GetCurrentAcademicYearId();
             var studentQuery = _context.StudentEnrollments.Include(x => x.ClassSection)
                                                           .ThenInclude(x => x.ClassRoom)
                                                           .Where(x => x.Student.IsActive == true &&
+                                                                 x.AcademicYearId == currentAcademicYearId &&
                                                                  x.ClassSection.Id == classSectionGuid);
 
             if (examType.HasValue)

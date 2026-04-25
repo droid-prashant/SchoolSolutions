@@ -113,6 +113,19 @@ export class LookupService {
     });
   }
 
+  getAcademicYearById(academicYearId: string, forceRefresh = false): Observable<AcademicViewModel | null> {
+    return new Observable<AcademicViewModel | null>((observer) => {
+      this.getAcademicYears(forceRefresh).subscribe({
+        next: (years) => {
+          const selectedYear = years.find(x => x.id === academicYearId) ?? null;
+          observer.next(selectedYear);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
   getClassRooms(forceRefresh = false): Observable<ClassRoomViewModel[]> {
     if (!forceRefresh) {
       if (this.classRoomsCache) {

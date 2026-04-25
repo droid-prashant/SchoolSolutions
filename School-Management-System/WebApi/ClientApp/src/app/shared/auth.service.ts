@@ -28,6 +28,10 @@ export class AuthService {
         }
     }
 
+    getCurrentAcademicYearId(): string {
+        return this.decodeToken()?.academicYear ?? '';
+    }
+
     getTokenExpirationDate(): Date {
         const decodedToken = this.decodeToken();
         if (decodedToken) {

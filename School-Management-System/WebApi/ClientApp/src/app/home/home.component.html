@@ -13,6 +13,7 @@
         </ng-template>
         <ng-template pTemplate="end">
             <div class="topbar-actions flex align-items-center gap-4">
+                <span *ngIf="currentAcademicYearName" class="topbar-academic-year">Academic Year: {{ currentAcademicYearName }}</span>
                 <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" />
                 <button
                     type="button"
@@ -58,6 +59,7 @@
                                 <h4>{{ currentUserName }}</h4>
                                 <p *ngIf="currentUserEmail">{{ currentUserEmail }}</p>
                                 <span>{{ currentUserRole }}</span>
+                                <span *ngIf="currentAcademicYearName">Academic Year: {{ currentAcademicYearName }}</span>
                             </div>
                         </div>
 

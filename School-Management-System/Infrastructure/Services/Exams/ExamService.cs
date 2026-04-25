@@ -16,20 +16,43 @@ namespace Infrastructure.Services.SubjectMarks
     public class ExamService : IExamService
     {
         private readonly IApplicationDbContext _context;
-        public ExamService(IApplicationDbContext context)
+        private readonly UserResolver _userResolver;
+        public ExamService(IApplicationDbContext context, UserResolver userResolver)
         {
             _context = context;
+            _userResolver = userResolver;
         }
+
+        private Guid GetCurrentAcademicYearId()
+        {
+            return _userResolver.GetAcademicYearGuidOrThrow();
+        }
+
+        private async Task EnsureEnrollmentBelongsToCurrentAcademicYear(Guid studentEnrollmentId, CancellationToken cancellationToken)
+        {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var isValidEnrollment = await _context.StudentEnrollments
+                .AnyAsync(x => x.Id == studentEnrollmentId && x.AcademicYearId == currentAcademicYearId, cancellationToken);
+
+            if (!isValidEnrollment)
+            {
+                throw new Exception("The selected student enrollment does not belong to the current academic year.");
+            }
+        }
+
         public async Task AddSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken)
         {
             var subjectMarkList = subjectMarkDto.StudentMarksLists;
+            var studentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId);
+
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentId, cancellationToken);
 
             var gpaAndTotalCreaditHour = calculateGPAAndTotalCreditHour(subjectMarkDto.StudentMarksLists);
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var studentResult = new ExamResult
                 {
-                    StudentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId),
+                    StudentEnrollmentId = studentEnrollmentId,
                     ExamType = subjectMarkDto.ExamType,
                     GPA = gpaAndTotalCreaditHour.GPA,
                     Attendance = subjectMarkDto.Attendance,
@@ -71,6 +94,8 @@ namespace Infrastructure.Services.SubjectMarks
         {
             var studentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId);
             var subjectMarkList = subjectMarkDto.StudentMarksLists;
+
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentId, cancellationToken);
 
             var gpaAndTotalCreaditHour = calculateGPAAndTotalCreditHour(subjectMarkDto.StudentMarksLists);
 
@@ -159,7 +184,10 @@ namespace Infrastructure.Services.SubjectMarks
         }
         public async Task<SubjectMarksViewModel> GetStudentMarks(string studentEnrollmentId, int examType, CancellationToken cancellationToken)
         {
-            var subjectMarks = await _context.ExamResults.Where(x => x.StudentEnrollmentId == Guid.Parse(studentEnrollmentId) && x.ExamType == examType)
+            var studentEnrollmentGuid = Guid.Parse(studentEnrollmentId);
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentGuid, cancellationToken);
+
+            var subjectMarks = await _context.ExamResults.Where(x => x.StudentEnrollmentId == studentEnrollmentGuid && x.ExamType == examType)
                                                          .Select(s => new SubjectMarksViewModel
                                                          {
                                                              ExamType = s.ExamType,
@@ -346,6 +374,8 @@ namespace Infrastructure.Services.SubjectMarks
 
         public async Task<ResultViewModel> GetResult(Guid studentEnrollmentId, int? examType, CancellationToken cancellationToken)
         {
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentId, cancellationToken);
+
             var resultQuery = _context.ExamResults.Where(x => x.StudentEnrollmentId == studentEnrollmentId);
 
             if (examType.HasValue)

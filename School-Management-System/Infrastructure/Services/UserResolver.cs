@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Security.Claims;
 
 namespace Infrastructure.Services;
@@ -30,5 +31,15 @@ public class UserResolver
     {
         // Add logic here later
         return false;
+    }
+
+    public Guid GetAcademicYearGuidOrThrow()
+    {
+        if (!Guid.TryParse(AcademicYearId, out var academicYearGuid))
+        {
+            throw new InvalidOperationException("Academic year is not available in the current session.");
+        }
+
+        return academicYearGuid;
     }
 }

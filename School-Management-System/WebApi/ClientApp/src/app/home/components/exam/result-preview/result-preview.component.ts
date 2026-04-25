@@ -5,6 +5,7 @@ import { formatDate } from '@angular/common';
 import { DateConverterService } from '../../../../shared/calender/date-convertor.service';
 import DateConverter from '@remotemerge/nepali-date-converter';
 import { LookupService } from '../../../../shared/common/lookup.service';
+import { AuthService } from '../../../../shared/auth.service';
 
 @Component({
   selector: 'app-result-preview',
@@ -32,7 +33,7 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     statement: 'STATEMENT OF GRADE-SHEET'
   };
 
-  constructor(private dateConverter: DateConverterService, private lookupService: LookupService) {
+  constructor(private dateConverter: DateConverterService, private lookupService: LookupService, private authService: AuthService) {
 
   }
   ngOnInit(): void {
@@ -50,7 +51,12 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
   }
 
   private setAcademicYear(): void {
-    this.lookupService.getActiveAcademicYear().subscribe({
+    const sessionAcademicYearId = this.authService.getCurrentAcademicYearId();
+    const academicYearLookup = sessionAcademicYearId
+      ? this.lookupService.getAcademicYearById(sessionAcademicYearId)
+      : this.lookupService.getActiveAcademicYear();
+
+    academicYearLookup.subscribe({
       next: (academicYear) => {
         this.academicYearNameNp = academicYear?.yearName ?? this.currentYearNp;
       },
