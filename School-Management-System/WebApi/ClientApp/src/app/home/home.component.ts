@@ -79,6 +79,7 @@ export class HomeComponent implements OnInit {
         icon: PrimeIcons.USER,
         items: [
           { label: 'All Students', icon: PrimeIcons.USERS, routerLink: ['/home/student/list-student'] },
+          { label: 'Promotion Preview', icon: PrimeIcons.ARROW_RIGHT_ARROW_LEFT, routerLink: ['/home/student/promotion-preview'] },
         ]
       },
       {
@@ -120,7 +121,7 @@ export class HomeComponent implements OnInit {
         items: [
           { label: 'Manage Fee Type', icon: PrimeIcons.CREDIT_CARD, routerLink: ['/home/fees/manage-fees'] },
           { label: 'Fee Payment', icon: PrimeIcons.MONEY_BILL, routerLink: ['/home/fees/fee-payment'] },
-          { label: 'Fee Reports', icon: PrimeIcons.FILE, routerLink: ['/fees/reports'] }
+          { label: 'Fee Reports', icon: PrimeIcons.FILE, routerLink: ['/home/fees/reports'] }
         ]
       }
     ];

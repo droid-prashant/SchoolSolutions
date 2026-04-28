@@ -1,3 +1,16 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.fee-payment-page {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 2rem;
+}
+
 :host ::ng-deep .p-cell-editing {
   padding-top: 0 !important;
   padding-bottom: 0 !important;

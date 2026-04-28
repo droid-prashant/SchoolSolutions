@@ -83,4 +83,26 @@ namespace Application.Teachers
         public string MimeType { get; set; }
         public long FileSize { get; set; }
     }
+
+    public class TeacherAccountCreateDto
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class TeacherAccountStatusDto
+    {
+        public bool IsActive { get; set; }
+    }
+
+    public class TeacherPasswordResetDto
+    {
+        public string NewPassword { get; set; }
+    }
+
+    public class TeacherAssignmentCopyDto
+    {
+        public string SourceAcademicYearId { get; set; }
+        public string TargetAcademicYearId { get; set; }
+    }
 }

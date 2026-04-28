@@ -65,3 +65,21 @@ export interface TeacherStatusDto {
   isActive: boolean;
   inactiveReason?: string;
 }
+
+export interface TeacherAccountCreateDto {
+  userName: string;
+  password: string;
+}
+
+export interface TeacherAccountStatusDto {
+  isActive: boolean;
+}
+
+export interface TeacherPasswordResetDto {
+  newPassword: string;
+}
+
+export interface TeacherAssignmentCopyDto {
+  sourceAcademicYearId: string;
+  targetAcademicYearId: string;
+}

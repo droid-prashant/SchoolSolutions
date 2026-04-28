@@ -18,8 +18,16 @@
     </div>
 </form>
 <div class="card">
-    <p-table [value]="sections" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
-        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
+    <p-table #sectionTable [value]="sections" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}"
+        [globalFilterFields]="['name']">
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="sections.length > 0">
+                <i class="pi pi-search"></i>
+                <input #sectionSearch type="text" pInputText placeholder="Search grid..."
+                    (input)="sectionTable.filterGlobal(sectionSearch.value, 'contains')" />
+            </span>
+        </ng-template>
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

@@ -1,6 +1,6 @@
 export interface FeeTypeViewModel {
     id: string;
     name: string;
-    isRecurring: string;
+    isRecurring: boolean;
     frequency: string;
 }

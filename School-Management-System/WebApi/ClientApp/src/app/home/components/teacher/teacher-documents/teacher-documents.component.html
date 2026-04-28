@@ -1,0 +1,170 @@
+<p-toast *ngIf="!embedded"></p-toast>
+
+<app-page-header
+  *ngIf="!embedded"
+  section="Teacher Section"
+  page="Teacher Documents"
+  [subtitle]="teacherDisplayName">
+</app-page-header>
+
+<p-card class="app-page-filter-card teacher-documents-upload-card">
+  <div class="teacher-documents-upload-shell" *ngIf="teacher as currentTeacher; else loadingState">
+    <div class="teacher-documents-summary">
+      <div class="teacher-documents-summary-title">{{ currentTeacher.fullName }}</div>
+      <div class="teacher-documents-summary-meta">
+        <span>{{ currentTeacher.designation || 'Teacher' }}</span>
+        <span>{{ currentTeacher.contactNumber || '-' }}</span>
+        <span>{{ currentTeacher.email || '-' }}</span>
+      </div>
+    </div>
+
+    <div class="formgrid grid p-fluid">
+      <div class="field col-12 lg:col-3">
+        <label>Document Type <span class="text-danger">*</span></label>
+        <p-dropdown
+          [options]="documentTypes"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="documentType"
+          appendTo="body"
+          placeholder="Select document type">
+        </p-dropdown>
+      </div>
+
+      <div class="field col-12 lg:col-3">
+        <label>Document Title <span class="text-danger">*</span></label>
+        <input type="text" pInputText [(ngModel)]="documentTitle" placeholder="Example: Appointment letter" />
+      </div>
+
+      <div class="field col-12 lg:col-4">
+        <label>File <span class="text-danger">*</span></label>
+        <div class="teacher-file-picker">
+          <input
+            #documentFileInput
+            type="file"
+            class="teacher-file-native"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            (change)="onDocumentSelected($event)" />
+          <button
+            pButton
+            type="button"
+            icon="pi pi-paperclip"
+            label="Choose File"
+            class="p-button-outlined teacher-file-trigger"
+            (click)="documentFileInput.click()">
+          </button>
+          <span class="teacher-file-name" [title]="selectedDocument?.name || ''">
+            {{ selectedDocument?.name || 'No file selected' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="field col-12 lg:col-2 teacher-upload-action">
+        <label>Action</label>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-upload"
+          label="Upload"
+          class="teacher-upload-btn"
+          [loading]="isUploading"
+          [disabled]="isUploading"
+          (click)="uploadDocument()">
+        </button>
+      </div>
+    </div>
+  </div>
+</p-card>
+
+<div class="card app-page-table-card teacher-documents-table-card">
+  <div *ngIf="isLoading" class="app-empty-state">
+    Loading teacher documents...
+  </div>
+
+  <p-table
+    #teacherDocumentTable
+    *ngIf="!isLoading"
+    [value]="teacher?.documents || []"
+    styleClass="app-grid-table"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [tableStyle]="{ 'min-width': '64rem' }"
+    [globalFilterFields]="['documentType', 'documentTitle', 'originalFileName']">
+    <ng-template pTemplate="caption">
+      <span class="p-input-icon-left app-page-search" *ngIf="(teacher?.documents || []).length > 0">
+        <i class="pi pi-search"></i>
+        <input
+          #teacherDocumentSearch
+          type="text"
+          pInputText
+          placeholder="Search grid..."
+          (input)="teacherDocumentTable.filterGlobal(teacherDocumentSearch.value, 'contains')" />
+      </span>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Type</th>
+        <th>Title</th>
+        <th>File</th>
+        <th>Uploaded</th>
+        <th>Size</th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-document>
+      <tr>
+        <td>{{ document.documentType }}</td>
+        <td>{{ document.documentTitle }}</td>
+        <td>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-eye"
+            [label]="document.originalFileName"
+            class="p-button-text teacher-file-link"
+            (click)="viewDocument(document)">
+          </button>
+        </td>
+        <td>{{ document.uploadedDate | date: 'mediumDate' }}</td>
+        <td>{{ formatFileSize(document.fileSize) }}</td>
+        <td>
+          <div class="teacher-document-actions">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              pTooltip="View document"
+              tooltipPosition="top"
+              class="p-button-text app-grid-action-btn"
+              (click)="viewDocument(document)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              pTooltip="Remove document"
+              tooltipPosition="top"
+              class="p-button-text p-button-danger app-grid-action-btn"
+              (click)="deleteDocument(document.id)">
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center">No documents uploaded for this teacher.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<ng-template #loadingState>
+  <div class="app-empty-state">
+    Loading teacher profile...
+  </div>
+</ng-template>

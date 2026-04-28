@@ -7,8 +7,16 @@
 <form [formGroup]="classSectionFormGroup" class="manage-class-form">
     <div class="card app-page-table-card manage-class-card">
         <div class="table-container">
-            <p-table [value]="classList" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
-                [rowsPerPageOptions]="[15,30,50]" [scrollable]="true" scrollHeight="flex" paginatorDropdownAppendTo="body" [tableStyle]="{'min-width': '50rem'}">
+            <p-table #manageClassTable [value]="classList" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+                [rowsPerPageOptions]="[15,30,50]" [scrollable]="true" scrollHeight="flex" paginatorDropdownAppendTo="body" [tableStyle]="{'min-width': '50rem'}"
+                [globalFilterFields]="['name', 'roomNumber']">
+                <ng-template pTemplate="caption">
+                    <span class="p-input-icon-left app-page-search">
+                        <i class="pi pi-search"></i>
+                        <input #manageClassSearch type="text" pInputText placeholder="Search grid..."
+                            (input)="manageClassTable.filterGlobal(manageClassSearch.value, 'contains')" />
+                    </span>
+                </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Id</th>

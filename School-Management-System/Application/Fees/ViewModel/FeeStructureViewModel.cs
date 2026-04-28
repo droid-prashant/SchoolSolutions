@@ -10,6 +10,8 @@ namespace Application.Fees.ViewModel
     public class FeeStructureViewModel
     {
         public Guid Id { get; set; }
+        public string AcademicYearId { get; set; }
+        public string AcademicYearName { get; set; }
         public string FeeTypeId{ get; set; }
         public string FeeType { get; set; }
         public string ClassId { get; set; }

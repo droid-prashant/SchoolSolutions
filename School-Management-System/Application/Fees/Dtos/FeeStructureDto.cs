@@ -9,6 +9,7 @@ namespace Application.Fees.Dtos
 {
     public class FeeStructureDto
     {
+        public Guid AcademicYearId { get; set; }
         public Guid FeeTypeId { get; set; }
         public Guid ClassId { get; set; }
         public decimal Amount { get; set; }

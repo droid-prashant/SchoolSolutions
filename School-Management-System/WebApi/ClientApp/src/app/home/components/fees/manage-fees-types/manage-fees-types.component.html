@@ -6,8 +6,11 @@
 </app-page-header>
 <div class="app-page-toolbar manage-fee-toolbar">
     <div class="app-page-toolbar-left">
-        <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-            placeholder="Select Class"></p-dropdown>
+        <span *ngIf="currentAcademicYearName" class="app-page-context-pill">Academic Year: {{ currentAcademicYearName }}</span>
+        <app-student-filter
+            [showClassFilter]="true"
+            (loadStudents)="onLoadStudents($event)">
+        </app-student-filter>
     </div>
     <div class="app-page-toolbar-right">
         <p-button severity="success" label="New" icon="pi pi-plus" pTooltip="Add New Row"
@@ -15,9 +18,20 @@
     </div>
 </div>
 <div class="card app-page-table-card">
+        <div *ngIf="!hasLoadedClassFeeStructures" class="app-empty-state">
+            Select a class and click Load to view or create fee structures.
+        </div>
         <form [formGroup]="feeStructureForm">
-            <p-table [value]="feeStrucures" styleClass="app-grid-table" [paginator]="true" [rows]="15"
-                [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{ 'min-width': '50rem' }">
+            <p-table #feeStructureTable [value]="feeStrucures" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+                [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{ 'min-width': '50rem' }"
+                [globalFilterFields]="['feeType', 'amount', 'description', 'academicYearName']">
+                <ng-template pTemplate="caption">
+                    <span class="p-input-icon-left app-page-search" *ngIf="feeStrucures.length > 0">
+                        <i class="pi pi-search"></i>
+                        <input #feeStructureSearch type="text" pInputText placeholder="Search grid..."
+                            (input)="feeStructureTable.filterGlobal(feeStructureSearch.value, 'contains')" />
+                    </span>
+                </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Id</th>
@@ -66,10 +80,13 @@
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
-                    <tr>
+                    <tr *ngIf="hasLoadedClassFeeStructures">
                         <td colspan="5" class="text-center">No records found</td>
                     </tr>
                 </ng-template>
             </p-table>
         </form>
+        <div *ngIf="hasLoadedClassFeeStructures && !feeStrucures.length && !isNewRow && !isUpdateRow" class="app-empty-state">
+            No fee structure found for this class in the current academic year. Click New to create one.
+        </div>
     </div>

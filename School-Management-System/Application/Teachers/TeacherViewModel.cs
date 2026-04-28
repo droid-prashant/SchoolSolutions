@@ -95,4 +95,15 @@ namespace Application.Teachers
         public int AssignedTeachers { get; set; }
         public int ClassTeachers { get; set; }
     }
+
+    public class TeacherAccountViewModel
+    {
+        public bool IsAccountCreated { get; set; }
+        public Guid? UserId { get; set; }
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public bool IsActive { get; set; }
+        public List<string> Roles { get; set; } = new();
+    }
 }

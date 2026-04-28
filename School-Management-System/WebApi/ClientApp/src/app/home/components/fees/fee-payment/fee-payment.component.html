@@ -1,175 +1,429 @@
-<p-toast></p-toast>
-<app-page-header
-  section="Fees"
-  page="Fee Payment"
-  subtitle="Load fee summaries and collect payments using the standard workflow.">
-</app-page-header>
+<div class="fee-payment-page">
+  <p-toast></p-toast>
+  <app-page-header
+    section="Fees"
+    page="Fee Payment"
+    subtitle="Load fee summaries and collect payments using the standard workflow.">
+  </app-page-header>
 
-<p-card header="Student Fees">
-  <!-- 🔹 Class / Section / Student Dropdowns -->
-  <div class="grid mb-3">
-    <div class="col-12 md:col-4">
-      <p-dropdown [options]="classRooms" optionLabel="name" optionValue="id" (onChange)="onClassRoomChange($event)"
-        placeholder="Select Class" [style]="{ width: '100%' }">
-      </p-dropdown>
+  <p-card header="Student Fees">
+    <div *ngIf="currentAcademicYearName" class="mb-3">
+      <strong>Academic Year:</strong> {{ currentAcademicYearName }}
     </div>
 
-    <div class="col-12 md:col-4">
-      <p-dropdown [options]="sections" optionLabel="name" optionValue="classSectionId"
-        (onChange)="onClassSectionChange($event)" [disabled]="!isClassSelected" placeholder="Select Section"
-        [style]="{ width: '100%' }">
-      </p-dropdown>
+    <div class="mb-3">
+      <app-student-filter
+        [showClassFilter]="true"
+        [showSectionFilter]="true"
+        (loadStudents)="onLoadStudents($event)">
+      </app-student-filter>
     </div>
 
-    <div class="col-12 md:col-4">
-      <p-dropdown [options]="students" optionLabel="name" optionValue="id" [filter]="true" filterBy="name"
-        (onChange)="onStudentChange($event)" [disabled]="!isClassSectionSelected" placeholder="Select Student"
-        [style]="{ width: '100%' }">
-      </p-dropdown>
-    </div>
-  </div>
-
-  <!-- 🔹 Fee Summary Section -->
-  <div *ngIf="isFeeSummaryFetched">
-    <p-divider></p-divider>
-
-    <p-card subheader="Fee Summary" class="p-mb-3">
-      <div class="grid text-sm">
-        <div class="col-4">
-          <strong>Student Name:</strong> {{ studentFeeSummary.studentName }}
-        </div>
-        <div class="col-4">
-          <strong>Class:</strong> {{ studentFeeSummary.className }}
-        </div>
-        <div class="col-4">
-          <strong>Section:</strong> {{ studentFeeSummary.sectionName }}
-        </div>
-
-        <div class="col-4">
-          <strong>Total Fees:</strong> {{ studentFeeSummary.totalFees | currency:'NPR':'symbol' }}
-        </div>
-        <div class="col-4">
-          <strong>Total Paid:</strong> {{ studentFeeSummary.totalPaid | currency:'NPR':'symbol' }}
-        </div>
-        <div class="col-4">
-          <strong>Total Pending:</strong> {{ studentFeeSummary.totalPending | currency:'NPR':'symbol' }}
-        </div>
+    <div class="grid mb-3" *ngIf="students.length > 0">
+      <div class="col-12 md:col-6">
+        <p-dropdown
+          [options]="students"
+          optionLabel="displayName"
+          optionValue="studentEnrollmentId"
+          [filter]="true"
+          filterBy="displayName"
+          (onChange)="onStudentChange($event)"
+          [disabled]="!classSectionId"
+          placeholder="Select Student"
+          [style]="{ width: '100%' }">
+        </p-dropdown>
       </div>
+    </div>
 
-      <!-- 🔹 Select All Pending Button -->
-      <div class="mt-3">
-        <p-button label="Select All Pending Fees" icon="pi pi-check" (onClick)="selectAllPendingFees()"
-          [outlined]="true"></p-button>
-      </div>
+    <div *ngIf="classSectionId && hasLoadedStudentList && !students.length" class="app-empty-state mb-3">
+      No students found for the selected class and section in the current academic year.
+    </div>
 
-      <!-- 🔹 Fee Details Table -->
-      <p-table [value]="studentFeeSummary.feeDetails" styleClass="app-grid-table" [(selection)]="selectedFees" dataKey="id" [paginator]="true"
-        [rows]="15" [rowsPerPageOptions]="[15,30,50]" [scrollable]="true" scrollHeight="34rem" [responsiveLayout]="'scroll'"
-        (selectionChange)="onSelectionChange($event)">
+    <div *ngIf="isFeeSummaryFetched">
+      <p-divider></p-divider>
 
-        <ng-template pTemplate="header">
-          <tr>
-            <th style="width: 3rem">
-              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-            </th>
-            <th>Fee Type</th>
-            <th>Month</th>
-            <th>Total Amount</th>
-            <th>Paid Amount</th>
-            <th>Pending Amount</th>
-            <th>Status</th>
-          </tr>
-        </ng-template>
+      <p-card subheader="Fee Summary" class="p-mb-3">
+        <div class="grid text-sm">
+          <div class="col-4">
+            <strong>Academic Year:</strong> {{ studentFeeSummary?.academicYearName }}
+          </div>
+          <div class="col-4">
+            <strong>Student Name:</strong> {{ studentFeeSummary?.studentName }}
+          </div>
+          <div class="col-4">
+            <strong>Class:</strong> {{ studentFeeSummary?.className }}
+          </div>
+          <div class="col-4">
+            <strong>Section:</strong> {{ studentFeeSummary?.sectionName }}
+          </div>
+          <div class="col-4">
+            <strong>Total Fees:</strong> {{ studentFeeSummary?.totalFees | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Total Discount:</strong> {{ studentFeeSummary?.totalDiscount | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Total Fine:</strong> {{ studentFeeSummary?.totalFine | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Net Fees:</strong> {{ studentFeeSummary?.netFees | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Total Paid:</strong> {{ studentFeeSummary?.totalPaid | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Current Year Due:</strong> {{ studentFeeSummary?.totalPending | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Previous Year Due:</strong> {{ studentFeeSummary?.previousYearPending | currency:'NPR':'symbol' }}
+          </div>
+          <div class="col-4">
+            <strong>Grand Total Due:</strong> {{ studentFeeSummary?.grandTotalPending | currency:'NPR':'symbol' }}
+          </div>
+        </div>
 
-        <ng-template pTemplate="body" let-fee>
-          <tr [pSelectableRow]="fee">
-            <td>
-              <p-tableCheckbox [value]="fee"></p-tableCheckbox>
-            </td>
-            <td>{{ fee.feeType }}</td>
-            <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
-            <td>{{ fee.totalAmount | currency:'NPR':'symbol' }}</td>
-            <td>{{ fee.paidAmount | currency:'NPR':'symbol' }}</td>
-            <td>{{ fee.pendingAmount | currency:'NPR':'symbol' }}</td>
-            <td>
-              <p-tag [value]="fee.isPaid ? 'Paid' : 'Pending'" [severity]="fee.isPaid ? 'success' : 'warning'"></p-tag>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="7" class="text-center">No records found</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-card>
-
-    <!-- 🔹 Fee Payment Section -->
-    <p-divider></p-divider>
-    <p-card subheader="Fee Payment" class="p-mb-3">
-      <div class="selected-fees mt-4">
-        <h4 class="mb-3">Selected Fees to Pay</h4>
-        <form [formGroup]="feeForm">
-          <p-table [value]="selectedFees" styleClass="p-datatable-sm p-datatable-gridlines" [scrollable]="true">
+        <div *ngIf="(studentFeeSummary?.previousYearDues || []).length > 0" class="mt-3">
+          <h4 class="mb-2">Previous Year Dues</h4>
+          <p-table
+            #previousDueTable
+            [value]="studentFeeSummary?.previousYearDues || []"
+            styleClass="app-grid-table"
+            [globalFilterFields]="['academicYearName', 'pendingAmount']">
+            <ng-template pTemplate="caption">
+              <span class="p-input-icon-left app-page-search">
+                <i class="pi pi-search"></i>
+                <input #previousDueSearch type="text" pInputText placeholder="Search grid..."
+                  (input)="previousDueTable.filterGlobal(previousDueSearch.value, 'contains')" />
+              </span>
+            </ng-template>
             <ng-template pTemplate="header">
               <tr>
-                <th>Fee Type</th>
-                <th>Month</th>
-                <th>Total Amount</th>
+                <th>Academic Year</th>
                 <th>Pending Amount</th>
-                <th>Amount (NPR)</th>
               </tr>
             </ng-template>
-            <ng-template pTemplate="body" let-fee let-editing="editing" let-rowIndex="rowIndex">
+            <ng-template pTemplate="body" let-due>
               <tr>
-                <td>{{ fee.feeType }}</td>
-                <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
-                <td>{{fee.totalAmount}}</td>
-                <td>{{fee.pendingAmount}}</td>
-                <td [formGroup]="getFormGroupAt(rowIndex)">
-                  <p-cellEditor>
-                    <ng-template pTemplate="input">
-                      <input pInputText type="number" formControlName="amount" required />
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                      <input pInputText type="number" formControlName="amount" required />
-                    </ng-template>
-                  </p-cellEditor>
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td colspan="5" class="text-center">No records found</td>
+                <td>{{ due.academicYearName }}</td>
+                <td>{{ due.pendingAmount | currency:'NPR':'symbol' }}</td>
               </tr>
             </ng-template>
           </p-table>
 
-          <div class="total-summary flex justify-content-end mt-2">
-            <strong>Total: {{ getSelectedTotal() | currency:'NPR':'symbol' }}</strong>
+          <div class="mt-3">
+            <p-button
+              label="Select All Previous Year Pending Fees"
+              icon="pi pi-check"
+              (onClick)="selectAllPreviousYearPendingFees()"
+              [disabled]="!(studentFeeSummary?.previousYearFeeDetails || []).length"
+              [outlined]="true"
+              styleClass="mb-3">
+            </p-button>
+
+            <p-table
+              #previousFeeDetailTable
+              [value]="studentFeeSummary?.previousYearFeeDetails || []"
+              styleClass="app-grid-table"
+              [(selection)]="selectedPreviousYearFees"
+              dataKey="id"
+              [paginator]="true"
+              [rows]="10"
+              [rowsPerPageOptions]="[10, 20, 50]"
+              [scrollable]="true"
+              scrollHeight="24rem"
+              [responsiveLayout]="'scroll'"
+              (selectionChange)="onPreviousYearSelectionChange($event)"
+              [globalFilterFields]="['academicYearName', 'className', 'feeType', 'feeMonth', 'totalAmount', 'paidAmount', 'pendingAmount']">
+              <ng-template pTemplate="caption">
+                <span class="p-input-icon-left app-page-search" *ngIf="(studentFeeSummary?.previousYearFeeDetails || []).length > 0">
+                  <i class="pi pi-search"></i>
+                  <input #previousFeeDetailSearch type="text" pInputText placeholder="Search previous dues..."
+                    (input)="previousFeeDetailTable.filterGlobal(previousFeeDetailSearch.value, 'contains')" />
+                </span>
+              </ng-template>
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 3rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                  </th>
+                  <th>Academic Year</th>
+                  <th>Class</th>
+                  <th>Fee Type</th>
+                  <th>Month</th>
+                  <th>Total Amount</th>
+                  <th>Discount</th>
+                  <th>Fine</th>
+                  <th>Net Amount</th>
+                  <th>Paid Amount</th>
+                  <th>Pending Amount</th>
+                  <th>Status</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-fee>
+                <tr [pSelectableRow]="fee">
+                  <td>
+                    <p-tableCheckbox [value]="fee" [disabled]="fee.isPaid"></p-tableCheckbox>
+                  </td>
+                  <td>{{ fee.academicYearName }}</td>
+                  <td>{{ fee.className }}</td>
+                  <td>{{ fee.feeType }}</td>
+                  <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
+                  <td>{{ fee.totalAmount | currency:'NPR':'symbol' }}</td>
+                  <td>{{ fee.discountAmount | currency:'NPR':'symbol' }}</td>
+                  <td>{{ fee.fineAmount | currency:'NPR':'symbol' }}</td>
+                  <td>{{ fee.netAmount | currency:'NPR':'symbol' }}</td>
+                  <td>{{ fee.paidAmount | currency:'NPR':'symbol' }}</td>
+                  <td>{{ fee.pendingAmount | currency:'NPR':'symbol' }}</td>
+                  <td>
+                    <p-tag [value]="fee.isPaid ? 'Paid' : 'Pending'" [severity]="fee.isPaid ? 'success' : 'warning'"></p-tag>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="12" class="text-center">No previous year fee details found</td>
+                </tr>
+              </ng-template>
+            </p-table>
           </div>
+        </div>
 
-          <div class="payment-section flex align-items-end gap-3 flex-wrap mt-3">
-            <!--Will use this in future -->
-            <!-- <div>
-              <label class="block mb-1 font-medium">Payment Mode</label>
-              <p-dropdown [options]="paymentModes" optionLabel="name" optionValue="id" placeholder="Select Mode"
-                [style]="{ width: '200px' }">
-              </p-dropdown>
-            </div> -->
+        <div class="mt-3">
+          <p-button
+            label="Select All Pending Fees"
+            icon="pi pi-check"
+            (onClick)="selectAllPendingFees()"
+            [disabled]="!studentFeeSummary?.totalPending"
+            [outlined]="true">
+          </p-button>
+        </div>
 
-            <div class="flex align-items-end">
-              <p-button label="Pay Selected Fees" icon="pi pi-credit-card" (onClick)="paySelectedFees()"
-                styleClass="p-button-primary">
-              </p-button>
+        <p-table
+          #feeSummaryTable
+          [value]="studentFeeSummary?.feeDetails || []"
+          styleClass="app-grid-table"
+          [(selection)]="selectedCurrentYearFees"
+          dataKey="id"
+          [paginator]="true"
+          [rows]="15"
+          [rowsPerPageOptions]="[15, 30, 50]"
+          [scrollable]="true"
+          scrollHeight="34rem"
+          [responsiveLayout]="'scroll'"
+          (selectionChange)="onSelectionChange($event)"
+          [globalFilterFields]="['feeType', 'feeMonth', 'totalAmount', 'paidAmount', 'pendingAmount']">
+          <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="(studentFeeSummary?.feeDetails || []).length > 0">
+              <i class="pi pi-search"></i>
+              <input #feeSummarySearch type="text" pInputText placeholder="Search grid..."
+                (input)="feeSummaryTable.filterGlobal(feeSummarySearch.value, 'contains')" />
+            </span>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 3rem">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+              </th>
+              <th>Fee Type</th>
+              <th>Month</th>
+              <th>Total Amount</th>
+              <th>Discount</th>
+              <th>Fine</th>
+              <th>Net Amount</th>
+              <th>Paid Amount</th>
+              <th>Pending Amount</th>
+              <th>Status</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-fee>
+            <tr [pSelectableRow]="fee">
+              <td>
+                <p-tableCheckbox [value]="fee" [disabled]="fee.isPaid"></p-tableCheckbox>
+              </td>
+              <td>{{ fee.feeType }}</td>
+              <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
+              <td>{{ fee.totalAmount | currency:'NPR':'symbol' }}</td>
+              <td>{{ fee.discountAmount | currency:'NPR':'symbol' }}</td>
+              <td>{{ fee.fineAmount | currency:'NPR':'symbol' }}</td>
+              <td>{{ fee.netAmount | currency:'NPR':'symbol' }}</td>
+              <td>{{ fee.paidAmount | currency:'NPR':'symbol' }}</td>
+              <td>{{ fee.pendingAmount | currency:'NPR':'symbol' }}</td>
+              <td>
+                <p-tag [value]="fee.isPaid ? 'Paid' : 'Pending'" [severity]="fee.isPaid ? 'success' : 'warning'"></p-tag>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="10" class="text-center">No records found</td>
+            </tr>
+          </ng-template>
+        </p-table>
+
+        <div [formGroup]="adjustmentForm">
+          <div class="mt-4">
+            <h4 class="mb-3">Concession / Fine Adjustment</h4>
+            <div class="grid">
+              <div class="col-12 md:col-4">
+                <label for="adjustmentFeeId" class="block font-medium mb-2">Fee Item</label>
+                <p-dropdown
+                  inputId="adjustmentFeeId"
+                  formControlName="adjustmentFeeId"
+                  [options]="studentFeeSummary?.feeDetails || []"
+                  optionLabel="feeType"
+                  optionValue="id"
+                  placeholder="Select fee item"
+                  [style]="{ width: '100%' }">
+                  <ng-template let-fee pTemplate="item">
+                    <div>{{ fee.feeType }} {{ fee.feeMonth ? ('- ' + (fee.feeMonth | date:'MMM yyyy')) : '' }}</div>
+                  </ng-template>
+                </p-dropdown>
+              </div>
+
+              <div class="col-12 md:col-4">
+                <label for="concessionType" class="block font-medium mb-2">Type</label>
+                <p-dropdown
+                  inputId="concessionType"
+                  formControlName="concessionType"
+                  [options]="concessionTypes"
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select type"
+                  [style]="{ width: '100%' }">
+                </p-dropdown>
+              </div>
+
+              <div class="col-12 md:col-4">
+                <label for="adjustmentRemark" class="block font-medium mb-2">Remark</label>
+                <input id="adjustmentRemark" pInputText formControlName="adjustmentRemark" placeholder="Optional note" />
+              </div>
+
+              <div class="col-12 md:col-3">
+                <label for="discountAmount" class="block font-medium mb-2">Discount Amount</label>
+                <input id="discountAmount" pInputText type="number" min="0" formControlName="discountAmount" />
+              </div>
+
+              <div class="col-12 md:col-3">
+                <label for="fineAmount" class="block font-medium mb-2">Fine Amount</label>
+                <input id="fineAmount" pInputText type="number" min="0" formControlName="fineAmount" />
+              </div>
+
+              <div class="col-12 md:col-3 flex align-items-end">
+                <p-button
+                  label="Apply Adjustment"
+                  icon="pi pi-percentage"
+                  (onClick)="applyAdjustment()"
+                  [loading]="isApplyingAdjustment"
+                  [disabled]="isApplyingAdjustment"
+                  styleClass="p-button-secondary">
+                </p-button>
+              </div>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </p-card>
 
-      <ng-template #noSelection>
-        <p class="text-gray-500">Please select one or more fees from the table to pay.</p>
-      </ng-template>
-    </p-card>
-  </div>
-</p-card>
+      <p-divider></p-divider>
+      <p-card subheader="Fee Payment" class="p-mb-3">
+        <div class="selected-fees mt-4">
+          <h4 class="mb-3">Selected Fees to Pay</h4>
+          <div [formGroup]="paymentForm">
+            <div class="grid mb-3">
+              <div class="col-12 md:col-4">
+                <label for="paymentMode" class="block font-medium mb-2">Payment Mode</label>
+                <p-dropdown
+                  inputId="paymentMode"
+                  formControlName="paymentMode"
+                  [options]="paymentModes"
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select payment mode"
+                  [style]="{ width: '100%' }">
+                </p-dropdown>
+              </div>
+            </div>
+
+            <p-table #selectedFeeTable [value]="selectedFees" styleClass="p-datatable-sm p-datatable-gridlines" [scrollable]="true"
+              [globalFilterFields]="['feeType', 'feeMonth', 'totalAmount', 'pendingAmount']">
+              <ng-template pTemplate="caption">
+                <span class="p-input-icon-left app-page-search" *ngIf="selectedFees.length > 0">
+                  <i class="pi pi-search"></i>
+                  <input #selectedFeeSearch type="text" pInputText placeholder="Search grid..."
+                    (input)="selectedFeeTable.filterGlobal(selectedFeeSearch.value, 'contains')" />
+                </span>
+              </ng-template>
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Academic Year</th>
+                  <th>Fee Type</th>
+                  <th>Month</th>
+                  <th>Total Amount</th>
+                  <th>Pending Amount</th>
+                  <th>Amount (NPR)</th>
+                  <th>Action</th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-fee let-rowIndex="rowIndex">
+                <tr>
+                  <td>{{ fee.academicYearName }}</td>
+                  <td>{{ fee.feeType }}</td>
+                  <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
+                  <td>{{ fee.totalAmount | currency:'NPR':'symbol' }}</td>
+                  <td>{{ fee.pendingAmount | currency:'NPR':'symbol' }}</td>
+                  <td [formGroup]="getFormGroupAt(rowIndex)">
+                    <input
+                      pInputText
+                      type="number"
+                      min="0.01"
+                      [max]="fee.pendingAmount"
+                      formControlName="amount"
+                      required />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      pButton
+                      icon="pi pi-times"
+                      class="p-button-text p-button-danger"
+                      (click)="removeSelectedFee(fee.id)">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="7" class="text-center">No records found</td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            <div *ngIf="!selectedFees.length" class="app-empty-state mt-3">
+              Select one or more pending fee rows above to prepare a payment.
+            </div>
+
+            <div class="total-summary flex justify-content-end mt-2">
+              <strong>Total: {{ getSelectedTotal() | currency:'NPR':'symbol' }}</strong>
+            </div>
+
+            <div class="payment-section flex align-items-end gap-3 flex-wrap mt-3">
+              <div class="flex align-items-end">
+                <p-button
+                  label="Pay Selected Fees"
+                  icon="pi pi-credit-card"
+                  (onClick)="paySelectedFees()"
+                  [loading]="isPaying"
+                  [disabled]="!selectedFees.length || isPaying"
+                  styleClass="p-button-primary">
+                </p-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </p-card>
+</div>

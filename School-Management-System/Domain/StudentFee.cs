@@ -21,5 +21,6 @@ namespace Domain
         public bool IsPaid { get; set; } = false;
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public ICollection<FeeAdjustment> FeeAdjustments { get; set; } = new List<FeeAdjustment>();
     }
 }

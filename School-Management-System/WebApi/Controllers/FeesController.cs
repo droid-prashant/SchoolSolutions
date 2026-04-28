@@ -34,6 +34,13 @@ namespace WebApi.Controllers
             return result;
         }
 
+        [HttpGet]
+        [Route("GetFeeReport")]
+        public async Task<FeeReportViewModel?> GetFeeReport([FromQuery] string classSectionId, CancellationToken cancellationToken)
+        {
+            return await _feesService.GetFeeReport(classSectionId, cancellationToken);
+        }
+
         [HttpGet("{id}")]
         public string Get(int id)
         {
@@ -42,7 +49,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddFeeType")]
-        public Task AddFeeType([FromBody] FeeTypeDto feeTypeDto, CancellationToken cancellationToken)
+        public Task AddFeeType([FromBody] FeeTypeDto     feeTypeDto, CancellationToken cancellationToken)
         {
             return _feesService.AddFeeType(feeTypeDto, cancellationToken);
         }
@@ -52,6 +59,13 @@ namespace WebApi.Controllers
         public Task AddFeeStructure([FromBody] FeeStructureDto feeStructureDto, CancellationToken cancellationToken)
         {
             return _feesService.AddFeeStructure(feeStructureDto, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("ApplyFeeAdjustment")]
+        public Task ApplyFeeAdjustment([FromBody] FeeAdjustmentDto feeAdjustmentDto, CancellationToken cancellationToken)
+        {
+            return _feesService.ApplyFeeAdjustmentAsync(feeAdjustmentDto, cancellationToken);
         }
 
         [HttpPut]
@@ -70,9 +84,9 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("PayStudentFee")]
-        public Task PayStudentFeeAsync([FromQuery] Guid studentFeeId, decimal amount, string paymentMode, CancellationToken cancellationToken)
+        public Task PayStudentFeeAsync([FromQuery] Guid studentFeeId, [FromQuery] Guid currentStudentEnrollmentId, [FromQuery] decimal amount, [FromQuery] string paymentMode, CancellationToken cancellationToken)
         {
-            return _feesService.PayStudentFeeAsync(studentFeeId, amount, paymentMode, cancellationToken);
+            return _feesService.PayStudentFeeAsync(studentFeeId, currentStudentEnrollmentId, amount, paymentMode, cancellationToken);
         }
 
         [HttpGet]

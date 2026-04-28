@@ -35,6 +35,6 @@ namespace Application.Exams.ViewModels
         public string GradeTheory { get; set; }
         public string GradePractical { get; set; }
         public string FinalGrade { get; set; }
-        public decimal FinalGradePoint { get; set; }
+        public decimal? FinalGradePoint { get; set; }
     }
 }

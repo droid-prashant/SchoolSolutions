@@ -6,12 +6,14 @@ import { SharedModule } from "../../../shared/shared.module";
 import { ManageFeesTypesComponent } from "./manage-fees-types/manage-fees-types.component";
 import { FeesRoutingModule } from "./fees.route";
 import { FeePaymentComponent } from "./fee-payment/fee-payment.component";
+import { FeeReportComponent } from "./fee-report/fee-report.component";
 
 
 @NgModule({
     declarations: [
         ManageFeesTypesComponent,
-        FeePaymentComponent
+        FeePaymentComponent,
+        FeeReportComponent
     ],
     imports: [
         CommonModule,

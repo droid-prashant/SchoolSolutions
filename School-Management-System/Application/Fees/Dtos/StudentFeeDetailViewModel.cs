@@ -9,10 +9,14 @@ namespace Application.Fees.Dtos
     public class StudentFeeDetailViewModel
     {
         public string Id { get; set; }
+        public string AcademicYearName { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
         public string FeeType { get; set; } = string.Empty;
         public DateTime? FeeMonth { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal FineAmount { get; set; }
         public decimal TotalAmount { get; set; }
+        public decimal NetAmount { get; set; }
         public decimal PaidAmount { get; set; }
         public decimal PendingAmount { get; set; }
         public bool IsPaid { get; set; }

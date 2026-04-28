@@ -1,0 +1,232 @@
+<div class="promotion-preview-page">
+  <app-page-header
+    section="Student Section"
+    page="Promotion Preview">
+  </app-page-header>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-card class="app-page-filter-card">
+    <app-student-filter
+      [showClassFilter]="true"
+      [showSectionFilter]="true"
+      [showExamTerminalFilter]="true"
+      (loadStudents)="onLoadCandidates($event)">
+    </app-student-filter>
+  </p-card>
+
+  <p-card class="app-page-filter-card promotion-command-card">
+    <div class="promotion-command-shell">
+      <section class="promotion-command-panel promotion-command-panel-summary">
+        <div class="promotion-summary-strip">
+          <div class="promotion-summary-pill promotion-summary-pill-success">
+            <span class="promotion-summary-pill-label">Promotable</span>
+            <span class="promotion-summary-pill-value">{{ promotableCandidates.length }}</span>
+          </div>
+          <div class="promotion-summary-pill promotion-summary-pill-primary">
+            <span class="promotion-summary-pill-label">Promoted</span>
+            <span class="promotion-summary-pill-value">{{ promotedCandidates.length }}</span>
+          </div>
+          <div class="promotion-summary-pill promotion-summary-pill-warning">
+            <span class="promotion-summary-pill-label">Not Promotable</span>
+            <span class="promotion-summary-pill-value">{{ notPromotableCandidates.length }}</span>
+          </div>
+          <div class="promotion-summary-pill promotion-summary-pill-info">
+            <span class="promotion-summary-pill-label">Selected</span>
+            <span class="promotion-summary-pill-value">{{ selectedCandidates.length }}</span>
+          </div>
+        </div>
+        <div class="promotion-visibility-filters">
+          <button
+            pButton
+            type="button"
+            label="All"
+            class="promotion-filter-chip"
+            [class.promotion-filter-chip-active]="visibilityFilter === 'all'"
+            (click)="setVisibilityFilter('all')">
+          </button>
+          <button
+            pButton
+            type="button"
+            label="Promotable"
+            class="promotion-filter-chip"
+            [class.promotion-filter-chip-active]="visibilityFilter === 'promotable'"
+            (click)="setVisibilityFilter('promotable')">
+          </button>
+          <button
+            pButton
+            type="button"
+            label="Not Promotable"
+            class="promotion-filter-chip"
+            [class.promotion-filter-chip-active]="visibilityFilter === 'notPromotable'"
+            (click)="setVisibilityFilter('notPromotable')">
+          </button>
+        </div>
+      </section>
+
+      <section class="promotion-command-panel promotion-command-panel-target">
+        <div class="promotion-target-row">
+          <div class="promotion-target-field promotion-target-field-wide">
+            <label for="targetAcademicYear">Academic Year</label>
+            <p-dropdown
+              inputId="targetAcademicYear"
+              [options]="targetAcademicYearOptions"
+              optionLabel="yearName"
+              optionValue="id"
+              [showClear]="true"
+              appendTo="body"
+              placeholder="Select target year"
+              [(ngModel)]="targetAcademicYearId">
+            </p-dropdown>
+          </div>
+
+          <div class="promotion-target-field">
+            <label for="manualTargetClass">Manual Class</label>
+            <p-dropdown
+              inputId="manualTargetClass"
+              [options]="classOptions"
+              optionLabel="name"
+              optionValue="id"
+              [showClear]="true"
+              appendTo="body"
+              placeholder="Optional"
+              [(ngModel)]="manualTargetClassId"
+              (onChange)="onManualTargetClassChange($event.value)">
+            </p-dropdown>
+          </div>
+
+          <div class="promotion-target-field">
+            <label for="manualTargetSection">Manual Section</label>
+            <p-dropdown
+              inputId="manualTargetSection"
+              [options]="targetSectionOptions"
+              optionLabel="name"
+              optionValue="classSectionId"
+              [showClear]="true"
+              appendTo="body"
+              placeholder="Optional"
+              [(ngModel)]="manualTargetClassSectionId"
+              [disabled]="!manualTargetClassId">
+            </p-dropdown>
+          </div>
+        </div>
+      </section>
+
+      <section class="promotion-command-panel promotion-command-panel-actions">
+        <div class="promotion-action-grid">
+          <button
+            pButton
+            type="button"
+            class="promotion-action-button promotion-action-button-primary"
+            [label]="manualTargetClassSectionId ? 'Promote to Manual Target' : 'Promote Selected'"
+            icon="pi pi-arrow-right"
+            [loading]="isPromoting"
+            [disabled]="!targetAcademicYearId || selectedCandidates.length === 0 || isPromoting"
+            (click)="promoteSelected()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="promotion-action-button p-button-secondary"
+            label="Sustain Selected"
+            icon="pi pi-refresh"
+            [loading]="isPromoting"
+            [disabled]="!targetAcademicYearId || selectedCandidates.length === 0 || isPromoting"
+            (click)="sustainSelected()">
+          </button>
+        </div>
+      </section>
+    </div>
+  </p-card>
+
+  <div class="card app-page-table-card promotion-table-card">
+    <div *ngIf="!hasLoadedCandidates" class="app-empty-state">
+      Select class, section, and terminal, then click Load to preview promotion candidates.
+    </div>
+
+    <p-table
+      #promotionTable
+      *ngIf="hasLoadedCandidates"
+      [value]="visibleCandidates"
+      [(selection)]="selectedCandidates"
+      dataKey="studentEnrollmentId"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 8, 15, 20]"
+      [scrollable]="true"
+      scrollHeight="17.5rem"
+      [globalFilterFields]="['studentName', 'rollNumber', 'currentClassName', 'currentSectionName', 'resultStatus', 'targetClassName', 'targetSectionName', 'remarks']">
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="candidates.length > 0">
+          <i class="pi pi-search"></i>
+          <input #promotionSearch type="text" pInputText placeholder="Search grid..."
+            (input)="promotionTable.filterGlobal(promotionSearch.value, 'contains')" />
+        </span>
+      </ng-template>
+
+      <ng-template pTemplate="colgroup">
+        <colgroup>
+          <col style="width: 4rem" />
+          <col style="width: 6rem" />
+          <col style="width: 16rem" />
+          <col style="width: 10rem" />
+          <col style="width: 10rem" />
+          <col style="width: 9rem" />
+          <col style="width: 9rem" />
+          <col style="width: 11rem" />
+          <col style="width: 16rem" />
+          <col style="width: 25rem" />
+        </colgroup>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 4rem;">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th>Roll No</th>
+          <th>Student</th>
+          <th>Current Class</th>
+          <th>Current Section</th>
+          <th>Result</th>
+          <th>Promotable</th>
+          <th>Target Class</th>
+          <th>Target Section</th>
+          <th>Remarks</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-candidate>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="candidate" [disabled]="candidate.isAlreadyPromoted"></p-tableCheckbox>
+          </td>
+          <td class="promotion-cell-center">{{ candidate.rollNumber ?? '-' }}</td>
+          <td class="promotion-student-cell">{{ candidate.studentName }}</td>
+          <td>{{ candidate.currentClassName }}</td>
+          <td>{{ candidate.currentSectionName }}</td>
+          <td>
+            <p-tag [value]="candidate.resultStatus" [severity]="getStatusSeverity(candidate.resultStatus)"></p-tag>
+          </td>
+          <td>
+            <p-tag
+              [value]="candidate.isAlreadyPromoted ? 'Promoted' : (candidate.isPromotable ? 'Yes' : 'No')"
+              [severity]="candidate.isAlreadyPromoted ? 'info' : (candidate.isPromotable ? 'success' : 'warning')">
+            </p-tag>
+          </td>
+          <td>{{ candidate.targetClassName || '-' }}</td>
+          <td>{{ candidate.targetSectionName || '-' }}</td>
+          <td class="promotion-remarks-cell">{{ candidate.remarks }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="11" class="text-center">No promotion candidates found for the selected filters.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

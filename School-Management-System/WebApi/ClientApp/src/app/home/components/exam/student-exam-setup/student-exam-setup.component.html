@@ -20,9 +20,17 @@
 
 <div class="card">
     <form [formGroup]="studentExamSetupForm">
-        <p-table [value]="enrolledStudents" styleClass="app-grid-table" editMode="row" [paginator]="true" [rows]="15"
+        <p-table #studentExamSetupTable [value]="enrolledStudents" styleClass="app-grid-table" editMode="row" [paginator]="true" [rows]="15"
             [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
-            [tableStyle]="{ 'min-width': '50rem' }">
+            [tableStyle]="{ 'min-width': '50rem' }"
+            [globalFilterFields]="['name', 'class', 'registrationNumber', 'symbolNumber']">
+            <ng-template pTemplate="caption">
+                <span class="p-input-icon-left app-page-search" *ngIf="enrolledStudents.length > 0">
+                    <i class="pi pi-search"></i>
+                    <input #studentExamSetupSearch type="text" pInputText placeholder="Search grid..."
+                        (input)="studentExamSetupTable.filterGlobal(studentExamSetupSearch.value, 'contains')" />
+                </span>
+            </ng-template>
             <ng-template pTemplate="header">
                 <tr>
                     <th>Id</th>

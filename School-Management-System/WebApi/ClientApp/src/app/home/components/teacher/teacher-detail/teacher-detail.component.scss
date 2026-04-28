@@ -1,0 +1,93 @@
+.teacher-detail-summary-card {
+  margin-bottom: 1rem;
+}
+
+.teacher-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.teacher-detail-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.teacher-detail-name {
+  color: var(--app-text, #1f2937);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.teacher-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.92rem;
+}
+
+.teacher-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.teacher-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.teacher-detail-grid div {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--app-border, #dbe5f0);
+  border-radius: 0.75rem;
+  background: #ffffff;
+}
+
+.teacher-detail-grid span {
+  display: block;
+  margin-bottom: 0.28rem;
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.teacher-detail-grid strong {
+  display: block;
+  color: var(--app-text, #1f2937);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.teacher-detail-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.teacher-detail-table-card {
+  padding: 0;
+}
+
+.teacher-detail-section-title {
+  padding: 1rem 1rem 0;
+  color: var(--app-text, #1f2937);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+@media screen and (max-width: 960px) {
+  .teacher-detail-header {
+    flex-direction: column;
+  }
+
+  .teacher-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

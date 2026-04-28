@@ -4,6 +4,7 @@ import { ApiService } from '../../../../shared/api.service';
 import { FeeTypeDto } from '../model/dtos/feeType.dto';
 import { FeeTypeViewModel } from '../model/viewModels/feeType.viewModel';
 import { MessageService } from 'primeng/api';
+import { LookupService } from '../../../../shared/common/lookup.service';
 
 @Component({
   selector: 'app-fee-type',
@@ -19,7 +20,7 @@ export class FeeTypeComponent implements OnInit {
   submitButtonLabel: string = "Save";
   feeTypeId: string = "";
 
-  constructor(private _fb: FormBuilder, private _apiService: ApiService, private _messageService: MessageService) {
+  constructor(private _fb: FormBuilder, private _apiService: ApiService, private _lookupService: LookupService, private _messageService: MessageService) {
     this.feeTypeForm = _fb.group({
       name: ['', Validators.required],
       isRecurring: [false],
@@ -28,7 +29,7 @@ export class FeeTypeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.listFeeType();
+    this.listFeeType(true);
   }
 
   submit() {
@@ -79,15 +80,15 @@ export class FeeTypeComponent implements OnInit {
       complete: () => {
         this.isSubmitted = false;
         this.isUpdate = false;
-        this.listFeeType();
+        this.listFeeType(true);
         this.resetForm();
         this.submitButtonLabel = "Save";
       }
     });
   }
 
-  listFeeType() {
-    this._apiService.getFeeType().subscribe({
+  listFeeType(forceRefresh = false) {
+    this._lookupService.getfeeTypes(forceRefresh).subscribe({
       next: (res) => {
         this.feeTypes = res;
       },
@@ -100,11 +101,12 @@ export class FeeTypeComponent implements OnInit {
   editFeeType(row: FeeTypeViewModel) {
     this.isUpdate = true;
     this.feeTypeForm.patchValue(row);
-    if (row.isRecurring === 'Yes') {
-      this.feeTypeForm.get('isRecurring')?.setValue(true);
-    }
     this.feeTypeId = row.id
     this.submitButtonLabel = "Update";
+  }
+
+  isRecurringFee(value: boolean): string {
+    return value === true ? 'Yes' : 'No';
   }
 
   resetForm() {

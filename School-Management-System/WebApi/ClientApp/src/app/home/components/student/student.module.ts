@@ -4,6 +4,7 @@ import { CommonModule } from "@angular/common";
 import { RouterOutlet } from "@angular/router";
 import { ListStudentComponent } from "./list-student/list-student.component";
 import { AddStudentComponent } from "./add-student/add-student.component";
+import { PromotionPreviewComponent } from "./promotion-preview/promotion-preview.component";
 import { SharedModule } from "../../../shared/shared.module";
 import { StudentRoutingModule } from "./student.routes";
 import { HttpClientModule } from "@angular/common/http";
@@ -14,7 +15,8 @@ import { StudentFilterComponent } from "../student-filter/student-filter.compone
 @NgModule({
     declarations: [
         ListStudentComponent,
-        AddStudentComponent
+        AddStudentComponent,
+        PromotionPreviewComponent
     ],
     imports: [
         CommonModule,

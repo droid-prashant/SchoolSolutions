@@ -11,7 +11,7 @@ namespace Application.Fees.ViewModel
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string IsRecurring { get; set; }
+        public bool IsRecurring { get; set; }
         public string Frequency { get; set; }
     }
 }

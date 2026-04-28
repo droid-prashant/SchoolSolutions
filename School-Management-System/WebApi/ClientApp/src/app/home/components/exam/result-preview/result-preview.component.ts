@@ -100,7 +100,7 @@ export class ResultPreviewComponent implements OnInit, OnChanges {
     return { ad: adDate, bs: bsDate };
   }
 
-  getFinalGradePoint(gradePoint: number): string {
+  getFinalGradePoint(gradePoint: number | null | undefined): string {
     return this.formatSubjectGradePoint(gradePoint);
   }
 

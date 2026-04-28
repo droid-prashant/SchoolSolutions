@@ -6,12 +6,20 @@ import { SharedModule } from '../../../shared/shared.module';
 import { TeacherRoutingModule } from './teacher.routes';
 import { ListTeacherComponent } from './list-teacher/list-teacher.component';
 import { AddTeacherComponent } from './add-teacher/add-teacher.component';
+import { TeacherAccountComponent } from './teacher-account/teacher-account.component';
+import { TeacherAssignmentsComponent } from './teacher-assignments/teacher-assignments.component';
+import { TeacherDetailComponent } from './teacher-detail/teacher-detail.component';
+import { TeacherDocumentsComponent } from './teacher-documents/teacher-documents.component';
 import { NpDatepickerComponent } from '../../../shared/calender/np-datepicker/np-datepicker.component';
 
 @NgModule({
   declarations: [
     ListTeacherComponent,
-    AddTeacherComponent
+    AddTeacherComponent,
+    TeacherAccountComponent,
+    TeacherAssignmentsComponent,
+    TeacherDetailComponent,
+    TeacherDocumentsComponent
   ],
   imports: [
     CommonModule,

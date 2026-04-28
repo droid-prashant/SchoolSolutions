@@ -1,0 +1,139 @@
+<p-toast *ngIf="!embedded"></p-toast>
+
+<app-page-header
+  *ngIf="!embedded"
+  section="Teacher Section"
+  page="Teacher Account"
+  [subtitle]="teacherDisplayName">
+</app-page-header>
+
+<p-card class="app-page-filter-card teacher-account-summary-card" *ngIf="teacher as currentTeacher; else loadingState">
+  <div class="teacher-account-summary-header">
+    <div class="teacher-account-summary-title">{{ currentTeacher.fullName }}</div>
+    <div class="teacher-account-summary-meta">
+      <span>{{ currentTeacher.designation || 'Teacher' }}</span>
+      <span>{{ currentTeacher.contactNumber || '-' }}</span>
+      <span>{{ currentTeacher.email || '-' }}</span>
+    </div>
+  </div>
+
+  <div class="teacher-account-status-grid" *ngIf="account as currentAccount">
+    <div>
+      <span>Login Status</span>
+      <strong>{{ currentAccount.isAccountCreated ? 'Created' : 'Not Created' }}</strong>
+    </div>
+    <div>
+      <span>Username</span>
+      <strong>{{ currentAccount.userName || '-' }}</strong>
+    </div>
+    <div>
+      <span>Account State</span>
+      <strong>{{ currentAccount.isAccountCreated ? (currentAccount.isActive ? 'Active' : 'Inactive') : '-' }}</strong>
+    </div>
+    <div>
+      <span>Role</span>
+      <strong>{{ currentAccount.roles.length ? currentAccount.roles.join(', ') : '-' }}</strong>
+    </div>
+  </div>
+</p-card>
+
+<p-card class="app-page-filter-card teacher-account-form-card" *ngIf="!isLoading && account && !account.isAccountCreated">
+  <div class="teacher-account-form-header">
+    <div>
+      <h3>Create Teacher Login</h3>
+      <p>Create the application login separately from the teacher profile.</p>
+    </div>
+  </div>
+
+  <form [formGroup]="createAccountForm" class="formgrid grid p-fluid">
+    <div class="field col-12 lg:col-5">
+      <label>Username <span class="text-danger">*</span></label>
+      <input type="text" pInputText formControlName="userName" placeholder="Enter login username" />
+    </div>
+
+    <div class="field col-12 lg:col-5">
+      <label>Password <span class="text-danger">*</span></label>
+      <input type="password" pInputText formControlName="password" placeholder="Enter initial password" />
+    </div>
+
+    <div class="field col-12 lg:col-2 teacher-account-action">
+      <label>Action</label>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-user-plus"
+        label="Create"
+        class="p-button-success"
+        [loading]="isSaving"
+        [disabled]="isSaving || createAccountForm.invalid"
+        (click)="createAccount()">
+      </button>
+    </div>
+  </form>
+</p-card>
+
+<ng-container *ngIf="!isLoading && account?.isAccountCreated">
+  <p-card class="app-page-filter-card teacher-account-form-card">
+    <div class="teacher-account-form-header">
+      <div>
+        <h3>Account Controls</h3>
+        <p>Activate or deactivate the teacher login without changing the teacher profile.</p>
+      </div>
+    </div>
+
+    <div class="teacher-account-toggle-row">
+      <p-tag
+        [value]="account?.isActive ? 'Active' : 'Inactive'"
+        [severity]="account?.isActive ? 'success' : 'danger'">
+      </p-tag>
+      <button
+        pButton
+        type="button"
+        [icon]="account?.isActive ? 'pi pi-ban' : 'pi pi-check'"
+        [label]="account?.isActive ? 'Deactivate Login' : 'Activate Login'"
+        class="p-button-outlined"
+        [loading]="isSaving"
+        [disabled]="isSaving"
+        (click)="toggleAccountStatus()">
+      </button>
+    </div>
+  </p-card>
+
+  <p-card class="app-page-filter-card teacher-account-form-card">
+    <div class="teacher-account-form-header">
+      <div>
+        <h3>Reset Password</h3>
+        <p>Set a new password for the teacher login from this dedicated account module.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="resetPasswordForm" class="formgrid grid p-fluid">
+      <div class="field col-12 lg:col-10">
+        <label>New Password <span class="text-danger">*</span></label>
+        <input type="password" pInputText formControlName="newPassword" placeholder="Enter new password" />
+      </div>
+
+      <div class="field col-12 lg:col-2 teacher-account-action">
+        <label>Action</label>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-key"
+          label="Reset"
+          class="p-button-primary"
+          [loading]="isSaving"
+          [disabled]="isSaving || resetPasswordForm.invalid"
+          (click)="resetPassword()">
+        </button>
+      </div>
+    </form>
+  </p-card>
+</ng-container>
+
+<ng-template #loadingState>
+  <div class="card app-page-table-card">
+    <div class="app-empty-state">
+      {{ isLoading ? 'Loading teacher account...' : 'Teacher account could not be loaded.' }}
+    </div>
+  </div>
+</ng-template>

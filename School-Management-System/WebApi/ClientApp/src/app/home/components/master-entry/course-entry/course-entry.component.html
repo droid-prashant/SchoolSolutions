@@ -19,9 +19,17 @@
 </form>
 
 <div class="card">
-    <p-table [value]="courses" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+    <p-table #courseEntryTable [value]="courses" styleClass="app-grid-table" [paginator]="true" [rows]="15"
         [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
-        [tableStyle]="{ 'min-width': '50rem' }">
+        [tableStyle]="{ 'min-width': '50rem' }"
+        [globalFilterFields]="['name']">
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="courses.length > 0">
+                <i class="pi pi-search"></i>
+                <input #courseEntrySearch type="text" pInputText placeholder="Search grid..."
+                    (input)="courseEntryTable.filterGlobal(courseEntrySearch.value, 'contains')" />
+            </span>
+        </ng-template>
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

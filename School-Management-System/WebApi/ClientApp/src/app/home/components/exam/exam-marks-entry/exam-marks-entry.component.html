@@ -97,7 +97,15 @@
             </div>
 
             <div formArrayName="studentMarksLists" class="Markscard">
-                <p-table [value]="courses" responsiveLayout="scroll">
+                <p-table #courseMarksTable [value]="courses" responsiveLayout="scroll"
+                    [globalFilterFields]="['courseName', 'courseType', 'theoryFullMarks', 'practicalFullMarks']">
+                    <ng-template pTemplate="caption">
+                        <span class="p-input-icon-left app-page-search" *ngIf="courses.length > 0">
+                            <i class="pi pi-search"></i>
+                            <input #courseMarksSearch type="text" pInputText placeholder="Search grid..."
+                                (input)="courseMarksTable.filterGlobal(courseMarksSearch.value, 'contains')" />
+                        </span>
+                    </ng-template>
                     <ng-template pTemplate="header">
                         <tr>
                             <th style="width: 10%">Id</th>
@@ -188,9 +196,18 @@
 </form>
 
 <div class="card">
-    <p-table [value]="students" styleClass="app-grid-table" [paginator]="true" [rows]="15"
+    <p-table #examStudentTable [value]="students" styleClass="app-grid-table" [paginator]="true" [rows]="15"
         [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
-        [tableStyle]="{ 'min-width': '50rem' }">
+        [tableStyle]="{ 'min-width': '50rem' }"
+        [globalFilterFields]="['firstName', 'lastName', 'classRoomName', 'sectionName', 'rollNumber']">
+
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="students.length > 0">
+                <i class="pi pi-search"></i>
+                <input #examStudentSearch type="text" pInputText placeholder="Search grid..."
+                    (input)="examStudentTable.filterGlobal(examStudentSearch.value, 'contains')" />
+            </span>
+        </ng-template>
 
         <ng-template pTemplate="header">
             <tr>

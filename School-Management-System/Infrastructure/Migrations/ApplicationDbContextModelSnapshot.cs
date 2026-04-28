@@ -74,7 +74,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AcademicYears");
+                    b.ToTable("AcademicYears", (string)null);
                 });
 
             modelBuilder.Entity("Domain.ClassCourse", b =>
@@ -137,7 +137,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("ClassCourses");
+                    b.ToTable("ClassCourses", (string)null);
                 });
 
             modelBuilder.Entity("Domain.ClassRoom", b =>
@@ -183,7 +183,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ClassRooms");
+                    b.ToTable("ClassRooms", (string)null);
                 });
 
             modelBuilder.Entity("Domain.ClassSection", b =>
@@ -204,7 +204,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("ClassSections");
+                    b.ToTable("ClassSections", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Course", b =>
@@ -248,7 +248,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ClassRoomId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("Domain.District", b =>
@@ -283,7 +283,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProvinceId");
 
-                    b.ToTable("Districts");
+                    b.ToTable("Districts", (string)null);
                 });
 
             modelBuilder.Entity("Domain.ExamResult", b =>
@@ -338,7 +338,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentEnrollmentId");
 
-                    b.ToTable("ExamResults");
+                    b.ToTable("ExamResults", (string)null);
                 });
 
             modelBuilder.Entity("Domain.FeeAdjustment", b =>
@@ -387,13 +387,16 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentFeeId");
 
-                    b.ToTable("FeeAdjustments");
+                    b.ToTable("FeeAdjustments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.FeeStructure", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AcademicYearId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Amount")
@@ -435,11 +438,13 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AcademicYearId");
+
                     b.HasIndex("ClassId");
 
                     b.HasIndex("FeeTypeId");
 
-                    b.ToTable("FeeStructures");
+                    b.ToTable("FeeStructures", (string)null);
                 });
 
             modelBuilder.Entity("Domain.FeeType", b =>
@@ -485,7 +490,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FeeTypes");
+                    b.ToTable("FeeTypes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Municipality", b =>
@@ -539,7 +544,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("DistrictId");
 
-                    b.ToTable("Municipalities");
+                    b.ToTable("Municipalities", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Payment", b =>
@@ -592,7 +597,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentFeeId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Province", b =>
@@ -626,7 +631,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Provinces");
+                    b.ToTable("Provinces", (string)null);
                 });
 
             modelBuilder.Entity("Domain.School", b =>
@@ -707,7 +712,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Schools");
+                    b.ToTable("Schools", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Section", b =>
@@ -722,7 +727,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Sections", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Student", b =>
@@ -825,7 +830,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProvinceId");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("Domain.StudentCharacterCertificateLog", b =>
@@ -874,7 +879,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("StudentId1")
                         .IsUnique();
 
-                    b.ToTable("studentCharacterCertificateLogs");
+                    b.ToTable("studentCharacterCertificateLogs", (string)null);
                 });
 
             modelBuilder.Entity("Domain.StudentEnrollment", b =>
@@ -939,7 +944,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentEnrollments");
+                    b.ToTable("StudentEnrollments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.StudentFee", b =>
@@ -993,7 +998,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentEnrollmentId");
 
-                    b.ToTable("StudentFees");
+                    b.ToTable("StudentFees", (string)null);
                 });
 
             modelBuilder.Entity("Domain.StudentTransferCertificateLog", b =>
@@ -1042,7 +1047,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("StudentId1")
                         .IsUnique();
 
-                    b.ToTable("studentTransferCertificateLogs");
+                    b.ToTable("studentTransferCertificateLogs", (string)null);
                 });
 
             modelBuilder.Entity("Domain.SubjectMark", b =>
@@ -1125,7 +1130,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentEnrollmentId");
 
-                    b.ToTable("SubjectMarks");
+                    b.ToTable("SubjectMarks", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Teacher", b =>
@@ -1258,7 +1263,7 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("\"EmployeeCode\" IS NOT NULL AND \"EmployeeCode\" <> ''");
 
-                    b.ToTable("Teachers");
+                    b.ToTable("Teachers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.TeacherClassSection", b =>
@@ -1329,7 +1334,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TeacherId", "AcademicYearId", "ClassSectionId", "CourseId", "IsDeleted");
 
-                    b.ToTable("TeacherClassSections");
+                    b.ToTable("TeacherClassSections", (string)null);
                 });
 
             modelBuilder.Entity("Domain.TeacherDocument", b =>
@@ -1400,7 +1405,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TeacherId", "DocumentType", "IsDeleted");
 
-                    b.ToTable("TeacherDocuments");
+                    b.ToTable("TeacherDocuments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.TeacherExperience", b =>
@@ -1479,7 +1484,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("TeacherExperiences");
+                    b.ToTable("TeacherExperiences", (string)null);
                 });
 
             modelBuilder.Entity("Domain.TeacherQualification", b =>
@@ -1554,7 +1559,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TeacherId", "DegreeName", "InstitutionName", "PassedYear", "IsDeleted");
 
-                    b.ToTable("TeacherQualifications");
+                    b.ToTable("TeacherQualifications", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationRole", b =>
@@ -1880,6 +1885,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.FeeStructure", b =>
                 {
+                    b.HasOne("Domain.AcademicYear", "AcademicYear")
+                        .WithMany()
+                        .HasForeignKey("AcademicYearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.ClassRoom", "ClassRoom")
                         .WithMany("FeeStructures")
                         .HasForeignKey("ClassId")
@@ -1891,6 +1902,8 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("FeeTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AcademicYear");
 
                     b.Navigation("ClassRoom");
 

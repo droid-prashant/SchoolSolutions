@@ -6,9 +6,10 @@ import { routes } from './app.routes';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { tokenInterceptor } from './shared/tokenInterceptor.service';
+import { errorInterceptor } from './shared/errorInterceptor.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes), 
               provideAnimations(),
-              provideHttpClient(withInterceptors([tokenInterceptor]),withFetch()), MessageService, ConfirmationService]
+              provideHttpClient(withInterceptors([tokenInterceptor, errorInterceptor]),withFetch()), MessageService, ConfirmationService]
 };

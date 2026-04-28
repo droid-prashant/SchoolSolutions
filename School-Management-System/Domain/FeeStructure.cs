@@ -9,6 +9,8 @@ namespace Domain
     public class FeeStructure : AuditableEntry
     {
         public Guid Id { get; set; }
+        public Guid AcademicYearId { get; set; }
+        public AcademicYear AcademicYear { get; set; }
         public Guid FeeTypeId { get; set; }
         public FeeType FeeType { get; set; }
         public Guid ClassId { get; set; }

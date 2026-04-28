@@ -33,6 +33,7 @@
 <div class="card app-page-table-card manage-course-card">
   <form [formGroup]="classCourseForm">
     <p-table
+      #manageCourseTable
       styleClass="manage-course-table"
       [value]="classCourses"
       [paginator]="true"
@@ -41,7 +42,16 @@
       [scrollable]="true"
       scrollHeight="34rem"
       responsiveLayout="scroll"
-      [tableStyle]="{ 'min-width': '70rem' }">
+      [tableStyle]="{ 'min-width': '70rem' }"
+      [globalFilterFields]="['className', 'courseName', 'theoryCreditHour', 'theoryFullMarks', 'practicalCreditHour', 'practicalFullMarks']">
+
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="classCourses.length > 0">
+          <i class="pi pi-search"></i>
+          <input #manageCourseSearch type="text" pInputText placeholder="Search grid..."
+            (input)="manageCourseTable.filterGlobal(manageCourseSearch.value, 'contains')" />
+        </span>
+      </ng-template>
 
       <ng-template pTemplate="header">
         <tr>

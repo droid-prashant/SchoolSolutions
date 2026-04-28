@@ -1,0 +1,256 @@
+<p-toast *ngIf="!embedded"></p-toast>
+
+<app-page-header
+  *ngIf="!embedded"
+  section="Teacher Section"
+  page="Teacher Detail"
+  [subtitle]="teacher?.fullName || 'Loading teacher profile...'">
+</app-page-header>
+
+<p-card class="app-page-filter-card teacher-detail-summary-card" *ngIf="teacher as currentTeacher; else loadingState">
+  <div class="teacher-detail-header">
+    <div class="teacher-detail-identity">
+      <div class="teacher-detail-name">{{ currentTeacher.fullName }}</div>
+      <div class="teacher-detail-meta">
+        <span>{{ currentTeacher.employeeCode || '-' }}</span>
+        <span>{{ currentTeacher.designation || 'Teacher' }}</span>
+        <span>{{ currentTeacher.contactNumber || '-' }}</span>
+        <span>{{ currentTeacher.email || '-' }}</span>
+      </div>
+    </div>
+
+    <div class="teacher-detail-actions">
+      <p-tag
+        [value]="currentTeacher.isActive ? 'Active' : 'Inactive'"
+        [severity]="currentTeacher.isActive ? 'success' : 'danger'">
+      </p-tag>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-print"
+        label="Print"
+        class="p-button-outlined"
+        (click)="printTeacherDetail()">
+      </button>
+    </div>
+  </div>
+
+  <div class="teacher-detail-grid">
+    <div><span>Gender</span><strong>{{ getGender(currentTeacher.gender) }}</strong></div>
+    <div><span>Age</span><strong>{{ currentTeacher.age || '-' }}</strong></div>
+    <div><span>Date of Birth</span><strong>{{ currentTeacher.dateOfBirthNp || '-' }}</strong></div>
+    <div><span>Joining Date</span><strong>{{ currentTeacher.joiningDateNp || '-' }}</strong></div>
+    <div><span>Father Name</span><strong>{{ currentTeacher.fatherName || '-' }}</strong></div>
+    <div><span>Mother Name</span><strong>{{ currentTeacher.motherName || '-' }}</strong></div>
+    <div><span>Address</span><strong>{{ getAddressSummary(currentTeacher) }}</strong></div>
+    <div><span>Application User</span><strong>{{ currentTeacher.userId ? 'Created' : 'Not created' }}</strong></div>
+  </div>
+</p-card>
+
+<div class="teacher-detail-content" *ngIf="teacher as currentTeacher">
+  <div class="card app-page-table-card teacher-detail-table-card">
+    <div class="teacher-detail-section-title">Assignments</div>
+    <p-table
+      #assignmentTable
+      [value]="currentTeacher.assignments || []"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'min-width': '58rem' }"
+      [globalFilterFields]="['academicYearName', 'classRoomName', 'sectionName', 'courseName']">
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="(currentTeacher.assignments || []).length > 0">
+          <i class="pi pi-search"></i>
+          <input
+            #assignmentSearch
+            type="text"
+            pInputText
+            placeholder="Search grid..."
+            (input)="assignmentTable.filterGlobal(assignmentSearch.value, 'contains')" />
+        </span>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Academic Year</th>
+          <th>Class / Section</th>
+          <th>Course</th>
+          <th>Class Teacher</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-assignment>
+        <tr>
+          <td>{{ assignment.academicYearName }}</td>
+          <td>{{ assignment.classRoomName }}-{{ assignment.sectionName }}</td>
+          <td>{{ assignment.courseName }}</td>
+          <td>{{ assignment.isClassTeacher ? 'Yes' : 'No' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="text-center">No assignments found for this teacher.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="card app-page-table-card teacher-detail-table-card">
+    <div class="teacher-detail-section-title">Documents</div>
+    <p-table
+      #documentTable
+      [value]="currentTeacher.documents || []"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'min-width': '58rem' }"
+      [globalFilterFields]="['documentType', 'documentTitle', 'originalFileName']">
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="(currentTeacher.documents || []).length > 0">
+          <i class="pi pi-search"></i>
+          <input
+            #documentSearch
+            type="text"
+            pInputText
+            placeholder="Search grid..."
+            (input)="documentTable.filterGlobal(documentSearch.value, 'contains')" />
+        </span>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Type</th>
+          <th>Title</th>
+          <th>File</th>
+          <th>Uploaded</th>
+          <th>Size</th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-document>
+        <tr>
+          <td>{{ document.documentType }}</td>
+          <td>{{ document.documentTitle }}</td>
+          <td>{{ document.originalFileName }}</td>
+          <td>{{ document.uploadedDate | date: 'mediumDate' }}</td>
+          <td>{{ formatFileSize(document.fileSize) }}</td>
+          <td>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              pTooltip="View document"
+              tooltipPosition="top"
+              class="p-button-text app-grid-action-btn"
+              (click)="viewDocument(document)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">No documents uploaded for this teacher.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="card app-page-table-card teacher-detail-table-card">
+    <div class="teacher-detail-section-title">Qualifications</div>
+    <p-table
+      #qualificationTable
+      [value]="currentTeacher.qualifications || []"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'min-width': '58rem' }"
+      [globalFilterFields]="['degreeName', 'institutionName', 'boardOrUniversity', 'passedYear']">
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="(currentTeacher.qualifications || []).length > 0">
+          <i class="pi pi-search"></i>
+          <input
+            #qualificationSearch
+            type="text"
+            pInputText
+            placeholder="Search grid..."
+            (input)="qualificationTable.filterGlobal(qualificationSearch.value, 'contains')" />
+        </span>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Degree</th>
+          <th>Institution</th>
+          <th>Board/University</th>
+          <th>Passed Year</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-qualification>
+        <tr>
+          <td>{{ qualification.degreeName }}</td>
+          <td>{{ qualification.institutionName }}</td>
+          <td>{{ qualification.boardOrUniversity || '-' }}</td>
+          <td>{{ qualification.passedYear || '-' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="text-center">No qualifications recorded for this teacher.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="card app-page-table-card teacher-detail-table-card">
+    <div class="teacher-detail-section-title">Experience</div>
+    <p-table
+      #experienceTable
+      [value]="currentTeacher.experiences || []"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'min-width': '58rem' }"
+      [globalFilterFields]="['organizationName', 'designation', 'startDateNp', 'endDateNp']">
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="(currentTeacher.experiences || []).length > 0">
+          <i class="pi pi-search"></i>
+          <input
+            #experienceSearch
+            type="text"
+            pInputText
+            placeholder="Search grid..."
+            (input)="experienceTable.filterGlobal(experienceSearch.value, 'contains')" />
+        </span>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Organization</th>
+          <th>Designation</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-experience>
+        <tr>
+          <td>{{ experience.organizationName }}</td>
+          <td>{{ experience.designation }}</td>
+          <td>{{ experience.startDateNp || '-' }}</td>
+          <td>{{ experience.endDateNp || '-' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="text-center">No experience records for this teacher.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<ng-template #loadingState>
+  <div class="card app-page-table-card">
+    <div class="app-empty-state">
+      {{ isLoading ? 'Loading teacher detail...' : 'Teacher detail could not be loaded.' }}
+    </div>
+  </div>
+</ng-template>

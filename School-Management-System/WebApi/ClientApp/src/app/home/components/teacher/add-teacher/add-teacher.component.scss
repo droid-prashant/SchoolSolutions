@@ -32,80 +32,22 @@
   margin-top: 1rem;
 }
 
-.teacher-upload-action {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.teacher-next-step-card {
+  border: 1px dashed var(--app-border, #cbd5e1);
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
 }
 
-.teacher-document-panel {
-  padding: 0.25rem 0 0.65rem;
+.teacher-next-step-copy h4 {
+  margin: 0 0 0.35rem;
+  color: var(--app-text, #1f2937);
+  font-size: 1rem;
+  font-weight: 700;
 }
 
-.teacher-file-picker {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.65rem;
-  min-height: 2.55rem;
-  padding: 0.3rem;
-  border: 1px solid var(--app-border, #d1d5db);
-  border-radius: 0.8rem;
-  background: #ffffff;
-}
-
-.teacher-file-native {
-  display: none;
-}
-
-.teacher-file-trigger {
-  width: auto;
-  white-space: nowrap;
-}
-
-.teacher-file-name {
-  overflow: hidden;
+.teacher-next-step-copy p {
+  margin: 0;
   color: var(--app-text-muted, #64748b);
-  font-size: 0.88rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.teacher-upload-btn {
-  width: 100%;
-  min-height: 2.55rem;
-  background: linear-gradient(135deg, var(--app-accent, #0f766e) 0%, #0d9488 100%) !important;
-  border-color: var(--app-accent, #0f766e) !important;
-  color: #ffffff !important;
-}
-
-.teacher-upload-btn:hover {
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
-  border-color: #0d9488 !important;
-}
-
-:host ::ng-deep .teacher-document-table .p-datatable-tbody > tr > td {
-  vertical-align: middle;
-}
-
-:host ::ng-deep .teacher-file-link {
-  max-width: 20rem;
-  padding: 0;
-  color: var(--app-primary-strong, #1d4ed8);
-  text-align: left;
-}
-
-:host ::ng-deep .teacher-file-link .p-button-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.teacher-document-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  white-space: nowrap;
+  line-height: 1.55;
 }
 
 .text-danger {

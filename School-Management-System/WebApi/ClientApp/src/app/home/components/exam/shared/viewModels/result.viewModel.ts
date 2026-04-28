@@ -24,5 +24,5 @@ export interface StudentMarksViewModel {
   gradeTheory: string;
   gradePractical: string;
   finalGrade: string;
-  finalGradePoint: number;
+  finalGradePoint: number | null;
 }

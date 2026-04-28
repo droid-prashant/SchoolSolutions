@@ -10,6 +10,7 @@ import { ProvinceViewModel } from './models/master/master.ViewModel';
 import { MunicipalityViewModel } from './models/master/municipality.ViewModel';
 import { AcademicViewModel } from '../../home/components/master-entry/model/viewModels/academicYear.ViewModel';
 import { MasterApiService } from '../master-api.service';
+import { FeeTypeViewModel } from '../../home/components/master-entry/model/viewModels/feeType.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,7 @@ export class LookupService {
   private classRoomsCache: ClassRoomViewModel[] | null = null;
   private sectionsCache: SectionViewModel[] | null = null;
   private coursesCache: CourseViewModel[] | null = null;
+  private feesCache: FeeTypeViewModel[] | null = null;
 
   constructor(private apiService: ApiService, private masterApiService: MasterApiService) { }
 
@@ -237,6 +239,26 @@ export class LookupService {
       })
     );
   }
+  getfeeTypes(forceRefresh = false): Observable<FeeTypeViewModel[]> {
+    if (!forceRefresh) {
+      if (this.feesCache) {
+        return of(this.feesCache);
+      }
+
+      const stored = this.getFromStorage<FeeTypeViewModel[]>('lookup_fees');
+      if (stored) {
+        this.feesCache = stored;
+        return of(stored);
+      }
+    }
+
+    return this.apiService.getFeeType().pipe(
+      tap((response: FeeTypeViewModel[]) => {
+        this.feesCache = response ?? [];
+        this.saveToStorage('lookup_fees', this.feesCache);
+      })
+    );
+  }
 
   clearAllCache(): void {
     this.provincesCache = null;
@@ -244,15 +266,16 @@ export class LookupService {
     this.classRoomsCache = null;
     this.sectionsCache = null;
     this.coursesCache = null;
-
+    this.feesCache = null;
     localStorage.removeItem('lookup_provinces');
     localStorage.removeItem('lookup_academic_years');
     localStorage.removeItem('lookup_class_rooms');
     localStorage.removeItem('lookup_sections');
     localStorage.removeItem('lookup_courses');
+    localStorage.removeItem('lookup_fees');
   }
 
-  clearCacheByKey(key: 'provinces' | 'academicYears' | 'classRooms' | 'sections' | 'courses'): void {
+  clearCacheByKey(key: 'provinces' | 'academicYears' | 'classRooms' | 'sections' | 'courses' | 'fees'): void {
     switch (key) {
       case 'provinces':
         this.provincesCache = null;

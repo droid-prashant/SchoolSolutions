@@ -32,8 +32,16 @@
     </div>
 </form>
 <div class="card">
-    <p-table [value]="feeTypes" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
-        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
+    <p-table #feeTypeTable [value]="feeTypes" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}"
+        [globalFilterFields]="['name', 'frequency']">
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="feeTypes.length > 0">
+                <i class="pi pi-search"></i>
+                <input #feeTypeSearch type="text" pInputText placeholder="Search grid..."
+                    (input)="feeTypeTable.filterGlobal(feeTypeSearch.value, 'contains')" />
+            </span>
+        </ng-template>
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>
@@ -47,7 +55,7 @@
             <tr [pEditableRow]="row">
                 <td>{{ rowIndex + 1 }}</td>
                 <td>{{ row.name }}</td>
-                <td>{{row.isRecurring }}</td>
+                <td>{{isRecurringFee(row.isRecurring) }}</td>
                 <td>{{row.frequency}}</td>
                 <td><i pTooltip="edit" class="pi pi-pencil" (click)="editFeeType(row)"></i></td>
             </tr>

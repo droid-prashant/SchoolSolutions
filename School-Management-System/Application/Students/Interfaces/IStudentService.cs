@@ -22,5 +22,9 @@ namespace Application.Students.Interfaces
         Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRommId, CancellationToken cancellationToken);
         Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, CancellationToken cancellationToken);
         Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents(string classSectionId, CancellationToken cancellationToken);
+        Task<List<PromotionCandidateViewModel>> GetPromotionCandidates(string classSectionId, int examType, CancellationToken cancellationToken);
+        Task<PromotionExecutionResultViewModel> PromoteStudentsAsync(PromoteStudentsDto request, CancellationToken cancellationToken);
+        Task<PromotionExecutionResultViewModel> SustainStudentsAsync(PromoteStudentsDto request, CancellationToken cancellationToken);
+        Task<PromotionExecutionResultViewModel> ManuallyPromoteStudentsAsync(PromoteStudentsDto request, CancellationToken cancellationToken);
     }
 }

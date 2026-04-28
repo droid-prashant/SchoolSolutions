@@ -1,0 +1,127 @@
+<p-toast></p-toast>
+<app-page-header
+  section="Fees"
+  page="Fee Reports"
+  subtitle="Review class-wise fee collection status for the current academic year.">
+</app-page-header>
+
+<div class="app-page-toolbar">
+  <div class="app-page-toolbar-left">
+    <span *ngIf="currentAcademicYearName" class="app-page-context-pill">
+      Academic Year: {{ currentAcademicYearName }}
+    </span>
+    <app-student-filter
+      [showClassFilter]="true"
+      [showSectionFilter]="true"
+      (loadStudents)="onLoadReport($event)">
+    </app-student-filter>
+  </div>
+</div>
+
+<div class="card app-page-table-card">
+  <div *ngIf="!hasLoadedReport" class="app-empty-state">
+    Select a class and section, then click Load to view the fee report.
+  </div>
+
+  <div *ngIf="hasLoadedReport && feeReport">
+    <div class="grid mb-4 text-sm">
+      <div class="col-12 md:col-3">
+        <strong>Class:</strong> {{ feeReport.className }}
+      </div>
+      <div class="col-12 md:col-3">
+        <strong>Section:</strong> {{ feeReport.sectionName }}
+      </div>
+      <div class="col-12 md:col-3">
+        <strong>Total Students:</strong> {{ feeReport.totalStudents }}
+      </div>
+      <div class="col-12 md:col-3">
+        <strong>Academic Year:</strong> {{ feeReport.academicYearName }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Total Fees:</strong> {{ feeReport.totalFees | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Total Discount:</strong> {{ feeReport.totalDiscount | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Total Fine:</strong> {{ feeReport.totalFine | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Net Fees:</strong> {{ feeReport.netFees | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Total Paid:</strong> {{ feeReport.totalPaid | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Current Year Due:</strong> {{ feeReport.totalPending | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Previous Year Due:</strong> {{ feeReport.totalPreviousYearPending | currency:'NPR':'symbol' }}
+      </div>
+      <div class="col-12 md:col-4">
+        <strong>Grand Total Due:</strong> {{ feeReport.grandTotalPending | currency:'NPR':'symbol' }}
+      </div>
+    </div>
+
+    <p-table
+      #feeReportTable
+      [value]="feeReport.students"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="15"
+      [rowsPerPageOptions]="[15, 30, 50]"
+      [scrollable]="true"
+      scrollHeight="34rem"
+      [globalFilterFields]="['rollNumber', 'studentName', 'totalFees', 'totalPaid', 'totalPending']">
+      <ng-template pTemplate="caption">
+        <span class="p-input-icon-left app-page-search" *ngIf="feeReport.students.length > 0">
+          <i class="pi pi-search"></i>
+          <input #feeReportSearch type="text" pInputText placeholder="Search grid..."
+            (input)="feeReportTable.filterGlobal(feeReportSearch.value, 'contains')" />
+        </span>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Roll No</th>
+          <th>Student</th>
+          <th>Total Fees</th>
+          <th>Discount</th>
+          <th>Fine</th>
+          <th>Net Fees</th>
+          <th>Total Paid</th>
+          <th>Total Pending</th>
+          <th>Prev. Year Due</th>
+          <th>Grand Total Due</th>
+          <th>Status</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-student>
+        <tr>
+          <td>{{ student.rollNumber ?? '-' }}</td>
+          <td>{{ student.studentName }}</td>
+          <td>{{ student.totalFees | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.totalDiscount | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.totalFine | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.netFees | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.totalPaid | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.totalPending | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.previousYearPending | currency:'NPR':'symbol' }}</td>
+          <td>{{ student.grandTotalPending | currency:'NPR':'symbol' }}</td>
+          <td>
+            <p-tag
+              [value]="student.grandTotalPending > 0 ? 'Pending' : 'Cleared'"
+              [severity]="student.grandTotalPending > 0 ? 'warning' : 'success'">
+            </p-tag>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="11" class="text-center">No fee data found for this class and section.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

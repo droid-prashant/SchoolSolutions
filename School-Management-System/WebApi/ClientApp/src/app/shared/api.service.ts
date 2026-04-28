@@ -17,7 +17,9 @@ import { ResultViewModel } from '../home/components/exam/shared/viewModels/resul
 import { FeeTypeDto } from '../home/components/master-entry/model/dtos/feeType.dto';
 import { FeeTypeViewModel } from '../home/components/master-entry/model/viewModels/feeType.viewModel';
 import { FeeStructureDto } from '../home/components/fees/model/feeStructure.dto';
+import { FeeAdjustmentDto } from '../home/components/fees/model/feeAdjustment.dto';
 import { FeeStructureViewModel } from '../home/components/fees/model/feeStructure.viewModel';
+import { FeeReportViewModel } from '../home/components/fees/model/feeReport.viewModel';
 import { StudentFeeSummaryViewModel } from '../home/components/fees/model/studentFeeSummary.viewModel';
 import { ClassRoomDto } from '../home/components/master-entry/model/dtos/classRoom.dto';
 import { AcademicYearDto } from '../home/components/master-entry/model/dtos/academicYear.dto';
@@ -31,8 +33,11 @@ import { StudentCertificateLogViewModel } from '../home/components/certificate/m
 import { CertificateType } from '../home/components/certificate/model/certificateType.enum';
 import { StudentsByClassViewModel } from '../home/components/dashboard/model/studentsByClass.viewModel';
 import { SubjectMarksViewModel } from '../home/components/exam/shared/viewModels/student-marks.viewModel';
-import { TeacherDto, TeacherStatusDto } from '../home/components/teacher/shared/models/dtos/teacher.dto';
-import { TeacherDashboardViewModel, TeacherDocumentViewModel, TeacherViewModel } from '../home/components/teacher/shared/models/viewModels/teacher.viewModel';
+import { TeacherAccountCreateDto, TeacherAccountStatusDto, TeacherAssignmentCopyDto, TeacherClassSectionDto, TeacherDto, TeacherPasswordResetDto, TeacherStatusDto } from '../home/components/teacher/shared/models/dtos/teacher.dto';
+import { TeacherAccountViewModel, TeacherClassSectionViewModel, TeacherDashboardViewModel, TeacherDocumentViewModel, TeacherViewModel } from '../home/components/teacher/shared/models/viewModels/teacher.viewModel';
+import { PromotionCandidateViewModel } from '../home/components/student/shared/models/viewModels/promotionCandidate.viewModel';
+import { PromoteStudentsDto } from '../home/components/student/shared/models/dtos/promoteStudents.dto';
+import { PromotionExecutionResultViewModel } from '../home/components/student/shared/models/viewModels/promotionExecutionResult.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -95,6 +100,10 @@ export class ApiService {
     return this._httpClient.get<TeacherViewModel[]>(this.baseUrl + `api/Teacher/GetTeachers?${academicYearQuery}includeInactive=${includeInactive}`);
   }
 
+  getTeacherById(teacherId: string): Observable<TeacherViewModel> {
+    return this._httpClient.get<TeacherViewModel>(this.baseUrl + `api/Teacher/GetTeacherById?teacherId=${teacherId}`);
+  }
+
   updateTeacherStatus(teacherId: string, status: TeacherStatusDto): Observable<void> {
     return this._httpClient.put<void>(this.baseUrl + `api/Teacher/UpdateTeacherStatus?teacherId=${teacherId}`, status);
   }
@@ -103,12 +112,49 @@ export class ApiService {
     return this._httpClient.delete<void>(this.baseUrl + `api/Teacher/DeleteTeacher?teacherId=${teacherId}`);
   }
 
+  getTeacherAssignments(teacherId: string, academicYearId?: string | null): Observable<TeacherClassSectionViewModel[]> {
+    const academicYearQuery = academicYearId ? `&academicYearId=${academicYearId}` : '';
+    return this._httpClient.get<TeacherClassSectionViewModel[]>(this.baseUrl + `api/Teacher/GetTeacherAssignments?teacherId=${teacherId}${academicYearQuery}`);
+  }
+
+  addTeacherAssignment(teacherId: string, assignment: TeacherClassSectionDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + `api/Teacher/AddTeacherAssignment?teacherId=${teacherId}`, assignment);
+  }
+
+  updateTeacherAssignment(teacherId: string, assignment: TeacherClassSectionDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Teacher/UpdateTeacherAssignment?teacherId=${teacherId}`, assignment);
+  }
+
+  deleteTeacherAssignment(assignmentId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/Teacher/DeleteTeacherAssignment?assignmentId=${assignmentId}`);
+  }
+
+  copyTeacherAssignments(teacherId: string, payload: TeacherAssignmentCopyDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + `api/Teacher/CopyTeacherAssignments?teacherId=${teacherId}`, payload);
+  }
+
   uploadTeacherDocument(formData: FormData): Observable<TeacherDocumentViewModel> {
     return this._httpClient.post<TeacherDocumentViewModel>(this.baseUrl + "api/Teacher/UploadTeacherDocument", formData);
   }
 
   deleteTeacherDocument(documentId: string): Observable<void> {
     return this._httpClient.delete<void>(this.baseUrl + `api/Teacher/DeleteTeacherDocument?documentId=${documentId}`);
+  }
+
+  getTeacherAccount(teacherId: string): Observable<TeacherAccountViewModel> {
+    return this._httpClient.get<TeacherAccountViewModel>(this.baseUrl + `api/Teacher/GetTeacherAccount?teacherId=${teacherId}`);
+  }
+
+  createTeacherUser(teacherId: string, account: TeacherAccountCreateDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + `api/Teacher/CreateTeacherUser?teacherId=${teacherId}`, account);
+  }
+
+  updateTeacherUserStatus(teacherId: string, status: TeacherAccountStatusDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Teacher/UpdateTeacherUserStatus?teacherId=${teacherId}`, status);
+  }
+
+  resetTeacherUserPassword(teacherId: string, payload: TeacherPasswordResetDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Teacher/ResetTeacherUserPassword?teacherId=${teacherId}`, payload);
   }
 
   getStudents(): Observable<StudentViewModel[]> {
@@ -217,6 +263,10 @@ export class ApiService {
     return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeStructure", feeStructure);
   }
 
+  applyFeeAdjustment(feeAdjustment: FeeAdjustmentDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Fees/ApplyFeeAdjustment", feeAdjustment);
+  }
+
   ensureMissingMonthlyFees(studentEnrollmentIdGuid: string): Observable<void> {
     return this._httpClient.get<void>(this.baseUrl + `api/Fees/EnsureMissingMonthlyFees?studentEnrollmentIdGuid=${studentEnrollmentIdGuid}`);
   }
@@ -229,12 +279,19 @@ export class ApiService {
     return this._httpClient.get<FeeStructureViewModel[]>(this.baseUrl + `api/Fees/GetFeeStructure?classId=${classId}`);
   }
 
+  getFeeReport(classSectionId: string): Observable<FeeReportViewModel> {
+    return this._httpClient.get<FeeReportViewModel>(this.baseUrl + `api/Fees/GetFeeReport?classSectionId=${classSectionId}`);
+  }
+
   getStudentFeeSummary(studentId: string, classSectionId: string): Observable<StudentFeeSummaryViewModel> {
     return this._httpClient.get<StudentFeeSummaryViewModel>(this.baseUrl + `api/Fees/GetStudentFeeSummary?studentEnrollmentIdGuid=${studentId}&classSectionId=${classSectionId}`);
   }
 
-  payFees(paymentRequest: any): Observable<void> {
-    return this._httpClient.post<void>(this.baseUrl + "api/Fees/AddFeeStructure", paymentRequest);
+  payStudentFee(studentFeeId: string, currentStudentEnrollmentId: string, amount: number, paymentMode: string): Observable<void> {
+    return this._httpClient.post<void>(
+      this.baseUrl + `api/Fees/PayStudentFee?studentFeeId=${studentFeeId}&currentStudentEnrollmentId=${currentStudentEnrollmentId}&amount=${amount}&paymentMode=${encodeURIComponent(paymentMode)}`,
+      {}
+    );
   }
   assignRegistrationAndSymbolNumber(paymentRequest: StudentStudentEnrollmentDto, studentEnrollmentId: string): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + `api/Student/AssignRegistrationAndSymbolNumber?studentEnrollmentId=${studentEnrollmentId}`, paymentRequest);
@@ -242,6 +299,22 @@ export class ApiService {
 
   getRegAndSymCompliantStudent(classSectionId: any): Observable<StudentEnrollmentViewModel[]> {
     return this._httpClient.get<StudentEnrollmentViewModel[]>(this.baseUrl + `api/Student/GetRegAndSymCompliantEnrolledStudents?classSectionId=${classSectionId}`);
+  }
+
+  getPromotionCandidates(classSectionId: string, examType: number): Observable<PromotionCandidateViewModel[]> {
+    return this._httpClient.get<PromotionCandidateViewModel[]>(this.baseUrl + `api/Student/GetPromotionCandidates?classSectionId=${classSectionId}&examType=${examType}`);
+  }
+
+  promoteStudents(request: PromoteStudentsDto): Observable<PromotionExecutionResultViewModel> {
+    return this._httpClient.post<PromotionExecutionResultViewModel>(this.baseUrl + "api/Student/PromoteStudents", request);
+  }
+
+  sustainStudents(request: PromoteStudentsDto): Observable<PromotionExecutionResultViewModel> {
+    return this._httpClient.post<PromotionExecutionResultViewModel>(this.baseUrl + "api/Student/SustainStudents", request);
+  }
+
+  manuallyPromoteStudents(request: PromoteStudentsDto): Observable<PromotionExecutionResultViewModel> {
+    return this._httpClient.post<PromotionExecutionResultViewModel>(this.baseUrl + "api/Student/ManuallyPromoteStudents", request);
   }
 
   addStudentCertificateLog(certificateLog: StudentCertificateDto): Observable<void> {

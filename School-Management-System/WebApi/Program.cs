@@ -2,6 +2,7 @@ using Application;
 using Infrastructure;
 using Infrastructure.Extension;
 using Infrastructure.Services;
+using WebApi.Middleware;
 using WebApi.Seeds;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ app.UseCors(builder => builder
               .AllowAnyMethod());
 app.UseStaticFiles();
 //app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthorization();
 

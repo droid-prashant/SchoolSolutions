@@ -12,6 +12,7 @@ export interface StudentViewModel {
     classRoomName: string;
     sectionId: string
     sectionName: string;
+    displayName?: string;
     address: string;
     dateOfBirthNp: string;
     dateOfBirthEn: string;

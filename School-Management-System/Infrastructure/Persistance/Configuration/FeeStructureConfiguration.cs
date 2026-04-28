@@ -14,6 +14,10 @@ namespace Infrastructure.Persistance.Configuration
         public void Configure(EntityTypeBuilder<FeeStructure> builder)
         {
             builder.HasKey(x => x.Id);
+            builder.HasOne(x => x.AcademicYear)
+                   .WithMany()
+                   .HasForeignKey(x => x.AcademicYearId);
+
             builder.HasMany(x => x.StudentFees)
                    .WithOne(x => x.FeeStructure)
                    .HasForeignKey(x => x.FeeStructureId);

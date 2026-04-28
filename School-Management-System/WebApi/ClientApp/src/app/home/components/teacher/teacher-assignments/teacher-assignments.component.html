@@ -1,0 +1,217 @@
+<app-page-header
+  *ngIf="!embedded"
+  section="Teacher Section"
+  page="Teacher Assignments"
+  [subtitle]="teacherDisplayName">
+</app-page-header>
+
+<p-card class="app-page-filter-card teacher-assignments-shell">
+  <div class="teacher-assignments-summary" *ngIf="teacher">
+    <div class="teacher-assignments-summary-title">{{ teacher.fullName }}</div>
+    <div class="teacher-assignments-summary-meta">
+      <span>{{ teacher.designation || 'Teacher' }}</span>
+      <span>{{ teacher.contactNumber || '-' }}</span>
+      <span>{{ teacher.email || '-' }}</span>
+      <span *ngIf="currentAcademicYearName">{{ currentAcademicYearName }}</span>
+    </div>
+  </div>
+</p-card>
+
+<p-card class="app-page-filter-card teacher-assignment-form-card">
+  <div class="teacher-form-card-header">
+    <div>
+      <h3>{{ isEditMode ? 'Edit Assignment' : 'Add Assignment' }}</h3>
+      <p>Manage class, section, course, and class teacher responsibility separately from the teacher profile.</p>
+    </div>
+    <button
+      *ngIf="isEditMode"
+      pButton
+      type="button"
+      label="Cancel"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="cancelEdit()">
+    </button>
+  </div>
+
+  <form [formGroup]="assignmentForm" class="formgrid grid p-fluid">
+    <div class="field col-12 lg:col-3">
+      <label>Class <span class="text-danger">*</span></label>
+      <p-dropdown
+        [options]="classRooms"
+        optionLabel="name"
+        optionValue="id"
+        formControlName="classRoomId"
+        appendTo="body"
+        placeholder="Select class">
+      </p-dropdown>
+    </div>
+
+    <div class="field col-12 lg:col-3">
+      <label>Section <span class="text-danger">*</span></label>
+      <p-dropdown
+        [options]="selectedSections"
+        optionLabel="name"
+        optionValue="sectionId"
+        formControlName="sectionId"
+        appendTo="body"
+        placeholder="Select section"
+        [disabled]="!assignmentForm.get('classRoomId')?.value">
+      </p-dropdown>
+    </div>
+
+    <div class="field col-12 lg:col-3">
+      <label>Course <span class="text-danger">*</span></label>
+      <p-dropdown
+        [options]="courses"
+        optionLabel="name"
+        optionValue="id"
+        formControlName="courseId"
+        appendTo="body"
+        placeholder="Select course">
+      </p-dropdown>
+    </div>
+
+    <div class="field col-12 lg:col-8">
+      <label>Remarks</label>
+      <input type="text" pInputText formControlName="remarks" placeholder="Optional assignment note" />
+    </div>
+
+    <div class="field col-12 lg:col-2 teacher-assignment-checkbox">
+      <label>Role</label>
+      <div class="teacher-checkbox-row">
+        <p-checkbox inputId="classTeacherFlag" formControlName="isClassTeacher" [binary]="true"></p-checkbox>
+        <label for="classTeacherFlag">Class Teacher</label>
+      </div>
+    </div>
+
+    <div class="field col-12 lg:col-2 teacher-assignment-submit">
+      <label>Action</label>
+      <button
+        pButton
+        type="button"
+        [label]="isEditMode ? 'Update' : 'Add'"
+        [icon]="isEditMode ? 'pi pi-check' : 'pi pi-plus'"
+        class="p-button-success"
+        [loading]="isSaving"
+        [disabled]="assignmentForm.invalid || isSaving"
+        (click)="saveAssignment()">
+      </button>
+    </div>
+  </form>
+</p-card>
+
+<p-card
+  *ngIf="previousAcademicYearId"
+  class="app-page-filter-card teacher-assignment-reference-card">
+  <div class="teacher-reference-header">
+    <div>
+      <h3>Previous Year Reference</h3>
+      <p>Review {{ previousAcademicYearName }} assignments and copy them into the current session when needed.</p>
+    </div>
+    <button
+      pButton
+      type="button"
+      [label]="'Copy to ' + currentAcademicYearName"
+      icon="pi pi-copy"
+      class="p-button-outlined"
+      [loading]="isCopying"
+      [disabled]="assignments.length > 0 || previousYearAssignments.length === 0 || isCopying"
+      (click)="copyPreviousYearAssignments()">
+    </button>
+  </div>
+
+  <div class="teacher-reference-list" *ngIf="previousYearAssignments.length > 0; else noPreviousAssignments">
+    <div class="teacher-reference-pill" *ngFor="let assignment of previousYearAssignments">
+      <strong>{{ assignment.classRoomName }}-{{ assignment.sectionName }}</strong>
+      <span>{{ assignment.courseName }}</span>
+      <span *ngIf="assignment.isClassTeacher" class="teacher-reference-role">Class Teacher</span>
+    </div>
+  </div>
+
+  <ng-template #noPreviousAssignments>
+    <div class="app-empty-state">
+      No active assignments were found in {{ previousAcademicYearName }} for this teacher.
+    </div>
+  </ng-template>
+</p-card>
+
+<div class="card app-page-table-card teacher-assignment-table-card">
+  <div *ngIf="isLoading" class="app-empty-state">
+    Loading teacher assignments...
+  </div>
+
+  <p-table
+    #assignmentTable
+    *ngIf="!isLoading"
+    [value]="assignments"
+    styleClass="app-grid-table"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [tableStyle]="{ 'min-width': '68rem' }"
+    [globalFilterFields]="['academicYearName', 'classRoomName', 'sectionName', 'courseName', 'remarks']">
+    <ng-template pTemplate="caption">
+      <span class="p-input-icon-left app-page-search" *ngIf="assignments.length > 0">
+        <i class="pi pi-search"></i>
+        <input #assignmentSearch type="text" pInputText placeholder="Search grid..."
+          (input)="assignmentTable.filterGlobal(assignmentSearch.value, 'contains')" />
+      </span>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Class</th>
+        <th>Section</th>
+        <th>Course</th>
+        <th>Class Teacher</th>
+        <th>Status</th>
+        <th>Remarks</th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-assignment>
+      <tr>
+        <td>{{ assignment.classRoomName }}</td>
+        <td>{{ assignment.sectionName }}</td>
+        <td>{{ assignment.courseName }}</td>
+        <td>
+          <p-tag [value]="assignment.isClassTeacher ? 'Yes' : 'No'" [severity]="assignment.isClassTeacher ? 'success' : 'info'"></p-tag>
+        </td>
+        <td>
+          <p-tag [value]="assignment.isActive ? 'Active' : 'Inactive'" [severity]="assignment.isActive ? 'success' : 'warning'"></p-tag>
+        </td>
+        <td>{{ assignment.remarks || '-' }}</td>
+        <td>
+          <div class="app-grid-actions">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              pTooltip="Edit assignment"
+              tooltipPosition="top"
+              class="p-button-text app-grid-action-btn"
+              (click)="editAssignment(assignment)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              pTooltip="Remove assignment"
+              tooltipPosition="top"
+              class="p-button-text p-button-danger app-grid-action-btn"
+              (click)="deleteAssignment(assignment)">
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center">No assignments found for this teacher in the current session.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

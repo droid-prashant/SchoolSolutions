@@ -85,6 +85,34 @@ namespace WebApi.Controllers
             return result;
         }
 
+        [HttpGet]
+        [Route("GetPromotionCandidates")]
+        public async Task<List<PromotionCandidateViewModel>> GetPromotionCandidates([FromQuery] string classSectionId, [FromQuery] int examType, CancellationToken cancellationToken)
+        {
+            return await _studentService.GetPromotionCandidates(classSectionId, examType, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("PromoteStudents")]
+        public async Task<PromotionExecutionResultViewModel> PromoteStudents([FromBody] PromoteStudentsDto request, CancellationToken cancellationToken)
+        {
+            return await _studentService.PromoteStudentsAsync(request, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("SustainStudents")]
+        public async Task<PromotionExecutionResultViewModel> SustainStudents([FromBody] PromoteStudentsDto request, CancellationToken cancellationToken)
+        {
+            return await _studentService.SustainStudentsAsync(request, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("ManuallyPromoteStudents")]
+        public async Task<PromotionExecutionResultViewModel> ManuallyPromoteStudents([FromBody] PromoteStudentsDto request, CancellationToken cancellationToken)
+        {
+            return await _studentService.ManuallyPromoteStudentsAsync(request, cancellationToken);
+        }
+
         [HttpPost]
         [Route("AddStudentCertificateLog")]
         public async Task AddStudentCertificateLog([FromBody] StudentCertificateDto studentCertificateDto, CancellationToken cancellationToken)

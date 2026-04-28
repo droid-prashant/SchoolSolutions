@@ -1,5 +1,6 @@
 export interface FeeStructureDto {
-    feeTyepId: string;
+    academicYearId: string;
+    feeTypeId: string;
     classId: string;
     amount: number;
     description: string;

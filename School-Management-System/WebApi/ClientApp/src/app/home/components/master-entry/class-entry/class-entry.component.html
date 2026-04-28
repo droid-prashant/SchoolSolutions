@@ -23,8 +23,16 @@
     </div>
 </form>
 <div class="card">
-    <p-table [value]="classList" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
-        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}">
+    <p-table #classEntryTable [value]="classList" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}"
+        [globalFilterFields]="['name', 'orderNumber']">
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="classList.length > 0">
+                <i class="pi pi-search"></i>
+                <input #classEntrySearch type="text" pInputText placeholder="Search grid..."
+                    (input)="classEntryTable.filterGlobal(classEntrySearch.value, 'contains')" />
+            </span>
+        </ng-template>
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>

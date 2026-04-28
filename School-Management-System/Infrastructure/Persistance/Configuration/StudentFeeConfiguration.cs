@@ -17,6 +17,9 @@ namespace Infrastructure.Persistance.Configuration
             builder.HasMany(x => x.Payments)
                    .WithOne(x => x.StudentFee)
                    .HasForeignKey(x => x.StudentFeeId);
+            builder.HasMany(x => x.FeeAdjustments)
+                   .WithOne(x => x.StudentFee)
+                   .HasForeignKey(x => x.StudentFeeId);
         }
     }
 }

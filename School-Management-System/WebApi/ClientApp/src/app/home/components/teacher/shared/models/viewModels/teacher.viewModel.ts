@@ -87,3 +87,13 @@ export interface TeacherDashboardViewModel {
   assignedTeachers: number;
   classTeachers: number;
 }
+
+export interface TeacherAccountViewModel {
+  isAccountCreated: boolean;
+  userId?: string;
+  userName?: string;
+  email?: string;
+  phoneNumber?: string;
+  isActive: boolean;
+  roles: string[];
+}

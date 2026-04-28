@@ -136,7 +136,6 @@ namespace Infrastructure.Services
 
                 MapQualifications(teacher, teacherDto.Qualifications);
                 MapExperiences(teacher, teacherDto.Experiences);
-                await MapAssignmentsAsync(teacher, teacherDto.Assignments, cancellationToken);
 
                 await _context.Teachers.AddAsync(teacher, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -160,9 +159,6 @@ namespace Infrastructure.Services
             try
             {
                 var teacher = await _context.Teachers
-                    .Include(x => x.Qualifications)
-                    .Include(x => x.Experiences)
-                    .Include(x => x.TeacherClassSections)
                     .FirstOrDefaultAsync(x => x.Id == teacherGuid && !x.IsDeleted, cancellationToken);
 
                 if (teacher == null)
@@ -202,9 +198,8 @@ namespace Infrastructure.Services
                 teacher.JoiningDateEn = teacherDto.JoiningDateEn ?? string.Empty;
                 teacher.ModifiedBy = GetCurrentUserId();
 
-                SyncQualifications(teacher, teacherDto.Qualifications);
-                SyncExperiences(teacher, teacherDto.Experiences);
-                await SyncAssignmentsAsync(teacher, teacherDto.Assignments, cancellationToken);
+                await ReplaceQualificationsAsync(teacher.Id, teacherDto.Qualifications, cancellationToken);
+                await ReplaceExperiencesAsync(teacher.Id, teacherDto.Experiences, cancellationToken);
 
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
@@ -291,6 +286,226 @@ namespace Infrastructure.Services
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task<List<TeacherClassSectionViewModel>> GetTeacherAssignmentsAsync(string teacherId, string? academicYearId, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(teacherId, out var teacherGuid))
+            {
+                throw new Exception("Invalid teacher id");
+            }
+
+            Guid? academicYearGuid = Guid.TryParse(academicYearId, out var parsedAcademicYearId) ? parsedAcademicYearId : null;
+
+            var query = _context.TeacherClassSections
+                .Include(x => x.AcademicYear)
+                .Include(x => x.Course)
+                .Include(x => x.ClassSection)
+                    .ThenInclude(x => x.ClassRoom)
+                .Include(x => x.ClassSection)
+                    .ThenInclude(x => x.Section)
+                .Where(x => x.TeacherId == teacherGuid && !x.IsDeleted);
+
+            if (academicYearGuid.HasValue)
+            {
+                query = query.Where(x => x.AcademicYearId == academicYearGuid.Value);
+            }
+
+            return await query
+                .OrderByDescending(x => x.IsActive)
+                .ThenByDescending(x => x.IsClassTeacher)
+                .ThenBy(x => x.AcademicYear.YearName)
+                .ThenBy(x => x.ClassSection.ClassRoom.OrderNumber)
+                .ThenBy(x => x.ClassSection.Section.Name)
+                .ThenBy(x => x.Course.Name)
+                .Select(x => new TeacherClassSectionViewModel
+                {
+                    Id = x.Id,
+                    AcademicYearId = x.AcademicYearId,
+                    AcademicYearName = x.AcademicYear.YearName,
+                    ClassSectionId = x.ClassSectionId,
+                    ClassRoomId = x.ClassSection.ClassId,
+                    ClassRoomName = x.ClassSection.ClassRoom.Name,
+                    SectionId = x.ClassSection.SectionId,
+                    SectionName = x.ClassSection.Section.Name,
+                    CourseId = x.CourseId,
+                    CourseName = x.Course.Name,
+                    IsClassTeacher = x.IsClassTeacher,
+                    IsActive = x.IsActive,
+                    Remarks = x.Remarks
+                })
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task AddTeacherAssignmentAsync(string teacherId, TeacherClassSectionDto assignment, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(teacherId, out var teacherGuid))
+            {
+                throw new Exception("Invalid teacher id");
+            }
+
+            var teacherExists = await _context.Teachers.AnyAsync(x => x.Id == teacherGuid && !x.IsDeleted, cancellationToken);
+            if (!teacherExists)
+            {
+                throw new Exception("Teacher not found");
+            }
+
+            await ValidateAssignmentAsync(teacherGuid, assignment, null, cancellationToken);
+
+            var entity = new TeacherClassSection
+            {
+                Id = Guid.NewGuid(),
+                TeacherId = teacherGuid,
+                AcademicYearId = Guid.Parse(assignment.AcademicYearId),
+                ClassSectionId = Guid.Parse(assignment.ClassSectionId),
+                CourseId = Guid.Parse(assignment.CourseId),
+                IsClassTeacher = assignment.IsClassTeacher,
+                Remarks = assignment.Remarks ?? string.Empty,
+                IsActive = true,
+                CreatedBy = GetCurrentUserId(),
+                ModifiedBy = GetCurrentUserId()
+            };
+
+            await _context.TeacherClassSections.AddAsync(entity, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task UpdateTeacherAssignmentAsync(string teacherId, TeacherClassSectionDto assignment, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(teacherId, out var teacherGuid))
+            {
+                throw new Exception("Invalid teacher id");
+            }
+
+            if (!Guid.TryParse(assignment.Id, out var assignmentGuid))
+            {
+                throw new Exception("Invalid teacher assignment id");
+            }
+
+            var entity = await _context.TeacherClassSections
+                .FirstOrDefaultAsync(x => x.Id == assignmentGuid && x.TeacherId == teacherGuid && !x.IsDeleted, cancellationToken);
+
+            if (entity == null)
+            {
+                throw new Exception("Teacher assignment not found");
+            }
+
+            await ValidateAssignmentAsync(teacherGuid, assignment, assignmentGuid, cancellationToken);
+
+            entity.AcademicYearId = Guid.Parse(assignment.AcademicYearId);
+            entity.ClassSectionId = Guid.Parse(assignment.ClassSectionId);
+            entity.CourseId = Guid.Parse(assignment.CourseId);
+            entity.IsClassTeacher = assignment.IsClassTeacher;
+            entity.Remarks = assignment.Remarks ?? string.Empty;
+            entity.IsActive = true;
+            entity.IsDeleted = false;
+            entity.ModifiedBy = GetCurrentUserId();
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteTeacherAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(assignmentId, out var assignmentGuid))
+            {
+                throw new Exception("Invalid teacher assignment id");
+            }
+
+            var entity = await _context.TeacherClassSections
+                .FirstOrDefaultAsync(x => x.Id == assignmentGuid && !x.IsDeleted, cancellationToken);
+
+            if (entity == null)
+            {
+                throw new Exception("Teacher assignment not found");
+            }
+
+            entity.IsDeleted = true;
+            entity.IsActive = false;
+            entity.DeletedOn = DateTime.UtcNow;
+            entity.DeletedBy = GetCurrentUserId();
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task CopyTeacherAssignmentsAsync(string teacherId, TeacherAssignmentCopyDto teacherAssignmentCopyDto, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(teacherId, out var teacherGuid))
+            {
+                throw new Exception("Invalid teacher id");
+            }
+
+            if (!Guid.TryParse(teacherAssignmentCopyDto.SourceAcademicYearId, out var sourceAcademicYearId) ||
+                !Guid.TryParse(teacherAssignmentCopyDto.TargetAcademicYearId, out var targetAcademicYearId))
+            {
+                throw new Exception("Invalid academic year selection");
+            }
+
+            if (sourceAcademicYearId == targetAcademicYearId)
+            {
+                throw new InvalidOperationException("Source and target academic year cannot be the same");
+            }
+
+            var teacherExists = await _context.Teachers.AnyAsync(x => x.Id == teacherGuid && !x.IsDeleted, cancellationToken);
+            if (!teacherExists)
+            {
+                throw new Exception("Teacher not found");
+            }
+
+            var targetAssignmentsExist = await _context.TeacherClassSections.AnyAsync(x =>
+                x.TeacherId == teacherGuid &&
+                x.AcademicYearId == targetAcademicYearId &&
+                !x.IsDeleted,
+                cancellationToken);
+            if (targetAssignmentsExist)
+            {
+                throw new InvalidOperationException("Current session assignments already exist for this teacher. Clear them before copying previous year assignments.");
+            }
+
+            var sourceAssignments = await _context.TeacherClassSections
+                .Where(x =>
+                    x.TeacherId == teacherGuid &&
+                    x.AcademicYearId == sourceAcademicYearId &&
+                    x.IsActive &&
+                    !x.IsDeleted)
+                .OrderByDescending(x => x.IsClassTeacher)
+                .ThenBy(x => x.ClassSectionId)
+                .ThenBy(x => x.CourseId)
+                .ToListAsync(cancellationToken);
+
+            if (sourceAssignments.Count == 0)
+            {
+                throw new InvalidOperationException("No active assignments were found in the previous academic year.");
+            }
+
+            foreach (var sourceAssignment in sourceAssignments)
+            {
+                var assignmentDto = new TeacherClassSectionDto
+                {
+                    AcademicYearId = targetAcademicYearId.ToString(),
+                    ClassSectionId = sourceAssignment.ClassSectionId.ToString(),
+                    CourseId = sourceAssignment.CourseId.ToString(),
+                    IsClassTeacher = sourceAssignment.IsClassTeacher,
+                    Remarks = sourceAssignment.Remarks
+                };
+
+                await ValidateAssignmentAsync(teacherGuid, assignmentDto, null, cancellationToken);
+
+                await _context.TeacherClassSections.AddAsync(new TeacherClassSection
+                {
+                    Id = Guid.NewGuid(),
+                    TeacherId = teacherGuid,
+                    AcademicYearId = targetAcademicYearId,
+                    ClassSectionId = sourceAssignment.ClassSectionId,
+                    CourseId = sourceAssignment.CourseId,
+                    IsClassTeacher = sourceAssignment.IsClassTeacher,
+                    Remarks = sourceAssignment.Remarks,
+                    IsActive = true,
+                    CreatedBy = GetCurrentUserId(),
+                    ModifiedBy = GetCurrentUserId()
+                }, cancellationToken);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task<TeacherDocumentViewModel> AddTeacherDocumentAsync(TeacherDocumentDto teacherDocumentDto, CancellationToken cancellationToken)
         {
             if (!Guid.TryParse(teacherDocumentDto.TeacherId, out var teacherId))
@@ -355,6 +570,126 @@ namespace Infrastructure.Services
             document.DeletedOn = DateTime.UtcNow;
             document.DeletedBy = GetCurrentUserId();
             await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<TeacherAccountViewModel> GetTeacherAccountAsync(string teacherId, CancellationToken cancellationToken)
+        {
+            var teacher = await GetTeacherEntityAsync(teacherId, cancellationToken);
+            if (!teacher.UserId.HasValue)
+            {
+                return new TeacherAccountViewModel
+                {
+                    IsAccountCreated = false
+                };
+            }
+
+            var user = await _userManager.FindByIdAsync(teacher.UserId.Value.ToString());
+            if (user == null)
+            {
+                return new TeacherAccountViewModel
+                {
+                    IsAccountCreated = false
+                };
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            return new TeacherAccountViewModel
+            {
+                IsAccountCreated = true,
+                UserId = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                IsActive = user.IsActive,
+                Roles = roles.ToList()
+            };
+        }
+
+        public async Task CreateTeacherUserAsync(string teacherId, TeacherAccountCreateDto teacherAccountCreateDto, CancellationToken cancellationToken)
+        {
+            var teacher = await GetTeacherEntityAsync(teacherId, cancellationToken);
+            if (teacher.UserId.HasValue)
+            {
+                throw new Exception("Teacher user already exists");
+            }
+
+            if (string.IsNullOrWhiteSpace(teacherAccountCreateDto.UserName) || string.IsNullOrWhiteSpace(teacherAccountCreateDto.Password))
+            {
+                throw new Exception("Username and password are required");
+            }
+
+            var userExists = await _userManager.FindByNameAsync(teacherAccountCreateDto.UserName.Trim());
+            if (userExists != null)
+            {
+                throw new Exception("Username already exists");
+            }
+
+            var userId = await CreateTeacherUserAsync(
+                teacher,
+                teacherAccountCreateDto.UserName.Trim(),
+                teacherAccountCreateDto.Password);
+
+            teacher.UserId = userId;
+            teacher.ModifiedBy = GetCurrentUserId();
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task UpdateTeacherUserStatusAsync(string teacherId, TeacherAccountStatusDto teacherAccountStatusDto, CancellationToken cancellationToken)
+        {
+            var teacher = await GetTeacherEntityAsync(teacherId, cancellationToken);
+            if (!teacher.UserId.HasValue)
+            {
+                throw new Exception("Teacher user account has not been created");
+            }
+
+            var user = await _userManager.FindByIdAsync(teacher.UserId.Value.ToString());
+            if (user == null)
+            {
+                throw new Exception("Teacher user not found");
+            }
+
+            user.IsActive = teacherAccountStatusDto.IsActive;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
+            }
+        }
+
+        public async Task ResetTeacherUserPasswordAsync(string teacherId, TeacherPasswordResetDto teacherPasswordResetDto, CancellationToken cancellationToken)
+        {
+            var teacher = await GetTeacherEntityAsync(teacherId, cancellationToken);
+            if (!teacher.UserId.HasValue)
+            {
+                throw new Exception("Teacher user account has not been created");
+            }
+
+            if (string.IsNullOrWhiteSpace(teacherPasswordResetDto.NewPassword))
+            {
+                throw new Exception("New password is required");
+            }
+
+            var user = await _userManager.FindByIdAsync(teacher.UserId.Value.ToString());
+            if (user == null)
+            {
+                throw new Exception("Teacher user not found");
+            }
+
+            IdentityResult result;
+            if (await _userManager.HasPasswordAsync(user))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                result = await _userManager.ResetPasswordAsync(user, token, teacherPasswordResetDto.NewPassword);
+            }
+            else
+            {
+                result = await _userManager.AddPasswordAsync(user, teacherPasswordResetDto.NewPassword);
+            }
+
+            if (!result.Succeeded)
+            {
+                throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
+            }
         }
 
         public async Task<TeacherDashboardViewModel> GetTeacherDashboardAsync(string? academicYearId, CancellationToken cancellationToken)
@@ -463,6 +798,37 @@ namespace Infrastructure.Services
 
         private async Task<Guid> CreateTeacherUserAsync(TeacherDto teacherDto)
         {
+            return await CreateTeacherUserAsync(
+                teacherDto.FirstName,
+                teacherDto.LastName,
+                teacherDto.Email,
+                teacherDto.ContactNumber,
+                BuildTeacherAddress(teacherDto),
+                teacherDto.UserName!,
+                teacherDto.Password!);
+        }
+
+        private async Task<Guid> CreateTeacherUserAsync(Teacher teacher, string userName, string password)
+        {
+            return await CreateTeacherUserAsync(
+                teacher.FirstName,
+                teacher.LastName,
+                teacher.Email,
+                teacher.ContactNumber,
+                BuildTeacherAddress(teacher),
+                userName,
+                password);
+        }
+
+        private async Task<Guid> CreateTeacherUserAsync(
+            string firstName,
+            string lastName,
+            string? email,
+            string? contactNumber,
+            string? address,
+            string userName,
+            string password)
+        {
             if (!await _roleManager.RoleExistsAsync(TeacherRoleName))
             {
                 await _roleManager.CreateAsync(new ApplicationRole { Name = TeacherRoleName, Description = "Teacher role" });
@@ -470,17 +836,17 @@ namespace Infrastructure.Services
 
             var user = new ApplicationUser
             {
-                UserName = teacherDto.UserName,
-                Email = teacherDto.Email,
-                PhoneNumber = teacherDto.ContactNumber,
-                FirstName = teacherDto.FirstName,
-                LastName = teacherDto.LastName,
-                ShortName = $"{teacherDto.FirstName.FirstOrDefault()}{teacherDto.LastName.FirstOrDefault()}".ToUpper(),
-                Address = BuildTeacherAddress(teacherDto),
+                UserName = userName,
+                Email = email,
+                PhoneNumber = contactNumber,
+                FirstName = firstName,
+                LastName = lastName,
+                ShortName = $"{firstName.FirstOrDefault()}{lastName.FirstOrDefault()}".ToUpper(),
+                Address = address,
                 IsActive = true
             };
 
-            var result = await _userManager.CreateAsync(user, teacherDto.Password);
+            var result = await _userManager.CreateAsync(user, password);
             if (!result.Succeeded)
             {
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
@@ -513,6 +879,29 @@ namespace Infrastructure.Services
             if (teacherDto.WardNo.HasValue)
             {
                 addressParts.Add($"Ward {teacherDto.WardNo.Value}");
+            }
+
+            return string.Join(", ", addressParts);
+        }
+
+        private static string BuildTeacherAddress(Teacher teacher)
+        {
+            var addressParts = new List<string>();
+            if (teacher.ProvinceId.HasValue)
+            {
+                addressParts.Add($"Province {teacher.ProvinceId.Value}");
+            }
+            if (teacher.DistrictId.HasValue)
+            {
+                addressParts.Add($"District {teacher.DistrictId.Value}");
+            }
+            if (teacher.MunicipalityId.HasValue)
+            {
+                addressParts.Add($"Municipality {teacher.MunicipalityId.Value}");
+            }
+            if (teacher.WardNo.HasValue)
+            {
+                addressParts.Add($"Ward {teacher.WardNo.Value}");
             }
 
             return string.Join(", ", addressParts);
@@ -576,54 +965,68 @@ namespace Infrastructure.Services
             }
         }
 
-        private void SyncQualifications(Teacher teacher, List<TeacherQualificationDto> qualifications)
+        private async Task ReplaceQualificationsAsync(Guid teacherId, List<TeacherQualificationDto> qualifications, CancellationToken cancellationToken)
         {
-            SyncChildCollection(
-                teacher.Qualifications,
-                qualifications,
-                x => x.Id,
-                x => new TeacherQualification
+            var existingQualifications = await _context.TeacherQualifications
+                .Where(x => x.TeacherId == teacherId)
+                .ToListAsync(cancellationToken);
+
+            if (existingQualifications.Count > 0)
+            {
+                _context.TeacherQualifications.RemoveRange(existingQualifications);
+            }
+
+            foreach (var qualification in qualifications)
+            {
+                await _context.TeacherQualifications.AddAsync(new TeacherQualification
                 {
                     Id = Guid.NewGuid(),
-                    TeacherId = teacher.Id,
-                    IsActive = true
-                },
-                (entity, dto) =>
-                {
-                    entity.DegreeName = dto.DegreeName;
-                    entity.InstitutionName = dto.InstitutionName;
-                    entity.BoardOrUniversity = dto.BoardOrUniversity ?? string.Empty;
-                    entity.PassedYear = dto.PassedYear ?? string.Empty;
-                    entity.GradeOrPercentage = dto.GradeOrPercentage ?? string.Empty;
-                    entity.MajorSubject = dto.MajorSubject ?? string.Empty;
-                    entity.Remarks = dto.Remarks ?? string.Empty;
-                });
+                    TeacherId = teacherId,
+                    DegreeName = qualification.DegreeName,
+                    InstitutionName = qualification.InstitutionName,
+                    BoardOrUniversity = qualification.BoardOrUniversity ?? string.Empty,
+                    PassedYear = qualification.PassedYear ?? string.Empty,
+                    GradeOrPercentage = qualification.GradeOrPercentage ?? string.Empty,
+                    MajorSubject = qualification.MajorSubject ?? string.Empty,
+                    Remarks = qualification.Remarks ?? string.Empty,
+                    IsActive = true,
+                    CreatedBy = GetCurrentUserId(),
+                    ModifiedBy = GetCurrentUserId()
+                }, cancellationToken);
+            }
         }
 
-        private void SyncExperiences(Teacher teacher, List<TeacherExperienceDto> experiences)
+        private async Task ReplaceExperiencesAsync(Guid teacherId, List<TeacherExperienceDto> experiences, CancellationToken cancellationToken)
         {
-            SyncChildCollection(
-                teacher.Experiences,
-                experiences,
-                x => x.Id,
-                x => new TeacherExperience
+            var existingExperiences = await _context.TeacherExperiences
+                .Where(x => x.TeacherId == teacherId)
+                .ToListAsync(cancellationToken);
+
+            if (existingExperiences.Count > 0)
+            {
+                _context.TeacherExperiences.RemoveRange(existingExperiences);
+            }
+
+            foreach (var experience in experiences)
+            {
+                await _context.TeacherExperiences.AddAsync(new TeacherExperience
                 {
                     Id = Guid.NewGuid(),
-                    TeacherId = teacher.Id,
-                    IsActive = true
-                },
-                (entity, dto) =>
-                {
-                    entity.OrganizationName = dto.OrganizationName;
-                    entity.Designation = dto.Designation;
-                    entity.SubjectOrDepartment = dto.SubjectOrDepartment ?? string.Empty;
-                    entity.StartDateNp = dto.StartDateNp ?? string.Empty;
-                    entity.StartDateEn = dto.StartDateEn ?? string.Empty;
-                    entity.EndDateNp = dto.EndDateNp ?? string.Empty;
-                    entity.EndDateEn = dto.EndDateEn ?? string.Empty;
-                    entity.IsCurrent = dto.IsCurrent;
-                    entity.Remarks = dto.Remarks ?? string.Empty;
-                });
+                    TeacherId = teacherId,
+                    OrganizationName = experience.OrganizationName,
+                    Designation = experience.Designation,
+                    SubjectOrDepartment = experience.SubjectOrDepartment ?? string.Empty,
+                    StartDateNp = experience.StartDateNp ?? string.Empty,
+                    StartDateEn = experience.StartDateEn ?? string.Empty,
+                    EndDateNp = experience.EndDateNp ?? string.Empty,
+                    EndDateEn = experience.EndDateEn ?? string.Empty,
+                    IsCurrent = experience.IsCurrent,
+                    Remarks = experience.Remarks ?? string.Empty,
+                    IsActive = true,
+                    CreatedBy = GetCurrentUserId(),
+                    ModifiedBy = GetCurrentUserId()
+                }, cancellationToken);
+            }
         }
 
         private async Task SyncAssignmentsAsync(Teacher teacher, List<TeacherClassSectionDto> assignments, CancellationToken cancellationToken)
@@ -695,7 +1098,7 @@ namespace Infrastructure.Services
                 cancellationToken);
             if (duplicateTeacherAssignment)
             {
-                throw new Exception("Teacher is already assigned to this class section and course");
+                throw new InvalidOperationException("Teacher is already assigned to this class section and course");
             }
 
             var duplicateSubjectAssignment = await _context.TeacherClassSections.AnyAsync(x =>
@@ -738,44 +1141,6 @@ namespace Infrastructure.Services
                 {
                     throw new Exception("Teacher is already class teacher for another class section in this academic year");
                 }
-            }
-        }
-
-        private void SyncChildCollection<TEntity, TDto>(
-            ICollection<TEntity> entities,
-            List<TDto> dtos,
-            Func<TDto, string?> getDtoId,
-            Func<TDto, TEntity> createEntity,
-            Action<TEntity, TDto> map)
-            where TEntity : AuditableEntry
-        {
-            var submittedIds = dtos
-                .Where(x => Guid.TryParse(getDtoId(x), out _))
-                .Select(x => Guid.Parse(getDtoId(x)!))
-                .ToHashSet();
-
-            foreach (var existing in entities.Where(x => !x.IsDeleted && !submittedIds.Contains(x.Id)))
-            {
-                existing.IsDeleted = true;
-                existing.IsActive = false;
-                existing.DeletedOn = DateTime.UtcNow;
-                existing.DeletedBy = GetCurrentUserId();
-            }
-
-            foreach (var dto in dtos)
-            {
-                var dtoId = Guid.TryParse(getDtoId(dto), out var parsedId) ? parsedId : Guid.Empty;
-                var entity = entities.FirstOrDefault(x => x.Id == dtoId);
-                if (entity == null)
-                {
-                    entity = createEntity(dto);
-                    entities.Add(entity);
-                }
-
-                map(entity, dto);
-                entity.IsActive = true;
-                entity.IsDeleted = false;
-                entity.ModifiedBy = GetCurrentUserId();
             }
         }
 
@@ -866,6 +1231,22 @@ namespace Infrastructure.Services
                 FileSize = document.FileSize,
                 UploadedDate = document.UploadedDate
             };
+        }
+
+        private async Task<Teacher> GetTeacherEntityAsync(string teacherId, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(teacherId, out var teacherGuid))
+            {
+                throw new Exception("Invalid teacher id");
+            }
+
+            var teacher = await _context.Teachers.FirstOrDefaultAsync(x => x.Id == teacherGuid && !x.IsDeleted, cancellationToken);
+            if (teacher == null)
+            {
+                throw new Exception("Teacher not found");
+            }
+
+            return teacher;
         }
 
         private Guid GetCurrentUserId()

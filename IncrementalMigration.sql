@@ -549,3 +549,30 @@ BEGIN
 
     END IF;
 END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260426050942_Academic_Year_Relation'
+    ) THEN
+
+        ALTER TABLE "FeeStructures"
+        ADD "AcademicYearId" uuid NOT NULL
+        DEFAULT '00000000-0000-0000-0000-000000000000';
+
+        CREATE INDEX "IX_FeeStructures_AcademicYearId"
+        ON "FeeStructures" ("AcademicYearId");
+
+        ALTER TABLE "FeeStructures"
+        ADD CONSTRAINT "FK_FeeStructures_AcademicYears_AcademicYearId"
+        FOREIGN KEY ("AcademicYearId")
+        REFERENCES "AcademicYears" ("Id")
+        ON DELETE CASCADE;
+
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+        VALUES ('20260426050942_Academic_Year_Relation', '8.0.15');
+
+    END IF;
+END $$;

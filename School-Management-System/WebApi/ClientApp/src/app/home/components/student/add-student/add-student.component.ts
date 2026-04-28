@@ -59,7 +59,7 @@ export class AddStudentComponent implements OnInit, OnChanges {
       provinceId: [null, Validators.required],
       districtId: [null, Validators.required],
       municipalityId: [null, Validators.required],
-      rollNumber: [null]
+      rollNumber: [{ value: null, disabled: true }]
     });
   }
   ngOnInit(): void {

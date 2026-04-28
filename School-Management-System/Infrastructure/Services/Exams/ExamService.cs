@@ -9,6 +9,7 @@ using Application.Exams.ViewModels;
 using Application.SubjectMarks.Dtos;
 using Application.SubjectMarks.Interfaces;
 using Domain;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.SubjectMarks
@@ -333,6 +334,25 @@ namespace Infrastructure.Services.SubjectMarks
                 };
             }
 
+            // A student must pass every required component. If theory or practical
+            // fails individually, the subject final result must also be NQ.
+            var hasFailedRequiredTheory = subjectMarkObj.IsTheoryRequired && theory.Grade == "NQ";
+            var hasFailedRequiredPractical = subjectMarkObj.IsPracticalRequired && practical.Grade == "NQ";
+
+            if (hasFailedRequiredTheory || hasFailedRequiredPractical)
+            {
+                return new SubjectCalculationResult
+                {
+                    GradeTheory = theory.Grade,
+                    TheoryGradePoint = theory.GradePoint,
+                    GradePractical = practical.Grade,
+                    PracticalGradePoint = practical.GradePoint,
+                    FinalGrade = "NQ",
+                    FinalGradePoint = 0.8m,
+                    TotalCredit = totalCredit
+                };
+            }
+
             decimal finalGradePointFloat = ((theory.GradePoint * theory.Credit) + (practical.GradePoint * practical.Credit)) / totalCredit;
             decimal finalGradePointCalculated = Math.Floor(finalGradePointFloat * 100) / 100;
             decimal finalGradePoint = GetFinalGradePoint(finalGradePointCalculated);
@@ -412,7 +432,9 @@ namespace Infrastructure.Services.SubjectMarks
                                                                                         TheoryCreditHour = s.ClassCourse.TheoryCreditHour,
                                                                                         PracticalCreditHour = s.ClassCourse.PracticalCreditHour,
                                                                                         FinalGrade = s.FinalGrade,
-                                                                                        FinalGradePoint = s.FinalGradePoint,
+                                                                                        FinalGradePoint = s.FinalGrade == "NQ" || s.FinalGrade == "NG"
+                                                                                            ? null
+                                                                                            : s.FinalGradePoint,
                                                                                         GradePractical = s.ClassCourse.IsPracticalRequired ? s.GradePractical : string.Empty,
                                                                                         GradeTheory = s.ClassCourse.IsTheoryRequired ? s.GradeTheory : string.Empty
                                                                                     }).ToList(),

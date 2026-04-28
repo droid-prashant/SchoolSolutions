@@ -53,6 +53,36 @@ namespace WebApi.Controllers
             await _teacherService.SoftDeleteTeacherAsync(teacherId, cancellationToken);
         }
 
+        [HttpGet("GetTeacherAssignments")]
+        public async Task<List<TeacherClassSectionViewModel>> GetTeacherAssignments([FromQuery] string teacherId, [FromQuery] string? academicYearId, CancellationToken cancellationToken)
+        {
+            return await _teacherService.GetTeacherAssignmentsAsync(teacherId, academicYearId, cancellationToken);
+        }
+
+        [HttpPost("AddTeacherAssignment")]
+        public async Task AddTeacherAssignment([FromQuery] string teacherId, [FromBody] TeacherClassSectionDto assignment, CancellationToken cancellationToken)
+        {
+            await _teacherService.AddTeacherAssignmentAsync(teacherId, assignment, cancellationToken);
+        }
+
+        [HttpPut("UpdateTeacherAssignment")]
+        public async Task UpdateTeacherAssignment([FromQuery] string teacherId, [FromBody] TeacherClassSectionDto assignment, CancellationToken cancellationToken)
+        {
+            await _teacherService.UpdateTeacherAssignmentAsync(teacherId, assignment, cancellationToken);
+        }
+
+        [HttpDelete("DeleteTeacherAssignment")]
+        public async Task DeleteTeacherAssignment([FromQuery] string assignmentId, CancellationToken cancellationToken)
+        {
+            await _teacherService.DeleteTeacherAssignmentAsync(assignmentId, cancellationToken);
+        }
+
+        [HttpPost("CopyTeacherAssignments")]
+        public async Task CopyTeacherAssignments([FromQuery] string teacherId, [FromBody] TeacherAssignmentCopyDto teacherAssignmentCopyDto, CancellationToken cancellationToken)
+        {
+            await _teacherService.CopyTeacherAssignmentsAsync(teacherId, teacherAssignmentCopyDto, cancellationToken);
+        }
+
         [HttpGet("GetTeacherDashboard")]
         public async Task<TeacherDashboardViewModel> GetTeacherDashboard([FromQuery] string? academicYearId, CancellationToken cancellationToken)
         {
@@ -132,6 +162,30 @@ namespace WebApi.Controllers
         public async Task DeleteTeacherDocument([FromQuery] string documentId, CancellationToken cancellationToken)
         {
             await _teacherService.DeleteTeacherDocumentAsync(documentId, cancellationToken);
+        }
+
+        [HttpGet("GetTeacherAccount")]
+        public async Task<TeacherAccountViewModel> GetTeacherAccount([FromQuery] string teacherId, CancellationToken cancellationToken)
+        {
+            return await _teacherService.GetTeacherAccountAsync(teacherId, cancellationToken);
+        }
+
+        [HttpPost("CreateTeacherUser")]
+        public async Task CreateTeacherUser([FromQuery] string teacherId, [FromBody] TeacherAccountCreateDto teacherAccountCreateDto, CancellationToken cancellationToken)
+        {
+            await _teacherService.CreateTeacherUserAsync(teacherId, teacherAccountCreateDto, cancellationToken);
+        }
+
+        [HttpPut("UpdateTeacherUserStatus")]
+        public async Task UpdateTeacherUserStatus([FromQuery] string teacherId, [FromBody] TeacherAccountStatusDto teacherAccountStatusDto, CancellationToken cancellationToken)
+        {
+            await _teacherService.UpdateTeacherUserStatusAsync(teacherId, teacherAccountStatusDto, cancellationToken);
+        }
+
+        [HttpPut("ResetTeacherUserPassword")]
+        public async Task ResetTeacherUserPassword([FromQuery] string teacherId, [FromBody] TeacherPasswordResetDto teacherPasswordResetDto, CancellationToken cancellationToken)
+        {
+            await _teacherService.ResetTeacherUserPasswordAsync(teacherId, teacherPasswordResetDto, cancellationToken);
         }
 
         [HttpGet("ViewTeacherDocument")]
