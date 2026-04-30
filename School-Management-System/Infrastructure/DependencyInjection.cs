@@ -43,6 +43,7 @@ namespace Infrastructure
             services.AddScoped<RoleManager<ApplicationRole>>();
             services.AddScoped<UserManager<ApplicationUser>>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IRolePermissionService, RolePermissionService>();
 
             services.AddScoped<IDashboardService, DasboardService>();
             services.AddScoped<IAcademicService, AcademicService>();

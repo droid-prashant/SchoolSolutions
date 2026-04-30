@@ -1,8 +1,8 @@
-﻿using Application.Dashboard.Interfaces;
+using Application.Dashboard.Interfaces;
 using Application.Dashboard.ViewModels;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using WebApi.Authorization;
 
 namespace WebApi.Controllers
 {
@@ -10,12 +10,15 @@ namespace WebApi.Controllers
     public class DashboardController : ApiBaseController
     {
         private readonly IDashboardService _dashboardService;
+
         public DashboardController(IDashboardService dashboardService)
         {
             _dashboardService = dashboardService;
         }
+
         [HttpGet]
         [Route("GetStudentsCount")]
+        [HasPermission(PermissionNames.StudentView)]
         public async Task<int> GetStudentCount(CancellationToken cancellationToken)
         {
             var result = await _dashboardService.GetStudentCount(cancellationToken);
@@ -24,6 +27,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetCoursesCount")]
+        [HasPermission(PermissionNames.CourseManage, PermissionNames.StudentView)]
         public async Task<int> GetCoursesCount(CancellationToken cancellationToken)
         {
             var result = await _dashboardService.GetCoursesCount(cancellationToken);
@@ -32,6 +36,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetTeachersCount")]
+        [HasPermission(PermissionNames.TeacherView, PermissionNames.TeacherManage)]
         public async Task<int> GetTeachersCount(CancellationToken cancellationToken)
         {
             return await _dashboardService.GetTeachersCount(cancellationToken);
@@ -39,6 +44,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetDashboardSummary")]
+        [HasPermission(PermissionNames.StudentView, PermissionNames.FeeView, PermissionNames.TeacherView)]
         public async Task<DashboardSummaryViewModel> GetDashboardSummary(CancellationToken cancellationToken)
         {
             return await _dashboardService.GetDashboardSummary(cancellationToken);
@@ -46,6 +52,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetStudentsByClass")]
+        [HasPermission(PermissionNames.StudentView)]
         public async Task<List<StudentsByClassViewModel>> GetStudentsByClass(CancellationToken cancellationToken)
         {
             var result = await _dashboardService.GetStudentsByClass(cancellationToken);

@@ -1,7 +1,9 @@
 ﻿using Application.Identity.Dtos;
 using Application.Identity.Interfaces;
 using Application.Identity.ViewModel;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 
 namespace WebApi.Controllers
 {
@@ -15,11 +17,13 @@ namespace WebApi.Controllers
             _identityService = identityService;
         }
         [HttpPost("CreateRole")]
+        [HasPermission(PermissionNames.RoleManage)]
         public async Task CreateRole([FromBody] UserRoleDto userRoleDto, CancellationToken cancellationToken)
         {
             await _identityService.CreateRoleAsync(userRoleDto, cancellationToken);
         }
         [HttpPost("CreateUser")]
+        [HasPermission(PermissionNames.UserManage)]
         public async Task CreateUser([FromBody] UserDto userDto, CancellationToken cancellationToken)
         {
             await _identityService.CreateUserAsync(userDto, cancellationToken);

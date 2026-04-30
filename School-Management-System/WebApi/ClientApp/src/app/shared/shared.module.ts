@@ -30,9 +30,14 @@ import { FormsModule } from "@angular/forms";
 import { ChartModule } from 'primeng/chart';
 import { StudentFilterComponent } from "../home/components/student-filter/student-filter.component";
 import { PageHeaderComponent } from "./page-header/page-header.component";
+import { HasPermissionDirective } from "./has-permission.directive";
+import { HasAnyPermissionDirective } from "./has-any-permission.directive";
 
 @NgModule({
-    declarations: [],
+    declarations: [
+        HasPermissionDirective,
+        HasAnyPermissionDirective
+    ],
     imports: [
         CommonModule,
         ButtonModule,
@@ -97,7 +102,9 @@ import { PageHeaderComponent } from "./page-header/page-header.component";
         OverlayPanelModule,
         ChartModule,
         StudentFilterComponent,
-        PageHeaderComponent
+        PageHeaderComponent,
+        HasPermissionDirective,
+        HasAnyPermissionDirective
     ]
 })
 export class SharedModule { }

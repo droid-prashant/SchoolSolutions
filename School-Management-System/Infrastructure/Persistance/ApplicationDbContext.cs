@@ -51,6 +51,8 @@ namespace Infrastructure.Persistance
         public DbSet<StudentCharacterCertificateLog> studentCharacterCertificateLogs => Set<StudentCharacterCertificateLog>();
 
         public DbSet<StudentTransferCertificateLog> studentTransferCertificateLogs => Set<StudentTransferCertificateLog>();
+        public DbSet<Permission> Permissions => Set<Permission>();
+        public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

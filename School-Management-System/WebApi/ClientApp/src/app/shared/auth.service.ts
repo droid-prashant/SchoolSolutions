@@ -32,6 +32,48 @@ export class AuthService {
         return this.decodeToken()?.academicYear ?? '';
     }
 
+    getPermissions(): string[] {
+        const decodedToken = this.decodeToken();
+        return this.toArray(decodedToken?.permission);
+    }
+
+    getRoles(): string[] {
+        const decodedToken: any = this.decodeToken();
+        return [
+            ...this.toArray(decodedToken?.roles),
+            ...this.toArray(decodedToken?.role),
+            ...this.toArray(decodedToken?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'])
+        ].filter((value, index, values) => values.indexOf(value) === index);
+    }
+
+    hasPermission(permission: string): boolean {
+        if (!permission) {
+            return true;
+        }
+
+        if (this.hasRole('SuperAdmin') || this.hasRole('Super Admin')) {
+            return true;
+        }
+
+        return this.getPermissions().some(x => x.toLowerCase() === permission.toLowerCase());
+    }
+
+    hasAnyPermission(permissions: string[]): boolean {
+        if (!permissions || permissions.length === 0) {
+            return true;
+        }
+
+        return permissions.some(permission => this.hasPermission(permission));
+    }
+
+    hasRole(role: string): boolean {
+        if (!role) {
+            return true;
+        }
+
+        return this.getRoles().some(x => x.toLowerCase() === role.toLowerCase());
+    }
+
     getTokenExpirationDate(): Date {
         const decodedToken = this.decodeToken();
         if (decodedToken) {
@@ -55,5 +97,13 @@ export class AuthService {
     logout() {
         window.localStorage.clear();
         this._router.navigateByUrl("");
+    }
+
+    private toArray(value: string | string[] | undefined | null): string[] {
+        if (!value) {
+            return [];
+        }
+
+        return Array.isArray(value) ? value : [value];
     }
 }

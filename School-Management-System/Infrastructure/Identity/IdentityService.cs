@@ -145,27 +145,37 @@ namespace Infrastructure.Identity
             }
             Claim claim = new Claim(CustomClaimType.AcademicYear, academicYear);
             await _userManager.AddClaimAsync(user, claim);
-            List<Claim> assignedRoles = roles.Select(role => new Claim("roles", role)).ToList();
-            List<Claim> userClaims = (await _userManager.GetClaimsAsync(user)).ToList();
-            List<Claim> claims = userClaims.Union(assignedRoles).ToList();
+            List<Claim> claims = (await _userManager.GetClaimsAsync(user)).ToList();
 
             foreach (var role in roles)
             {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim("roles", role));
+
                 ApplicationRole? appRole = await _roleManager.FindByNameAsync(role);
                 if (appRole != null)
                 {
                     IList<Claim> roleClaims = await _roleManager.GetClaimsAsync(appRole);
-                    claims = claims.Union(roleClaims).ToList();
+                    claims.AddRange(roleClaims);
                 }
             }
 
-            claims = new List<Claim>(claims)
+            claims.AddRange(new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Name,user.UserName),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email)
-            };
-            return claims;
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim("userId", user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+                new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
+                new Claim("username", user.UserName ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty)
+            });
+
+            return claims
+                .GroupBy(x => new { x.Type, x.Value })
+                .Select(x => x.First())
+                .ToList();
         }
 
         private async Task<bool> CheckAcademicClaimExist(ApplicationUser user)

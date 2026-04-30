@@ -6,14 +6,16 @@ import { TeacherAccountComponent } from './teacher-account/teacher-account.compo
 import { TeacherDetailComponent } from './teacher-detail/teacher-detail.component';
 import { TeacherDocumentsComponent } from './teacher-documents/teacher-documents.component';
 import { TeacherMarksEntryComponent } from './teacher-marks-entry/teacher-marks-entry.component';
+import { PermissionGuardService } from '../../../shared/permissionGuard.service';
+import { PermissionNames } from '../../../shared/common/constants/permission-names';
 
 const routes: Routes = [
-  { path: 'list-teacher', component: ListTeacherComponent },
-  { path: 'assignments/:teacherId', component: TeacherAssignmentsComponent },
-  { path: 'details/:teacherId', component: TeacherDetailComponent },
-  { path: 'documents/:teacherId', component: TeacherDocumentsComponent },
-  { path: 'user/:teacherId', component: TeacherAccountComponent },
-  { path: 'marks-entry', component: TeacherMarksEntryComponent }
+  { path: 'list-teacher', component: ListTeacherComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.TeacherView] } },
+  { path: 'assignments/:teacherId', component: TeacherAssignmentsComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.TeacherManage] } },
+  { path: 'details/:teacherId', component: TeacherDetailComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.TeacherView] } },
+  { path: 'documents/:teacherId', component: TeacherDocumentsComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.TeacherView] } },
+  { path: 'user/:teacherId', component: TeacherAccountComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.UserManage] } },
+  { path: 'marks-entry', component: TeacherMarksEntryComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.ExamMarksEntry] } }
 ];
 
 @NgModule({

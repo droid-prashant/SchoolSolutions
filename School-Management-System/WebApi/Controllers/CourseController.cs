@@ -2,7 +2,9 @@
 using Application.Courses.Dtos;
 using Application.Courses.Interfaces;
 using Application.Courses.ViewModels;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 
 namespace WebApi.Controllers
 {
@@ -18,6 +20,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetAllClassCourse")]
+        [HasPermission(PermissionNames.CourseManage, PermissionNames.ExamMarksEntry, PermissionNames.TeacherManage)]
         public async Task<List<ClassCreditCourseViewModel>> GetAllClassCourse(CancellationToken cancellationToken)
         {
             var result = await _courseService.GetAllClassCourse(cancellationToken);
@@ -26,6 +29,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetClassCourseByClassId")]
+        [HasPermission(PermissionNames.CourseManage, PermissionNames.ExamMarksEntry, PermissionNames.TeacherManage)]
         public async Task<List<ClassCreditCourseViewModel>> GetClassCourseByClassId([FromQuery] string classId, CancellationToken cancellationToken)
         {
             var ClassRoomId = Guid.Parse(classId);
@@ -35,6 +39,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddClassCourse")]
+        [HasPermission(PermissionNames.CourseManage)]
         public async Task AddClassCourse([FromBody] ClassCourseDto classCourseDto, CancellationToken cancellationToken)
         {
             await _courseService.AddClassCourse(classCourseDto, cancellationToken);
@@ -42,6 +47,7 @@ namespace WebApi.Controllers
         
         [HttpPost]
         [Route("UpdateClassCourse")]
+        [HasPermission(PermissionNames.CourseManage)]
         public async Task UpdateClassCourse([FromBody] ClassCourseDto classCourseDto, CancellationToken cancellationToken)
         {
             await _courseService.UpdateClassCourse(classCourseDto, cancellationToken);
@@ -49,6 +55,7 @@ namespace WebApi.Controllers
 
         [HttpDelete]
         [Route("DeleteClassCourse/{classCourseId}")]
+        [HasPermission(PermissionNames.CourseManage)]
         public async Task DeleteClassCourse ([FromQuery] string classCourseId, CancellationToken cancellationToken)
         {
             await _courseService.DeleteClassCourse(classCourseId, cancellationToken);
@@ -57,6 +64,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddCourse")]
+        [HasPermission(PermissionNames.CourseManage)]
         public async Task AddCourse([FromBody] CourseDto courseDto, CancellationToken cancellationToken)
         {
             await _courseService.AddCourse(courseDto, cancellationToken);
@@ -64,6 +72,7 @@ namespace WebApi.Controllers
 
         [HttpPut]
         [Route("UpdateCourse")]
+        [HasPermission(PermissionNames.CourseManage)]
         public async Task UpdateCourse([FromBody] CourseDto courseDto, CancellationToken cancellationToken)
         {
             await _courseService.UpdateCourse(courseDto, cancellationToken);

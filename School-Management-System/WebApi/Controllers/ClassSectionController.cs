@@ -2,7 +2,9 @@
 using Application.ClassSections.Dtos;
 using Application.ClassSections.Interfaces;
 using Application.ClassSections.VieModels;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 
 namespace WebApi.Controllers
 {
@@ -18,6 +20,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddClass")]
+        [HasPermission(PermissionNames.ClassManage)]
         public async Task AddClass([FromBody] ClassRoomDto classRoomDto, CancellationToken cancellationToken)
         {
             await _classSectionService.AddClass(classRoomDto, cancellationToken);
@@ -25,6 +28,7 @@ namespace WebApi.Controllers
 
         [HttpPut]
         [Route("UpdateClass")]
+        [HasPermission(PermissionNames.ClassManage)]
         public async Task UpdateClass([FromBody] ClassRoomDto classRoomDto, CancellationToken cancellationToken)
         {
             await _classSectionService.UpdateClass(classRoomDto, cancellationToken);
@@ -32,6 +36,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddSection")]
+        [HasPermission(PermissionNames.ClassManage)]
         public async Task AddSection([FromBody] SectionDto section, CancellationToken cancellationToken)
         {
             await _classSectionService.AddSection(section, cancellationToken);
@@ -39,6 +44,7 @@ namespace WebApi.Controllers
         
         [HttpPut]
         [Route("UpdateSection")]
+        [HasPermission(PermissionNames.ClassManage)]
         public async Task UpdateSection([FromBody] SectionDto section, CancellationToken cancellationToken)
         {
             await _classSectionService.UpdateSection(section, cancellationToken);
@@ -47,6 +53,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("MapClassSection")]
+        [HasPermission(PermissionNames.ClassManage)]
         public async Task CreateClassSection(ClassSectionDto classSectionDto, CancellationToken cancellationToken)
         {
             await _classSectionService.CreateClassSection(classSectionDto, cancellationToken);
@@ -54,6 +61,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetClassSections")]
+        [HasPermission(PermissionNames.ClassManage, PermissionNames.StudentView)]
         public async Task<List<ClassSectionViewModel>> GetAllClassSections(CancellationToken cancellationToken)
         {
             var result = await _classSectionService.GetAllClassSections(cancellationToken);
@@ -61,6 +69,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("GetClassDetails/{id}")]
+        [HasPermission(PermissionNames.ClassManage, PermissionNames.StudentView)]
         public async Task<ClassSectionViewModel> GetClassDetails(Guid id, CancellationToken cancellationToken)
         {
             var result = await _classSectionService.GetClassSectionDetails(id, cancellationToken);

@@ -1,5 +1,7 @@
 using Application.Teachers;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 
 namespace WebApi.Controllers
 {
@@ -18,78 +20,91 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("GetTeachers")]
+        [HasPermission(PermissionNames.TeacherView, PermissionNames.TeacherManage)]
         public async Task<List<TeacherViewModel>> GetTeachers([FromQuery] string? academicYearId, [FromQuery] bool includeInactive, CancellationToken cancellationToken)
         {
             return await _teacherService.GetTeachersAsync(academicYearId, includeInactive, cancellationToken);
         }
 
         [HttpGet("GetTeacherById")]
+        [HasPermission(PermissionNames.TeacherView, PermissionNames.TeacherManage)]
         public async Task<TeacherViewModel?> GetTeacherById([FromQuery] string teacherId, CancellationToken cancellationToken)
         {
             return await _teacherService.GetTeacherByIdAsync(teacherId, cancellationToken);
         }
 
         [HttpPost("AddTeacher")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task AddTeacher([FromBody] TeacherDto teacherDto, CancellationToken cancellationToken)
         {
             await _teacherService.AddTeacherAsync(teacherDto, cancellationToken);
         }
 
         [HttpPut("UpdateTeacher")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task UpdateTeacher([FromBody] TeacherDto teacherDto, CancellationToken cancellationToken)
         {
             await _teacherService.UpdateTeacherAsync(teacherDto, cancellationToken);
         }
 
         [HttpPut("UpdateTeacherStatus")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task UpdateTeacherStatus([FromQuery] string teacherId, [FromBody] TeacherStatusDto teacherStatusDto, CancellationToken cancellationToken)
         {
             await _teacherService.UpdateTeacherStatusAsync(teacherId, teacherStatusDto, cancellationToken);
         }
 
         [HttpDelete("DeleteTeacher")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task DeleteTeacher([FromQuery] string teacherId, CancellationToken cancellationToken)
         {
             await _teacherService.SoftDeleteTeacherAsync(teacherId, cancellationToken);
         }
 
         [HttpGet("GetTeacherAssignments")]
+        [HasPermission(PermissionNames.TeacherView, PermissionNames.TeacherManage)]
         public async Task<List<TeacherClassSectionViewModel>> GetTeacherAssignments([FromQuery] string teacherId, [FromQuery] string? academicYearId, CancellationToken cancellationToken)
         {
             return await _teacherService.GetTeacherAssignmentsAsync(teacherId, academicYearId, cancellationToken);
         }
 
         [HttpPost("AddTeacherAssignment")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task AddTeacherAssignment([FromQuery] string teacherId, [FromBody] TeacherClassSectionDto assignment, CancellationToken cancellationToken)
         {
             await _teacherService.AddTeacherAssignmentAsync(teacherId, assignment, cancellationToken);
         }
 
         [HttpPut("UpdateTeacherAssignment")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task UpdateTeacherAssignment([FromQuery] string teacherId, [FromBody] TeacherClassSectionDto assignment, CancellationToken cancellationToken)
         {
             await _teacherService.UpdateTeacherAssignmentAsync(teacherId, assignment, cancellationToken);
         }
 
         [HttpDelete("DeleteTeacherAssignment")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task DeleteTeacherAssignment([FromQuery] string assignmentId, CancellationToken cancellationToken)
         {
             await _teacherService.DeleteTeacherAssignmentAsync(assignmentId, cancellationToken);
         }
 
         [HttpPost("CopyTeacherAssignments")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task CopyTeacherAssignments([FromQuery] string teacherId, [FromBody] TeacherAssignmentCopyDto teacherAssignmentCopyDto, CancellationToken cancellationToken)
         {
             await _teacherService.CopyTeacherAssignmentsAsync(teacherId, teacherAssignmentCopyDto, cancellationToken);
         }
 
         [HttpGet("GetTeacherDashboard")]
+        [HasPermission(PermissionNames.TeacherView, PermissionNames.TeacherManage)]
         public async Task<TeacherDashboardViewModel> GetTeacherDashboard([FromQuery] string? academicYearId, CancellationToken cancellationToken)
         {
             return await _teacherService.GetTeacherDashboardAsync(academicYearId, cancellationToken);
         }
 
         [HttpPost("UploadTeacherDocument")]
+        [HasPermission(PermissionNames.TeacherManage)]
         [Consumes("multipart/form-data")]
         public async Task<TeacherDocumentViewModel> UploadTeacherDocument([FromForm] TeacherDocumentUploadRequest request, CancellationToken cancellationToken)
         {
@@ -159,36 +174,42 @@ namespace WebApi.Controllers
         }
 
         [HttpDelete("DeleteTeacherDocument")]
+        [HasPermission(PermissionNames.TeacherManage)]
         public async Task DeleteTeacherDocument([FromQuery] string documentId, CancellationToken cancellationToken)
         {
             await _teacherService.DeleteTeacherDocumentAsync(documentId, cancellationToken);
         }
 
         [HttpGet("GetTeacherAccount")]
+        [HasPermission(PermissionNames.TeacherManage, PermissionNames.UserManage)]
         public async Task<TeacherAccountViewModel> GetTeacherAccount([FromQuery] string teacherId, CancellationToken cancellationToken)
         {
             return await _teacherService.GetTeacherAccountAsync(teacherId, cancellationToken);
         }
 
         [HttpPost("CreateTeacherUser")]
+        [HasPermission(PermissionNames.TeacherManage, PermissionNames.UserManage)]
         public async Task CreateTeacherUser([FromQuery] string teacherId, [FromBody] TeacherAccountCreateDto teacherAccountCreateDto, CancellationToken cancellationToken)
         {
             await _teacherService.CreateTeacherUserAsync(teacherId, teacherAccountCreateDto, cancellationToken);
         }
 
         [HttpPut("UpdateTeacherUserStatus")]
+        [HasPermission(PermissionNames.TeacherManage, PermissionNames.UserManage)]
         public async Task UpdateTeacherUserStatus([FromQuery] string teacherId, [FromBody] TeacherAccountStatusDto teacherAccountStatusDto, CancellationToken cancellationToken)
         {
             await _teacherService.UpdateTeacherUserStatusAsync(teacherId, teacherAccountStatusDto, cancellationToken);
         }
 
         [HttpPut("ResetTeacherUserPassword")]
+        [HasPermission(PermissionNames.TeacherManage, PermissionNames.UserManage)]
         public async Task ResetTeacherUserPassword([FromQuery] string teacherId, [FromBody] TeacherPasswordResetDto teacherPasswordResetDto, CancellationToken cancellationToken)
         {
             await _teacherService.ResetTeacherUserPasswordAsync(teacherId, teacherPasswordResetDto, cancellationToken);
         }
 
         [HttpGet("ViewTeacherDocument")]
+        [HasPermission(PermissionNames.TeacherView, PermissionNames.TeacherManage)]
         public async Task<IActionResult> ViewTeacherDocument([FromQuery] string documentId, CancellationToken cancellationToken)
         {
             var document = await _teacherService.GetTeacherDocumentAsync(documentId, cancellationToken);

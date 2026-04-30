@@ -576,3 +576,66 @@ BEGIN
 
     END IF;
 END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260430090000_AddRoleBasedPermissions'
+    ) THEN
+
+        CREATE TABLE IF NOT EXISTS "Permissions" (
+            "Id" uuid NOT NULL,
+            "Code" character varying(100) NOT NULL,
+            "Name" character varying(150) NOT NULL,
+            "GroupName" character varying(100) NOT NULL,
+            "Description" character varying(500),
+            "IsActive" boolean NOT NULL DEFAULT true,
+            "IsDeleted" boolean NOT NULL DEFAULT false,
+            "CreatedDate" timestamp with time zone NOT NULL DEFAULT NOW(),
+            "ModifiedDate" timestamp with time zone NOT NULL DEFAULT NOW(),
+            "DeletedOn" timestamp with time zone,
+            "CreatedBy" uuid NOT NULL,
+            "ModifiedBy" uuid NOT NULL,
+            "DeletedBy" uuid,
+            CONSTRAINT "PK_Permissions" PRIMARY KEY ("Id")
+        );
+
+        CREATE TABLE IF NOT EXISTS "RolePermissions" (
+            "Id" uuid NOT NULL,
+            "RoleId" uuid NOT NULL,
+            "PermissionId" uuid NOT NULL,
+            "IsActive" boolean NOT NULL DEFAULT true,
+            "IsDeleted" boolean NOT NULL DEFAULT false,
+            "CreatedDate" timestamp with time zone NOT NULL DEFAULT NOW(),
+            "ModifiedDate" timestamp with time zone NOT NULL DEFAULT NOW(),
+            "DeletedOn" timestamp with time zone,
+            "CreatedBy" uuid NOT NULL,
+            "ModifiedBy" uuid NOT NULL,
+            "DeletedBy" uuid,
+            CONSTRAINT "PK_RolePermissions" PRIMARY KEY ("Id"),
+            CONSTRAINT "FK_RolePermissions_AspNetRoles_RoleId"
+                FOREIGN KEY ("RoleId")
+                REFERENCES "AspNetRoles" ("Id")
+                ON DELETE CASCADE,
+            CONSTRAINT "FK_RolePermissions_Permissions_PermissionId"
+                FOREIGN KEY ("PermissionId")
+                REFERENCES "Permissions" ("Id")
+                ON DELETE CASCADE
+        );
+
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_Permissions_Code"
+            ON "Permissions" ("Code");
+
+        CREATE INDEX IF NOT EXISTS "IX_RolePermissions_PermissionId"
+            ON "RolePermissions" ("PermissionId");
+
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_RolePermissions_RoleId_PermissionId"
+            ON "RolePermissions" ("RoleId", "PermissionId");
+
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+        VALUES ('20260430090000_AddRoleBasedPermissions', '8.0.15');
+
+    END IF;
+END $$;

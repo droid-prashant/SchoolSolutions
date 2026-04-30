@@ -1,4 +1,5 @@
-﻿using Infrastructure.Identity;
+using Infrastructure.Identity;
+using Infrastructure.Persistance;
 using Microsoft.AspNetCore.Identity;
 
 namespace WebApi.Seeds
@@ -17,10 +18,11 @@ namespace WebApi.Seeds
                     {
                         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-                        await DefaultRoles.SeedRolesAsync(userManager, roleManager);
+                        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+                        await DefaultRoles.SeedRolesAsync(userManager, roleManager, dbContext);
                         await DefaultUsers.SeedAdminAsync(userManager, roleManager);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         throw;
                     }

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Identity;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace WebApi.Seeds
@@ -9,7 +9,6 @@ namespace WebApi.Seeds
         {
             try
             {
-                //Seed Default User
                 var defaultUser = new ApplicationUser
                 {
                     UserName = "smsMaster",
@@ -21,11 +20,12 @@ namespace WebApi.Seeds
                     LastName = "master",
                     ShortName = "sms master",
                     Gender = "male",
-                    DateOfBirth = System.DateTime.UtcNow.AddYears(-20)
+                    DateOfBirth = DateTime.UtcNow.AddYears(-20),
+                    IsActive = true
                 };
 
-
-                if (await userManager.FindByNameAsync(defaultUser.UserName) == null)
+                var existingDefaultUser = await userManager.FindByNameAsync(defaultUser.UserName);
+                if (existingDefaultUser == null)
                 {
                     var user = await userManager.FindByEmailAsync(defaultUser.Email);
                     if (user == null)
@@ -33,16 +33,21 @@ namespace WebApi.Seeds
                         var res = await userManager.CreateAsync(defaultUser, "P@ssw0rd123");
                         if (res.Succeeded)
                         {
-                            await userManager.AddToRoleAsync(defaultUser, "Super Admin");
+                            existingDefaultUser = defaultUser;
                         }
                     }
+                }
+
+                existingDefaultUser ??= await userManager.FindByNameAsync(defaultUser.UserName);
+                if (existingDefaultUser != null && !await userManager.IsInRoleAsync(existingDefaultUser, "SuperAdmin"))
+                {
+                    await userManager.AddToRoleAsync(existingDefaultUser, "SuperAdmin");
                 }
             }
             catch (Exception)
             {
                 throw;
             }
-
         }
     }
 }

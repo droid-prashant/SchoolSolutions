@@ -1,0 +1,99 @@
+<p-toast></p-toast>
+
+<app-page-header
+    section="Security"
+    page="Role Management"
+    subtitle="Create roles and assign backend permissions.">
+</app-page-header>
+
+<div class="flex justify-content-end mb-3">
+    <button pButton pRipple type="button" icon="pi pi-plus" label="New Role" (click)="openCreateDialog()"></button>
+</div>
+
+<div class="card">
+    <p-table
+        #roleTable
+        [value]="roles"
+        styleClass="app-grid-table"
+        [paginator]="true"
+        [rows]="15"
+        [globalFilterFields]="['name', 'description']">
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="roles.length > 0">
+                <i class="pi pi-search"></i>
+                <input #roleSearch type="text" pInputText placeholder="Search roles..." (input)="roleTable.filterGlobal(roleSearch.value, 'contains')" />
+            </span>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="name">Role <p-sortIcon field="name"></p-sortIcon></th>
+                <th>Description</th>
+                <th>Permissions</th>
+                <th style="width: 10rem">Action</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-role>
+            <tr>
+                <td>{{ role.name }}</td>
+                <td>{{ role.description || '-' }}</td>
+                <td>{{ role.permissionCodes.length }}</td>
+                <td>
+                    <i class="pi pi-pencil pointer-icon mr-3" (click)="openEditDialog(role)"></i>
+                    <i class="pi pi-trash pointer-icon text-red-500" *ngIf="role.name !== 'SuperAdmin'" (click)="deleteRole(role)"></i>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog
+    [header]="isEditMode ? 'Edit Role' : 'Create Role'"
+    [(visible)]="isDialogVisible"
+    [modal]="true"
+    [style]="{ width: '52rem' }">
+    <form [formGroup]="roleForm" class="p-fluid">
+        <div class="grid">
+            <div class="col-12 md:col-5">
+                <div class="field">
+                    <label for="name">Role Name</label>
+                    <input id="name" pInputText formControlName="name" />
+                </div>
+            </div>
+            <div class="col-12 md:col-7">
+                <div class="field">
+                    <label for="description">Description</label>
+                    <input id="description" pInputText formControlName="description" />
+                </div>
+            </div>
+        </div>
+
+        <div class="permission-groups">
+            <div class="permission-group" *ngFor="let group of groupedPermissions">
+                <h4>{{ group.groupName }}</h4>
+                <div class="grid">
+                    <div class="col-12 md:col-6" *ngFor="let permission of group.permissions">
+                        <div class="permission-option">
+                            <p-checkbox
+                                name="permissions"
+                                [value]="permission.code"
+                                [(ngModel)]="selectedPermissionCodes"
+                                [ngModelOptions]="{ standalone: true }">
+                            </p-checkbox>
+                            <div>
+                                <strong>{{ permission.name }}</strong>
+                                <span>{{ permission.code }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-content-end gap-2 mt-3">
+            <button pButton pRipple type="button" label="Cancel" class="p-button-text" (click)="isDialogVisible = false"></button>
+            <button pButton pRipple type="button" label="Save" (click)="saveRole()"></button>
+        </div>
+    </form>
+</p-dialog>

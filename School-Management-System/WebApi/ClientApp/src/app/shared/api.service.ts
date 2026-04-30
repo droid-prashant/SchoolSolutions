@@ -40,6 +40,7 @@ import { PromoteStudentsDto } from '../home/components/student/shared/models/dto
 import { PromotionExecutionResultViewModel } from '../home/components/student/shared/models/viewModels/promotionExecutionResult.viewModel';
 import { TeacherMarksAssignmentViewModel, TeacherSubjectStudentMarksViewModel } from '../home/components/teacher/shared/models/viewModels/teacher-marks.viewModel';
 import { DashboardSummaryViewModel } from '../home/components/dashboard/model/dashboardSummary.viewModel';
+import { PermissionViewModel, RoleDto, RolePermissionsDto, RoleViewModel, UserRolesDto, UserRolesViewModel, UserViewModel } from './common/models/security/role-permission.models';
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +63,46 @@ export class ApiService {
 
   getDashboardSummary(): Observable<DashboardSummaryViewModel> {
     return this._httpClient.get<DashboardSummaryViewModel>(this.baseUrl + "api/Dashboard/GetDashboardSummary");
+  }
+
+  getRoles(): Observable<RoleViewModel[]> {
+    return this._httpClient.get<RoleViewModel[]>(this.baseUrl + "api/roles");
+  }
+
+  getPermissions(): Observable<PermissionViewModel[]> {
+    return this._httpClient.get<PermissionViewModel[]>(this.baseUrl + "api/permissions");
+  }
+
+  getRole(roleId: string): Observable<RoleViewModel> {
+    return this._httpClient.get<RoleViewModel>(this.baseUrl + `api/roles/${roleId}`);
+  }
+
+  createRole(role: RoleDto): Observable<RoleViewModel> {
+    return this._httpClient.post<RoleViewModel>(this.baseUrl + "api/roles", role);
+  }
+
+  updateRole(roleId: string, role: RoleDto): Observable<RoleViewModel> {
+    return this._httpClient.put<RoleViewModel>(this.baseUrl + `api/roles/${roleId}`, role);
+  }
+
+  deleteRole(roleId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/roles/${roleId}`);
+  }
+
+  setRolePermissions(roleId: string, permissions: RolePermissionsDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + `api/roles/${roleId}/permissions`, permissions);
+  }
+
+  getUsers(): Observable<UserViewModel[]> {
+    return this._httpClient.get<UserViewModel[]>(this.baseUrl + "api/users");
+  }
+
+  getUserRoles(userId: string): Observable<UserRolesViewModel> {
+    return this._httpClient.get<UserRolesViewModel>(this.baseUrl + `api/users/${userId}/roles`);
+  }
+
+  setUserRoles(userId: string, roles: UserRolesDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + `api/users/${userId}/roles`, roles);
   }
 
   getStudentsByClassCount(): Observable<StudentsByClassViewModel[]> {

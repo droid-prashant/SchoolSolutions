@@ -1,5 +1,9 @@
 export class JwtPayLoad {
-    permission: string = "";
+    permission: string | string[] = "";
+    role?: string | string[];
+    roles?: string | string[];
+    userId: string = "";
+    username: string = "";
     sub: string = "";
     name: string = "";
     email: string = "";

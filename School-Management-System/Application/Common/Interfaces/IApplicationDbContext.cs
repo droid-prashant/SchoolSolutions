@@ -36,6 +36,8 @@ namespace Application.Common.Interfaces
         DbSet<Municipality> Municipalities { get; }
         DbSet<StudentCharacterCertificateLog> studentCharacterCertificateLogs { get; }
         DbSet<StudentTransferCertificateLog> studentTransferCertificateLogs { get; }
+        DbSet<Permission> Permissions { get; }
+        DbSet<RolePermission> RolePermissions { get; }
         DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

@@ -13,7 +13,8 @@ builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 //builder.Services.AddApplication();
 
-builder.Services.AddJwtAuthentication(builder.Configuration); 
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<UserResolver>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -38,6 +39,7 @@ app.UseStaticFiles();
 //app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
