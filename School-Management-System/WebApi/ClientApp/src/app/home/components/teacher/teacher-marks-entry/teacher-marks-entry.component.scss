@@ -1,0 +1,7 @@
+.pointer-icon {
+  cursor: pointer;
+}
+
+:host ::ng-deep .p-dialog .field label {
+  font-weight: 600;
+}

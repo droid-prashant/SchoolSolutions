@@ -5,13 +5,15 @@ import { TeacherAssignmentsComponent } from './teacher-assignments/teacher-assig
 import { TeacherAccountComponent } from './teacher-account/teacher-account.component';
 import { TeacherDetailComponent } from './teacher-detail/teacher-detail.component';
 import { TeacherDocumentsComponent } from './teacher-documents/teacher-documents.component';
+import { TeacherMarksEntryComponent } from './teacher-marks-entry/teacher-marks-entry.component';
 
 const routes: Routes = [
   { path: 'list-teacher', component: ListTeacherComponent },
   { path: 'assignments/:teacherId', component: TeacherAssignmentsComponent },
   { path: 'details/:teacherId', component: TeacherDetailComponent },
   { path: 'documents/:teacherId', component: TeacherDocumentsComponent },
-  { path: 'user/:teacherId', component: TeacherAccountComponent }
+  { path: 'user/:teacherId', component: TeacherAccountComponent },
+  { path: 'marks-entry', component: TeacherMarksEntryComponent }
 ];
 
 @NgModule({

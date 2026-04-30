@@ -31,6 +31,20 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
+        [Route("GetTeachersCount")]
+        public async Task<int> GetTeachersCount(CancellationToken cancellationToken)
+        {
+            return await _dashboardService.GetTeachersCount(cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardSummary")]
+        public async Task<DashboardSummaryViewModel> GetDashboardSummary(CancellationToken cancellationToken)
+        {
+            return await _dashboardService.GetDashboardSummary(cancellationToken);
+        }
+
+        [HttpGet]
         [Route("GetStudentsByClass")]
         public async Task<List<StudentsByClassViewModel>> GetStudentsByClass(CancellationToken cancellationToken)
         {

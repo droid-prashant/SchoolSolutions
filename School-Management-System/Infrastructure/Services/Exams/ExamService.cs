@@ -183,6 +183,119 @@ namespace Infrastructure.Services.SubjectMarks
                 scope.Complete();
             }
         }
+
+        public async Task UpsertTeacherSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken)
+        {
+            var studentEnrollmentId = Guid.Parse(subjectMarkDto.StudentId);
+            var subjectMarkList = subjectMarkDto.StudentMarksLists;
+
+            if (subjectMarkList.Count != 1)
+            {
+                throw new Exception("Teacher marks entry must contain exactly one subject.");
+            }
+
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentId, cancellationToken);
+            var classCourseId = Guid.Parse(subjectMarkList[0].ClassCourseId);
+            await EnsureCurrentTeacherCanEnterMarks(studentEnrollmentId, classCourseId, cancellationToken);
+
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var existingExamResult = await _context.ExamResults
+                    .Include(x => x.SubjectMarks)
+                    .FirstOrDefaultAsync(x =>
+                        x.StudentEnrollmentId == studentEnrollmentId &&
+                        x.ExamType == subjectMarkDto.ExamType,
+                        cancellationToken);
+
+                if (existingExamResult == null)
+                {
+                    existingExamResult = new ExamResult
+                    {
+                        Id = Guid.NewGuid(),
+                        StudentEnrollmentId = studentEnrollmentId,
+                        ExamType = subjectMarkDto.ExamType,
+                        Attendance = subjectMarkDto.Attendance,
+                        TotalSchoolDays = subjectMarkDto.TotalSchoolDays,
+                        GPA = 0m,
+                        TotalCredit = 0m
+                    };
+
+                    await _context.ExamResults.AddAsync(existingExamResult, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+                else
+                {
+                    existingExamResult.Attendance = subjectMarkDto.Attendance;
+                    existingExamResult.TotalSchoolDays = subjectMarkDto.TotalSchoolDays;
+                }
+
+                var subjectMarkObj = subjectMarkList[0];
+                var calculation = CalculateSubjectPerformance(subjectMarkObj);
+                var existingSubjectMark = await _context.SubjectMarks
+                    .FirstOrDefaultAsync(x =>
+                        x.ExamResultId == existingExamResult.Id &&
+                        x.ClassCourseId == classCourseId,
+                        cancellationToken);
+
+                if (existingSubjectMark == null)
+                {
+                    existingSubjectMark = new SubjectMark
+                    {
+                        Id = Guid.NewGuid(),
+                        StudentEnrollmentId = studentEnrollmentId,
+                        ClassCourseId = classCourseId,
+                        ExamResultId = existingExamResult.Id
+                    };
+                    await _context.SubjectMarks.AddAsync(existingSubjectMark, cancellationToken);
+                }
+
+                ApplySubjectMarkValues(existingSubjectMark, subjectMarkObj, calculation);
+                await _context.SaveChangesAsync(cancellationToken);
+                await RecalculateExamResult(existingExamResult.Id, cancellationToken);
+                scope.Complete();
+            }
+        }
+
+        public async Task DeleteTeacherSubjectMarks(string studentEnrollmentId, int examType, string classCourseId, CancellationToken cancellationToken)
+        {
+            var studentEnrollmentGuid = Guid.Parse(studentEnrollmentId);
+            var classCourseGuid = Guid.Parse(classCourseId);
+
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentGuid, cancellationToken);
+            await EnsureCurrentTeacherCanEnterMarks(studentEnrollmentGuid, classCourseGuid, cancellationToken);
+
+            var examResult = await _context.ExamResults
+                .Include(x => x.SubjectMarks)
+                .FirstOrDefaultAsync(x =>
+                    x.StudentEnrollmentId == studentEnrollmentGuid &&
+                    x.ExamType == examType,
+                    cancellationToken);
+
+            if (examResult == null)
+            {
+                throw new Exception("Exam result not found.");
+            }
+
+            var subjectMark = examResult.SubjectMarks.FirstOrDefault(x => x.ClassCourseId == classCourseGuid);
+            if (subjectMark == null)
+            {
+                throw new Exception("Subject marks entry not found.");
+            }
+
+            _context.SubjectMarks.Remove(subjectMark);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var hasRemainingMarks = await _context.SubjectMarks.AnyAsync(x => x.ExamResultId == examResult.Id, cancellationToken);
+            if (!hasRemainingMarks)
+            {
+                _context.ExamResults.Remove(examResult);
+                await _context.SaveChangesAsync(cancellationToken);
+                return;
+            }
+
+            await RecalculateExamResult(examResult.Id, cancellationToken);
+        }
+
         public async Task<SubjectMarksViewModel> GetStudentMarks(string studentEnrollmentId, int examType, CancellationToken cancellationToken)
         {
             var studentEnrollmentGuid = Guid.Parse(studentEnrollmentId);
@@ -212,6 +325,143 @@ namespace Infrastructure.Services.SubjectMarks
             return subjectMarks;
         }
 
+        public async Task<SubjectMarksViewModel?> GetTeacherStudentSubjectMarks(string studentEnrollmentId, int examType, string classCourseId, CancellationToken cancellationToken)
+        {
+            var studentEnrollmentGuid = Guid.Parse(studentEnrollmentId);
+            var classCourseGuid = Guid.Parse(classCourseId);
+
+            await EnsureEnrollmentBelongsToCurrentAcademicYear(studentEnrollmentGuid, cancellationToken);
+            await EnsureCurrentTeacherCanEnterMarks(studentEnrollmentGuid, classCourseGuid, cancellationToken);
+
+            return await _context.ExamResults
+                .Where(x => x.StudentEnrollmentId == studentEnrollmentGuid && x.ExamType == examType)
+                .Select(s => new SubjectMarksViewModel
+                {
+                    ExamType = s.ExamType,
+                    Attendance = s.Attendance,
+                    TotalSchoolDays = s.TotalSchoolDays,
+                    StudentId = s.StudentEnrollmentId.ToString(),
+                    StudentMarksLists = s.SubjectMarks
+                        .Where(sm => sm.ClassCourseId == classCourseGuid)
+                        .Select(sm => new StudentMarksList
+                        {
+                            ClassCourseId = sm.ClassCourseId.ToString(),
+                            IsTheoryRequired = sm.ClassCourse.IsTheoryRequired,
+                            IsPracticalRequired = sm.ClassCourse.IsPracticalRequired,
+                            ObtainedTheoryMarks = sm.ClassCourse.IsTheoryRequired ? sm.ObtainedTheoryMarks : null,
+                            ObtainedPracticalMarks = sm.ClassCourse.IsPracticalRequired ? sm.ObtainedPracticalMarks : null,
+                            TheoryCredit = sm.ClassCourse.TheoryCreditHour,
+                            PracticalFullMarks = sm.ClassCourse.IsPracticalRequired ? sm.FullPracticalMarks : null,
+                            TheoryFullMarks = sm.ClassCourse.IsTheoryRequired ? sm.FullTheoryMarks : null,
+                            PracticalCredit = sm.ClassCourse.PracticalCreditHour
+                        }).ToList()
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<List<TeacherMarksAssignmentViewModel>> GetTeacherMarksAssignments(CancellationToken cancellationToken)
+        {
+            var teacherId = await GetCurrentTeacherId(cancellationToken);
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+
+            return await _context.TeacherClassSections
+                .Where(x =>
+                    x.TeacherId == teacherId &&
+                    x.AcademicYearId == currentAcademicYearId &&
+                    x.IsActive &&
+                    !x.IsDeleted)
+                .Join(_context.ClassCourses.Where(x => !x.IsDeleted),
+                    assignment => new { assignment.CourseId, ClassRoomId = assignment.ClassSection.ClassId },
+                    classCourse => new { classCourse.CourseId, classCourse.ClassRoomId },
+                    (assignment, classCourse) => new TeacherMarksAssignmentViewModel
+                    {
+                        AssignmentId = assignment.Id,
+                        ClassSectionId = assignment.ClassSectionId,
+                        ClassRoomId = assignment.ClassSection.ClassId,
+                        ClassRoomName = assignment.ClassSection.ClassRoom.Name,
+                        SectionId = assignment.ClassSection.SectionId,
+                        SectionName = assignment.ClassSection.Section.Name,
+                        CourseId = assignment.CourseId,
+                        ClassCourseId = classCourse.Id,
+                        CourseName = assignment.Course.Name,
+                        IsTheoryRequired = classCourse.IsTheoryRequired,
+                        IsPracticalRequired = classCourse.IsPracticalRequired,
+                        TheoryFullMarks = classCourse.TheoryFullMarks,
+                        PracticalFullMarks = classCourse.PracticalFullMarks,
+                        TheoryCreditHour = classCourse.TheoryCreditHour,
+                        PracticalCreditHour = classCourse.PracticalCreditHour
+                    })
+                .OrderBy(x => x.ClassRoomName)
+                .ThenBy(x => x.SectionName)
+                .ThenBy(x => x.CourseName)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<TeacherSubjectStudentMarksViewModel>> GetTeacherSubjectStudentMarks(string classSectionId, string classCourseId, int examType, string? keyword, CancellationToken cancellationToken)
+        {
+            var classSectionGuid = Guid.Parse(classSectionId);
+            var classCourseGuid = Guid.Parse(classCourseId);
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var teacherId = await GetCurrentTeacherId(cancellationToken);
+
+            var isAssigned = await IsTeacherAssignedToSubject(teacherId, classSectionGuid, classCourseGuid, cancellationToken);
+            if (!isAssigned)
+            {
+                throw new UnauthorizedAccessException("You are not assigned to this subject.");
+            }
+
+            var query = _context.StudentEnrollments
+                .Where(x =>
+                    x.AcademicYearId == currentAcademicYearId &&
+                    x.ClassSectionId == classSectionGuid &&
+                    x.Student.IsActive &&
+                    !x.Student.IsDeleted);
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var cleanKeyword = keyword.Trim();
+                query = query.Where(x =>
+                    x.Student.FirstName.Contains(cleanKeyword) ||
+                    x.Student.LastName.Contains(cleanKeyword) ||
+                    (x.RegistrationNumber != null && x.RegistrationNumber.Contains(cleanKeyword)) ||
+                    (x.SymbolNumber != null && x.SymbolNumber.Contains(cleanKeyword)));
+            }
+
+            return await query
+                .OrderBy(x => x.RollNumber)
+                .ThenBy(x => x.Student.FirstName)
+                .Select(x => new TeacherSubjectStudentMarksViewModel
+                {
+                    StudentEnrollmentId = x.Id,
+                    StudentName = x.Student.FirstName + " " + x.Student.LastName,
+                    RollNumber = x.RollNumber,
+                    Attendance = x.ExamResults.Where(r => r.ExamType == examType).Select(r => (int?)r.Attendance).FirstOrDefault(),
+                    TotalSchoolDays = x.ExamResults.Where(r => r.ExamType == examType).Select(r => (int?)r.TotalSchoolDays).FirstOrDefault(),
+                    HasMarksEntry = x.ExamResults
+                        .Where(r => r.ExamType == examType)
+                        .SelectMany(r => r.SubjectMarks)
+                        .Any(m => m.ClassCourseId == classCourseGuid),
+                    Marks = x.ExamResults
+                        .Where(r => r.ExamType == examType)
+                        .SelectMany(r => r.SubjectMarks)
+                        .Where(m => m.ClassCourseId == classCourseGuid)
+                        .Select(m => new StudentMarksList
+                        {
+                            ClassCourseId = m.ClassCourseId.ToString(),
+                            IsTheoryRequired = m.ClassCourse.IsTheoryRequired,
+                            IsPracticalRequired = m.ClassCourse.IsPracticalRequired,
+                            TheoryCredit = m.ClassCourse.TheoryCreditHour,
+                            PracticalCredit = m.ClassCourse.PracticalCreditHour,
+                            TheoryFullMarks = m.ClassCourse.IsTheoryRequired ? m.FullTheoryMarks : null,
+                            PracticalFullMarks = m.ClassCourse.IsPracticalRequired ? m.FullPracticalMarks : null,
+                            ObtainedTheoryMarks = m.ClassCourse.IsTheoryRequired ? m.ObtainedTheoryMarks : null,
+                            ObtainedPracticalMarks = m.ClassCourse.IsPracticalRequired ? m.ObtainedPracticalMarks : null
+                        })
+                        .FirstOrDefault()
+                })
+                .ToListAsync(cancellationToken);
+        }
+
         private (decimal GPA, decimal TotalCreditHour) calculateGPAAndTotalCreditHour(List<StudentMarksList> subjectMarkList)
         {
             decimal weightedGP = 0.00m;
@@ -237,6 +487,112 @@ namespace Infrastructure.Services.SubjectMarks
             var gpaFloat = weightedGP / totalCreditHour;
             var gpa = Math.Floor(gpaFloat * 100) / 100;
             return (gpa, totalCreditHour);
+        }
+
+        private async Task<Guid> GetCurrentTeacherId(CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(_userResolver.UserId, out var userId))
+            {
+                throw new UnauthorizedAccessException("Current user is not available.");
+            }
+
+            var teacherId = await _context.Teachers
+                .Where(x => x.UserId == userId && x.IsActive && !x.IsDeleted)
+                .Select(x => (Guid?)x.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!teacherId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Current user is not linked to an active teacher.");
+            }
+
+            return teacherId.Value;
+        }
+
+        private async Task EnsureCurrentTeacherCanEnterMarks(Guid studentEnrollmentId, Guid classCourseId, CancellationToken cancellationToken)
+        {
+            var teacherId = await GetCurrentTeacherId(cancellationToken);
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+
+            var enrollment = await _context.StudentEnrollments
+                .Include(x => x.ClassSection)
+                .FirstOrDefaultAsync(x => x.Id == studentEnrollmentId && x.AcademicYearId == currentAcademicYearId, cancellationToken);
+
+            if (enrollment == null)
+            {
+                throw new Exception("The selected student enrollment does not belong to the current academic year.");
+            }
+
+            var isAssigned = await IsTeacherAssignedToSubject(teacherId, enrollment.ClassSectionId, classCourseId, cancellationToken);
+            if (!isAssigned)
+            {
+                throw new UnauthorizedAccessException("You are not assigned to enter marks for this subject.");
+            }
+        }
+
+        private async Task<bool> IsTeacherAssignedToSubject(Guid teacherId, Guid classSectionId, Guid classCourseId, CancellationToken cancellationToken)
+        {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+
+            return await _context.TeacherClassSections
+                .Where(x =>
+                    x.TeacherId == teacherId &&
+                    x.AcademicYearId == currentAcademicYearId &&
+                    x.ClassSectionId == classSectionId &&
+                    x.IsActive &&
+                    !x.IsDeleted)
+                .Join(_context.ClassCourses.Where(x => x.Id == classCourseId && !x.IsDeleted),
+                    assignment => new { assignment.CourseId, ClassRoomId = assignment.ClassSection.ClassId },
+                    classCourse => new { classCourse.CourseId, classCourse.ClassRoomId },
+                    (assignment, classCourse) => assignment)
+                .AnyAsync(cancellationToken);
+        }
+
+        private void ApplySubjectMarkValues(SubjectMark subjectMark, StudentMarksList subjectMarkObj, SubjectCalculationResult calculation)
+        {
+            subjectMark.FullTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.TheoryFullMarks ?? 0m) : 0m;
+            subjectMark.FullPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.PracticalFullMarks ?? 0m) : 0m;
+            subjectMark.ObtainedTheoryMarks = subjectMarkObj.IsTheoryRequired ? (subjectMarkObj.ObtainedTheoryMarks ?? 0m) : 0m;
+            subjectMark.ObtainedPracticalMarks = subjectMarkObj.IsPracticalRequired ? (subjectMarkObj.ObtainedPracticalMarks ?? 0m) : 0m;
+            subjectMark.GradeTheory = calculation.GradeTheory;
+            subjectMark.GradePointTheory = calculation.TheoryGradePoint;
+            subjectMark.GradePractical = calculation.GradePractical;
+            subjectMark.GradePointPractical = calculation.PracticalGradePoint;
+            subjectMark.FinalGrade = calculation.FinalGrade;
+            subjectMark.FinalGradePoint = calculation.FinalGradePoint;
+        }
+
+        private async Task RecalculateExamResult(Guid examResultId, CancellationToken cancellationToken)
+        {
+            var examResult = await _context.ExamResults
+                .Include(x => x.SubjectMarks)
+                    .ThenInclude(x => x.ClassCourse)
+                .FirstOrDefaultAsync(x => x.Id == examResultId, cancellationToken);
+
+            if (examResult == null)
+            {
+                return;
+            }
+
+            decimal weightedGP = 0m;
+            decimal totalCreditHour = 0m;
+            foreach (var subjectMark in examResult.SubjectMarks)
+            {
+                var theoryCredit = subjectMark.ClassCourse.IsTheoryRequired ? (subjectMark.ClassCourse.TheoryCreditHour ?? 0m) : 0m;
+                var practicalCredit = subjectMark.ClassCourse.IsPracticalRequired ? (subjectMark.ClassCourse.PracticalCreditHour ?? 0m) : 0m;
+                var subjectCredit = theoryCredit + practicalCredit;
+                if (subjectCredit <= 0m)
+                {
+                    continue;
+                }
+
+                weightedGP += subjectCredit * subjectMark.FinalGradePoint;
+                totalCreditHour += subjectCredit;
+            }
+
+            examResult.TotalCredit = totalCreditHour;
+            examResult.GPA = totalCreditHour <= 0m ? 0m : Math.Floor((weightedGP / totalCreditHour) * 100) / 100;
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         private string calculateGrade(decimal obtainedMarks, decimal fullMarks)

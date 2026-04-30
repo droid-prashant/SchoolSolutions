@@ -1,6 +1,6 @@
 export interface SubjectMarkDto {
   studentId: string;              
-  examType: string;               
+  examType: number;               
   attendance: number;               
   totalSchoolDays: number;               
   studentMarksLists: StudentMarksList[];

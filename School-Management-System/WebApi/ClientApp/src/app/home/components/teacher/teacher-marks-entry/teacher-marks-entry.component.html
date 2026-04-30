@@ -1,0 +1,151 @@
+<p-toast></p-toast>
+
+<app-page-header
+    section="Teacher"
+    page="Subject Marks Entry"
+    subtitle="Enter marks only for subjects assigned to your teacher account.">
+</app-page-header>
+
+<form [formGroup]="marksForm" class="p-fluid">
+    <div class="formgrid grid">
+        <div class="col-12 md:col-4">
+            <div class="field">
+                <label for="assignment">Assigned Subject</label>
+                <p-dropdown
+                    inputId="assignment"
+                    [options]="assignments"
+                    [(ngModel)]="selectedAssignment"
+                    [ngModelOptions]="{ standalone: true }"
+                    optionLabel="courseName"
+                    placeholder="Select Subject"
+                    (onChange)="onCriteriaChange()">
+                    <ng-template pTemplate="selectedItem" let-assignment>
+                        <span *ngIf="assignment">{{ assignment.classRoomName }} - {{ assignment.sectionName }} / {{ assignment.courseName }}</span>
+                    </ng-template>
+                    <ng-template pTemplate="item" let-assignment>
+                        <span>{{ assignment.classRoomName }} - {{ assignment.sectionName }} / {{ assignment.courseName }}</span>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+        </div>
+
+        <div class="col-12 md:col-3">
+            <div class="field">
+                <label for="examType">Exam Terminal</label>
+                <p-dropdown
+                    inputId="examType"
+                    [options]="examTerminals"
+                    optionLabel="terminalName"
+                    optionValue="id"
+                    formControlName="examType"
+                    placeholder="Select Terminal"
+                    (onChange)="onCriteriaChange()">
+                </p-dropdown>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card">
+    <p-table
+        #teacherMarksTable
+        [value]="students"
+        styleClass="app-grid-table"
+        [loading]="isLoading"
+        [paginator]="true"
+        [rows]="15"
+        [rowsPerPageOptions]="[15, 30, 50]"
+        [globalFilterFields]="['studentName', 'rollNumber']">
+
+        <ng-template pTemplate="caption">
+            <span class="p-input-icon-left app-page-search" *ngIf="students.length > 0">
+                <i class="pi pi-search"></i>
+                <input
+                    #studentSearch
+                    type="text"
+                    pInputText
+                    placeholder="Search student..."
+                    (input)="teacherMarksTable.filterGlobal(studentSearch.value, 'contains')" />
+            </span>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 5%">Id</th>
+                <th pSortableColumn="studentName">Student <p-sortIcon field="studentName"></p-sortIcon></th>
+                <th pSortableColumn="rollNumber">Roll No <p-sortIcon field="rollNumber"></p-sortIcon></th>
+                <th>Theory</th>
+                <th>Practical</th>
+                <th>Attendance</th>
+                <th>Status</th>
+                <th style="width: 12%">Action</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
+            <tr>
+                <td>{{ rowIndex + 1 }}</td>
+                <td>{{ student.studentName }}</td>
+                <td>{{ student.rollNumber || '-' }}</td>
+                <td>{{ student.marks?.obtainedTheoryMarks ?? '-' }}</td>
+                <td>{{ student.marks?.obtainedPracticalMarks ?? '-' }}</td>
+                <td>{{ student.attendance ?? '-' }} / {{ student.totalSchoolDays ?? '-' }}</td>
+                <td>
+                    <p-tag
+                        [severity]="student.hasMarksEntry ? 'success' : 'warning'"
+                        [value]="student.hasMarksEntry ? 'Entered' : 'Pending'">
+                    </p-tag>
+                </td>
+                <td>
+                    <i class="pi pi-pencil pointer-icon mr-3" (click)="showDialog(student)"></i>
+                    <i
+                        class="pi pi-trash pointer-icon text-red-500"
+                        *ngIf="student.hasMarksEntry"
+                        (click)="deleteMarks(student)">
+                    </i>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="8" class="text-center">Select an assigned subject and exam terminal.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog
+    header="Marks Entry - {{ selectedStudent?.studentName }}"
+    [modal]="true"
+    [(visible)]="isMarksEntryVisible"
+    (onHide)="closeDialog()"
+    [style]="{ width: '34rem' }">
+
+    <form [formGroup]="marksForm" class="p-fluid">
+        <div class="field">
+            <label for="attendance">Attendance</label>
+            <input id="attendance" pInputText type="number" formControlName="attendance" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('attendance') }" />
+        </div>
+
+        <div class="field">
+            <label for="totalSchoolDays">Total School Days</label>
+            <input id="totalSchoolDays" pInputText type="number" formControlName="totalSchoolDays" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('totalSchoolDays') }" />
+        </div>
+
+        <div class="field" *ngIf="selectedAssignment?.isTheoryRequired">
+            <label for="obtainedTheoryMarks">Theory Marks / {{ selectedAssignment?.theoryFullMarks }}</label>
+            <input id="obtainedTheoryMarks" pInputText type="number" formControlName="obtainedTheoryMarks" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('obtainedTheoryMarks') }" />
+        </div>
+
+        <div class="field" *ngIf="selectedAssignment?.isPracticalRequired">
+            <label for="obtainedPracticalMarks">Practical Marks / {{ selectedAssignment?.practicalFullMarks }}</label>
+            <input id="obtainedPracticalMarks" pInputText type="number" formControlName="obtainedPracticalMarks" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('obtainedPracticalMarks') }" />
+        </div>
+
+        <div class="flex justify-content-end gap-2 mt-3">
+            <button pButton pRipple type="button" label="Cancel" class="p-button-text" (click)="closeDialog()"></button>
+            <button pButton pRipple type="button" label="Save" class="p-button-success" (click)="save()"></button>
+        </div>
+    </form>
+</p-dialog>

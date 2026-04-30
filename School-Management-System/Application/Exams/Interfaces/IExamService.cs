@@ -13,7 +13,12 @@ namespace Application.SubjectMarks.Interfaces
     {
         Task AddSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken);
         Task UpdateSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken);
+        Task UpsertTeacherSubjectMarks(SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken);
+        Task DeleteTeacherSubjectMarks(string studentEnrollmentId, int examType, string classCourseId, CancellationToken cancellationToken);
         Task<SubjectMarksViewModel> GetStudentMarks(string studentEnrollmentId, int examType, CancellationToken cancellationToken);
+        Task<SubjectMarksViewModel?> GetTeacherStudentSubjectMarks(string studentEnrollmentId, int examType, string classCourseId, CancellationToken cancellationToken);
+        Task<List<TeacherMarksAssignmentViewModel>> GetTeacherMarksAssignments(CancellationToken cancellationToken);
+        Task<List<TeacherSubjectStudentMarksViewModel>> GetTeacherSubjectStudentMarks(string classSectionId, string classCourseId, int examType, string? keyword, CancellationToken cancellationToken);
         Task<ResultViewModel> GetResult(Guid studentEnrollmentId, int? examType, CancellationToken cancellationToken);
     }
 }

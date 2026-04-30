@@ -14,7 +14,7 @@
     <div class="col-12 md:col-3">
         <div class="surface-card shadow-2 p-4 border-round">
             <span class="text-xl font-bold">Teachers</span>
-            <div class="text-3xl mt-2 font-bold text-primary">30</div>
+            <div class="text-3xl mt-2 font-bold text-primary">{{teachersCount}}</div>
         </div>
     </div>
 
@@ -27,8 +27,30 @@
 
     <div class="col-12 md:col-3">
         <div class="surface-card shadow-2 p-4 p-4 border-round">
-            <span class="text-xl font-bold">Attendance Today</span>
-            <div class="text-3xl mt-2 font-bold text-primary">92%</div>
+            <span class="text-xl font-bold">Fee Collected Today</span>
+            <div class="text-3xl mt-2 font-bold text-primary">{{feeCollectedToday | number:'1.0-2'}}</div>
+        </div>
+    </div>
+</div>
+<div class="grid mt-3">
+    <div class="col-12 md:col-4">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <span class="text-xl font-bold">Fee Pending Overall</span>
+            <div class="text-3xl mt-2 font-bold text-orange-500">{{feePendingOverall | number:'1.0-2'}}</div>
+        </div>
+    </div>
+
+    <div class="col-12 md:col-4">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <span class="text-xl font-bold">Fee Collected Overall</span>
+            <div class="text-3xl mt-2 font-bold text-green-600">{{feeCollectedOverall | number:'1.0-2'}}</div>
+        </div>
+    </div>
+
+    <div class="col-12 md:col-4">
+        <div class="surface-card shadow-2 p-4 border-round">
+            <span class="text-xl font-bold">Students With Due Fees</span>
+            <div class="text-3xl mt-2 font-bold text-primary">{{pendingFeeStudents}}</div>
         </div>
     </div>
 </div>

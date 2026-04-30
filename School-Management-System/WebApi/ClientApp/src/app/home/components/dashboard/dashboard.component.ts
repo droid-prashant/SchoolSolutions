@@ -18,6 +18,11 @@ export class DashboardComponent implements OnInit {
   options: any;
   studentsCount: number = 0;
   courseCount: number = 0;
+  teachersCount: number = 0;
+  feePendingOverall: number = 0;
+  feeCollectedToday: number = 0;
+  feeCollectedOverall: number = 0;
+  pendingFeeStudents: number = 0;
   studentsByClass: StudentsByClassViewModel[] = []
   provinceDetails: ProvinceViewModel[] = [];
   classRooms: ClassRoomViewModel[] = []
@@ -25,11 +30,29 @@ export class DashboardComponent implements OnInit {
   constructor(private _apiService: ApiService, private masterApiService: MasterApiService) { }
 
   ngOnInit(): void {
-    this.studentCount();
-    this.coursesCount();
+    this.loadDashboardSummary();
     this.classVsStudents();
     this.getProvinceDetails();
     this.getClassRooms();
+  }
+
+  loadDashboardSummary() {
+    this._apiService.getDashboardSummary().subscribe({
+      next: (res) => {
+        this.studentsCount = res.studentsCount;
+        this.courseCount = res.coursesCount;
+        this.teachersCount = res.teachersCount;
+        this.feePendingOverall = res.feePendingOverall;
+        this.feeCollectedToday = res.feeCollectedToday;
+        this.feeCollectedOverall = res.feeCollectedOverall;
+        this.pendingFeeStudents = res.pendingFeeStudents;
+      },
+      error: () => {
+        this.studentCount();
+        this.coursesCount();
+        this.teachersCountLoad();
+      }
+    });
   }
 
   getProvinceDetails() {
@@ -60,6 +83,17 @@ export class DashboardComponent implements OnInit {
     this._apiService.getCoursesCount().subscribe({
       next: (res) => {
         this.courseCount = res;
+      },
+      error: (err) => {
+
+      }
+    });
+  }
+
+  teachersCountLoad() {
+    this._apiService.getTeachersCount().subscribe({
+      next: (res) => {
+        this.teachersCount = res;
       },
       error: (err) => {
 

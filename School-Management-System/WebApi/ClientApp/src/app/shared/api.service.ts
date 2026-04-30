@@ -38,6 +38,8 @@ import { TeacherAccountViewModel, TeacherClassSectionViewModel, TeacherDashboard
 import { PromotionCandidateViewModel } from '../home/components/student/shared/models/viewModels/promotionCandidate.viewModel';
 import { PromoteStudentsDto } from '../home/components/student/shared/models/dtos/promoteStudents.dto';
 import { PromotionExecutionResultViewModel } from '../home/components/student/shared/models/viewModels/promotionExecutionResult.viewModel';
+import { TeacherMarksAssignmentViewModel, TeacherSubjectStudentMarksViewModel } from '../home/components/teacher/shared/models/viewModels/teacher-marks.viewModel';
+import { DashboardSummaryViewModel } from '../home/components/dashboard/model/dashboardSummary.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -52,6 +54,14 @@ export class ApiService {
 
   getCoursesCount(): Observable<number> {
     return this._httpClient.get<number>(this.baseUrl + "api/Dashboard/GetCoursesCount");
+  }
+
+  getTeachersCount(): Observable<number> {
+    return this._httpClient.get<number>(this.baseUrl + "api/Dashboard/GetTeachersCount");
+  }
+
+  getDashboardSummary(): Observable<DashboardSummaryViewModel> {
+    return this._httpClient.get<DashboardSummaryViewModel>(this.baseUrl + "api/Dashboard/GetDashboardSummary");
   }
 
   getStudentsByClassCount(): Observable<StudentsByClassViewModel[]> {
@@ -238,8 +248,24 @@ export class ApiService {
   updateStudentMarks(studentmarks: SubjectMarkDto): Observable<void> {
     return this._httpClient.put<void>(this.baseUrl + "api/Exam/UpdateMarks", studentmarks);
   }
+  upsertTeacherSubjectMarks(studentmarks: SubjectMarkDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Exam/UpsertTeacherSubjectMarks", studentmarks);
+  }
+  deleteTeacherSubjectMarks(studentEnrollmentId: string, examType: number, classCourseId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/Exam/DeleteTeacherSubjectMarks?studentEnrollmentId=${studentEnrollmentId}&examType=${examType}&classCourseId=${classCourseId}`);
+  }
   getStudentMarks(studentEnrollmentId: string, examType: number): Observable<SubjectMarksViewModel> {
     return this._httpClient.get<SubjectMarksViewModel>(this.baseUrl + `api/Exam/GetStudentMarks?studentEnrollmentId=${studentEnrollmentId}&examType=${examType}`);
+  }
+  getTeacherStudentSubjectMarks(studentEnrollmentId: string, examType: number, classCourseId: string): Observable<SubjectMarksViewModel> {
+    return this._httpClient.get<SubjectMarksViewModel>(this.baseUrl + `api/Exam/GetTeacherStudentSubjectMarks?studentEnrollmentId=${studentEnrollmentId}&examType=${examType}&classCourseId=${classCourseId}`);
+  }
+  getTeacherMarksAssignments(): Observable<TeacherMarksAssignmentViewModel[]> {
+    return this._httpClient.get<TeacherMarksAssignmentViewModel[]>(this.baseUrl + "api/Exam/GetTeacherMarksAssignments");
+  }
+  getTeacherSubjectStudentMarks(classSectionId: string, classCourseId: string, examType: number, keyword = ''): Observable<TeacherSubjectStudentMarksViewModel[]> {
+    const keywordQuery = keyword ? `&keyword=${encodeURIComponent(keyword)}` : '';
+    return this._httpClient.get<TeacherSubjectStudentMarksViewModel[]>(this.baseUrl + `api/Exam/GetTeacherSubjectStudentMarks?classSectionId=${classSectionId}&classCourseId=${classCourseId}&examType=${examType}${keywordQuery}`);
   }
 
   getResult(studentEnrollmentId: string, examType?: number | null): Observable<ResultViewModel> {

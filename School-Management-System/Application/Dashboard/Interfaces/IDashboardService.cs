@@ -11,6 +11,8 @@ namespace Application.Dashboard.Interfaces
     {
         Task<int> GetStudentCount(CancellationToken cancellationToken);
         Task<int> GetCoursesCount(CancellationToken cancellationToken);
+        Task<int> GetTeachersCount(CancellationToken cancellationToken);
+        Task<DashboardSummaryViewModel> GetDashboardSummary(CancellationToken cancellationToken);
         Task<List<StudentsByClassViewModel>> GetStudentsByClass(CancellationToken cancellationToken);
     }
 }

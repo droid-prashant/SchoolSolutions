@@ -42,12 +42,47 @@ namespace WebApi.Controllers
             await _examService.UpdateSubjectMarks(subjectMarkDto, cancellationToken);
         }
 
+        [HttpPost]
+        [Route("UpsertTeacherSubjectMarks")]
+        public async Task UpsertTeacherSubjectMarks([FromBody] SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken)
+        {
+            await _examService.UpsertTeacherSubjectMarks(subjectMarkDto, cancellationToken);
+        }
+
+        [HttpDelete]
+        [Route("DeleteTeacherSubjectMarks")]
+        public async Task DeleteTeacherSubjectMarks([FromQuery] string studentEnrollmentId, [FromQuery] int examType, [FromQuery] string classCourseId, CancellationToken cancellationToken)
+        {
+            await _examService.DeleteTeacherSubjectMarks(studentEnrollmentId, examType, classCourseId, cancellationToken);
+        }
+
         [HttpGet]
         [Route("GetStudentMarks")]
         public async Task<SubjectMarksViewModel> GetStudentMarks([FromQuery] string studentEnrollmentId, [FromQuery] int examType, CancellationToken cancellationToken)
         {
             var result = await _examService.GetStudentMarks(studentEnrollmentId, examType, cancellationToken);
             return result;
+        }
+
+        [HttpGet]
+        [Route("GetTeacherStudentSubjectMarks")]
+        public async Task<SubjectMarksViewModel?> GetTeacherStudentSubjectMarks([FromQuery] string studentEnrollmentId, [FromQuery] int examType, [FromQuery] string classCourseId, CancellationToken cancellationToken)
+        {
+            return await _examService.GetTeacherStudentSubjectMarks(studentEnrollmentId, examType, classCourseId, cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("GetTeacherMarksAssignments")]
+        public async Task<List<TeacherMarksAssignmentViewModel>> GetTeacherMarksAssignments(CancellationToken cancellationToken)
+        {
+            return await _examService.GetTeacherMarksAssignments(cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("GetTeacherSubjectStudentMarks")]
+        public async Task<List<TeacherSubjectStudentMarksViewModel>> GetTeacherSubjectStudentMarks([FromQuery] string classSectionId, [FromQuery] string classCourseId, [FromQuery] int examType, [FromQuery] string? keyword, CancellationToken cancellationToken)
+        {
+            return await _examService.GetTeacherSubjectStudentMarks(classSectionId, classCourseId, examType, keyword, cancellationToken);
         }
 
         //[HttpPut("{id}")]

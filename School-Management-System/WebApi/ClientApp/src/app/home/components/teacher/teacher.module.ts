@@ -11,6 +11,7 @@ import { TeacherAssignmentsComponent } from './teacher-assignments/teacher-assig
 import { TeacherDetailComponent } from './teacher-detail/teacher-detail.component';
 import { TeacherDocumentsComponent } from './teacher-documents/teacher-documents.component';
 import { NpDatepickerComponent } from '../../../shared/calender/np-datepicker/np-datepicker.component';
+import { TeacherMarksEntryComponent } from './teacher-marks-entry/teacher-marks-entry.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { NpDatepickerComponent } from '../../../shared/calender/np-datepicker/np
     TeacherAccountComponent,
     TeacherAssignmentsComponent,
     TeacherDetailComponent,
-    TeacherDocumentsComponent
+    TeacherDocumentsComponent,
+    TeacherMarksEntryComponent
   ],
   imports: [
     CommonModule,
