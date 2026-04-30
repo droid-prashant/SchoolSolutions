@@ -1,122 +1,170 @@
-<div class="card topbar-card">
-    <p-menubar [model]="items">
-        <ng-template pTemplate="item" let-item let-root="root">
-            <a pRipple class="flex align-items-center p-menuitem-link">
-                <span [class]="item.icon"></span>
-                <span class="ml-2">{{ item.label }}</span>
-                <p-badge *ngIf="item.badge" [ngClass]="{ 'ml-auto': !root, 'ml-2': root }" [value]="item.badge" />
-                <span *ngIf="item.shortcut"
-                    class="ml-auto border-1 surface-border border-round surface-100 text-xs p-1">{{ item.shortcut
-                    }}</span>
-                <i *ngIf="item.items" [ngClass]="['pi', root ? 'pi-angle-down ml-2' : 'pi-angle-right ml-auto']"></i>
-            </a>
-        </ng-template>
-        <ng-template pTemplate="end">
-            <div class="topbar-actions flex align-items-center gap-4">
-                <span *ngIf="currentAcademicYearName" class="topbar-academic-year">Academic Year: {{ currentAcademicYearName }}</span>
-                <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" />
-                <button
-                    type="button"
-                    class="avatar-trigger"
-                    (click)="avatarPanel.toggle($event)">
-                    <ng-container *ngIf="userAvatarImage; else topbarInitialAvatar">
+<header class="app-topbar">
+    <div class="topbar-left">
+        <button
+            pButton
+            pRipple
+            type="button"
+            class="topbar-icon-btn"
+            [icon]="isSidebarCollapsed ? 'pi pi-bars' : 'pi pi-align-left'"
+            [attr.aria-label]="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            (click)="toggleSidebar()">
+        </button>
+
+        <div class="topbar-brand">
+            <img src="assets/Om Pushpanjali logo.png" alt="School Logo" class="topbar-logo" />
+            <div class="topbar-brand-copy">
+                <h1>{{ schoolName }}</h1>
+                <span>School Management System</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="topbar-actions">
+        <div class="academic-pill" *ngIf="currentAcademicYearName">
+            <i class="pi pi-calendar"></i>
+            <span>{{ currentAcademicYearName }}</span>
+        </div>
+
+        <button
+            type="button"
+            class="avatar-trigger"
+            (click)="avatarPanel.toggle($event)"
+            aria-label="Open profile menu">
+            <ng-container *ngIf="userAvatarImage; else topbarInitialAvatar">
+                <p-avatar
+                    [image]="userAvatarImage"
+                    shape="circle"
+                    (imageError)="onAvatarImageError()"
+                    styleClass="topbar-avatar topbar-avatar-image">
+                </p-avatar>
+            </ng-container>
+            <ng-template #topbarInitialAvatar>
+                <p-avatar
+                    [label]="userInitials"
+                    shape="circle"
+                    styleClass="topbar-avatar">
+                </p-avatar>
+            </ng-template>
+            <span class="topbar-user">
+                <strong>{{ currentUserName }}</strong>
+                <small>{{ currentUserRole }}</small>
+            </span>
+        </button>
+
+        <button
+            pButton
+            pRipple
+            type="button"
+            icon="pi pi-sign-out"
+            class="topbar-icon-btn logout-btn"
+            aria-label="Logout"
+            (click)="logout()">
+        </button>
+
+        <p-overlayPanel #avatarPanel [dismissable]="true" styleClass="account-overlay">
+            <div class="account-panel">
+                <div class="account-summary">
+                    <ng-container *ngIf="userAvatarImage; else accountInitialAvatar">
                         <p-avatar
                             [image]="userAvatarImage"
                             shape="circle"
+                            size="large"
                             (imageError)="onAvatarImageError()"
-                            styleClass="topbar-avatar topbar-avatar-image">
+                            styleClass="account-avatar account-avatar-image">
                         </p-avatar>
                     </ng-container>
-                    <ng-template #topbarInitialAvatar>
+                    <ng-template #accountInitialAvatar>
                         <p-avatar
                             [label]="userInitials"
                             shape="circle"
-                            styleClass="topbar-avatar">
+                            size="large"
+                            styleClass="account-avatar">
                         </p-avatar>
                     </ng-template>
-                </button>
-                <p-overlayPanel #avatarPanel [dismissable]="true" styleClass="account-overlay">
-                    <div class="account-panel">
-                        <div class="account-summary">
-                            <ng-container *ngIf="userAvatarImage; else accountInitialAvatar">
-                                <p-avatar
-                                    [image]="userAvatarImage"
-                                    shape="circle"
-                                    size="large"
-                                    (imageError)="onAvatarImageError()"
-                                    styleClass="account-avatar account-avatar-image">
-                                </p-avatar>
-                            </ng-container>
-                            <ng-template #accountInitialAvatar>
-                                <p-avatar
-                                    [label]="userInitials"
-                                    shape="circle"
-                                    size="large"
-                                    styleClass="account-avatar">
-                                </p-avatar>
-                            </ng-template>
-                            <div class="account-meta">
-                                <h4>{{ currentUserName }}</h4>
-                                <p *ngIf="currentUserEmail">{{ currentUserEmail }}</p>
-                                <span>{{ currentUserRole }}</span>
-                                <span *ngIf="currentAcademicYearName">Academic Year: {{ currentAcademicYearName }}</span>
-                            </div>
-                        </div>
 
-                        <div class="account-actions">
-                            <ng-container *ngFor="let item of avatarMenuItems">
-                                <p-divider *ngIf="item.separator"></p-divider>
-                                <button
-                                    *ngIf="!item.separator"
-                                    pButton
-                                    pRipple
-                                    type="button"
-                                    [icon]="item.icon || ''"
-                                    [label]="item.label || ''"
-                                    class="p-button-text account-action-btn"
-                                    (click)="onAvatarActionClick(item); avatarPanel.hide()"
-                                    [ngClass]="{ 'account-action-logout': item.label === 'Logout' }">
-                                </button>
-                            </ng-container>
-                        </div>
-                    </div>
-                </p-overlayPanel>
-            </div>
-        </ng-template>
-    </p-menubar>
-</div>
-
-<div class="card shell-card">
-    <div class="app-shell flex surface-ground">
-
-        <!-- Sidebar Section -->
-        <div class="sidebar-panel w-18rem">
-            <div class="sidebar-brand">
-                <div class="sidebar-brand-top">
-                    <img src="assets/Om Pushpanjali logo.png" alt="School Logo" class="sidebar-logo" />
-                    <div class="sidebar-brand-copy">
-                        <h3>Om Pushpanjali English School</h3>
-                        <p>Administration Workspace</p>
+                    <div class="account-meta">
+                        <h4>{{ currentUserName }}</h4>
+                        <p *ngIf="currentUserEmail">{{ currentUserEmail }}</p>
+                        <span>{{ currentUserRole }}</span>
+                        <span *ngIf="currentAcademicYearName">{{ currentAcademicYearName }}</span>
                     </div>
                 </div>
-            </div>
 
-            <div class="sidebar-nav-label">Navigation</div>
-
-            <div class="sidebar-menu-wrap">
-                <p-panelMenu [model]="sidebarItems" styleClass="w-full app-sidebar-menu" />
+                <div class="account-actions">
+                    <button
+                        *ngFor="let item of avatarMenuItems"
+                        pButton
+                        pRipple
+                        type="button"
+                        [icon]="item.icon || ''"
+                        [label]="item.label || ''"
+                        class="p-button-text account-action-btn account-action-logout"
+                        (click)="onAvatarActionClick(item); avatarPanel.hide()">
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <!-- Body / Main Content Section -->
-        <div class="content-panel flex-1">
-            <div class="content-body">
-                <router-outlet></router-outlet>
-            </div>
-            <footer class="app-footer">
-                <span>Developed by IntelliSync-360</span>
-                <span>Copyright © 2026. All rights reserved.</span>
-            </footer>
-        </div>
+        </p-overlayPanel>
     </div>
+</header>
+
+<div class="app-shell" [class.sidebar-collapsed]="isSidebarCollapsed">
+    <aside class="sidebar-panel" aria-label="Application navigation">
+        <div class="sidebar-rail-head">
+            <span class="sidebar-nav-label">Navigation</span>
+            <span class="sidebar-collapsed-mark">SMS</span>
+        </div>
+
+        <nav class="sidebar-menu-wrap">
+            <ng-container *ngFor="let item of sidebarItems">
+                <a
+                    *ngIf="!item.items?.length"
+                    pRipple
+                    class="sidebar-direct-link"
+                    [routerLink]="getRouterLink(item)"
+                    routerLinkActive="active-route"
+                    [routerLinkActiveOptions]="{ exact: false }"
+                    [attr.title]="isSidebarCollapsed ? item.label : null">
+                    <i [class]="item.icon"></i>
+                    <span class="menu-label">{{ item.label }}</span>
+                </a>
+
+                <section
+                    *ngIf="item.items?.length"
+                    class="sidebar-group"
+                    [class.sidebar-group-active]="isGroupActive(item)">
+                    <div
+                        class="sidebar-group-heading"
+                        [attr.title]="isSidebarCollapsed ? item.label : null">
+                        <i [class]="item.icon"></i>
+                        <span class="menu-label">{{ item.label }}</span>
+                    </div>
+
+                    <div class="sidebar-submenu">
+                        <a
+                            *ngFor="let child of item.items"
+                            pRipple
+                            class="sidebar-child-link"
+                            [routerLink]="getRouterLink(child)"
+                            routerLinkActive="active-route"
+                            [routerLinkActiveOptions]="{ exact: false }"
+                            [attr.title]="isSidebarCollapsed ? child.label : null">
+                            <i [class]="child.icon"></i>
+                            <span class="menu-label">{{ child.label }}</span>
+                        </a>
+                    </div>
+                </section>
+            </ng-container>
+        </nav>
+    </aside>
+
+    <main class="content-panel">
+        <div class="content-body">
+            <router-outlet></router-outlet>
+        </div>
+
+        <footer class="app-footer">
+            <span>Developed by IntelliSync-360</span>
+            <span>Copyright &copy; 2026. All rights reserved.</span>
+        </footer>
+    </main>
 </div>
