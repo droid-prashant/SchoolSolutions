@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.SubjectMarks.Dtos
+namespace Application.Exams.Dtos
 {
     public class SubjectMarkDto
     {

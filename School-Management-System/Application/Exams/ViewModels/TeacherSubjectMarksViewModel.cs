@@ -1,10 +1,12 @@
-using Application.SubjectMarks.Dtos;
+using Application.Exams.Dtos;
 
 namespace Application.Exams.ViewModels
 {
     public class TeacherMarksAssignmentViewModel
     {
         public Guid AssignmentId { get; set; }
+        public Guid TeacherId { get; set; }
+        public string TeacherName { get; set; } = string.Empty;
         public Guid ClassSectionId { get; set; }
         public Guid ClassRoomId { get; set; }
         public string ClassRoomName { get; set; } = string.Empty;

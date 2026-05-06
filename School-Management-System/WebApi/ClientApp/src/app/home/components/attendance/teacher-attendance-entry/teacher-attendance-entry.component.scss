@@ -1,0 +1,159 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.attendance-filter,
+.attendance-table-card {
+  margin-top: .75rem;
+}
+
+.toolbar-grid {
+  align-items: end;
+  display: grid;
+  grid-template-columns: minmax(10rem, 13rem) auto auto auto;
+  gap: .75rem;
+  width: auto;
+}
+
+.filter-action {
+  min-width: 7rem;
+}
+
+.filter-action button {
+  width: 100%;
+}
+
+::ng-deep .attendance-toolbar.p-toolbar {
+  align-items: end;
+  justify-content: flex-start;
+  padding: .75rem;
+}
+
+::ng-deep .attendance-toolbar .field {
+  margin-bottom: 0;
+}
+
+.attendance-table-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .attendance-table-card .p-toolbar {
+  gap: .75rem;
+}
+
+::ng-deep .attendance-table-card p-table,
+::ng-deep .attendance-table-card .p-datatable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .attendance-table-card .app-grid-table .p-datatable-wrapper {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+}
+
+::ng-deep .attendance-table-card .p-paginator {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.table-commandbar {
+  margin-bottom: .5rem;
+}
+
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+}
+
+.summary-strip span {
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 6px;
+  color: #475569;
+  font-size: .85rem;
+  padding: .35rem .55rem;
+}
+
+.summary-strip b {
+  color: #0f172a;
+}
+
+.summary-strip .present b {
+  color: #15803d;
+}
+
+.summary-strip .absent b {
+  color: #b91c1c;
+}
+
+.teacher-cell {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.teacher-cell small {
+  color: #64748b;
+}
+
+.status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  min-width: 240px;
+}
+
+.status-pill {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  min-width: 36px;
+  padding: .35rem .5rem;
+}
+
+.status-pill.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.inactive-row {
+  background: #f8fafc;
+}
+
+.empty-state {
+  color: #64748b;
+  padding: 2rem;
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  :host {
+    overflow-y: auto;
+  }
+
+  .toolbar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-table-card {
+    min-height: 34rem;
+  }
+}

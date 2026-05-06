@@ -1,0 +1,107 @@
+<p-toast></p-toast>
+
+<app-page-header
+  section="Attendance"
+  page="Teacher Attendance Report"
+  subtitle="Review monthly teacher attendance, late arrivals, leave, and daily records.">
+</app-page-header>
+
+<form [formGroup]="reportForm" class="report-filter p-fluid">
+  <p-toolbar styleClass="report-toolbar">
+    <div class="p-toolbar-group-start filter-grid">
+      <div class="field">
+        <label>Report Type</label>
+        <p-dropdown [options]="reportTypes" optionLabel="label" optionValue="value" formControlName="reportType" appendTo="body" (onChange)="resetReport()"></p-dropdown>
+      </div>
+      <div class="field">
+        <label>Academic Year</label>
+        <p-dropdown [options]="academicYears" optionLabel="yearName" optionValue="id" formControlName="academicYearId" appendTo="body" (onChange)="resetReport()"></p-dropdown>
+      </div>
+      <div class="field" *ngIf="reportForm.get('reportType')?.value === 'monthly'">
+        <label>Teacher</label>
+        <p-dropdown [options]="teachers" optionLabel="fullName" optionValue="id" formControlName="teacherId" appendTo="body" [filter]="true" filterBy="fullName,employeeCode,designation" placeholder="All Teachers" [showClear]="true"></p-dropdown>
+      </div>
+      <div class="field" *ngIf="reportForm.get('reportType')?.value === 'daily'">
+        <label>Date</label>
+        <app-np-datepicker [selectedDate]="selectedDateNp" selectedDateType="bs" calendarVariant="bs" [unicodeDate]="false" (dateChange)="onDateChange($event)"></app-np-datepicker>
+      </div>
+      <div class="field" *ngIf="reportForm.get('reportType')?.value !== 'daily'">
+        <label>Month Reference</label>
+        <app-np-datepicker [selectedDate]="selectedMonthNp" selectedDateType="bs" calendarVariant="bs" [unicodeDate]="false" (dateChange)="onMonthChange($event)"></app-np-datepicker>
+      </div>
+    </div>
+
+    <div class="p-toolbar-group-end">
+      <button pButton pRipple type="button" icon="pi pi-chart-line" label="Run Report" [loading]="isLoading" (click)="runReport()"></button>
+    </div>
+  </p-toolbar>
+</form>
+
+<div class="summary-grid">
+  <p-card styleClass="summary-card"><span>Total</span><strong>{{ summary.total }}</strong></p-card>
+  <p-card styleClass="summary-card present"><span>Present</span><strong>{{ summary.present }}</strong></p-card>
+  <p-card styleClass="summary-card absent"><span>Absent</span><strong>{{ summary.absent }}</strong></p-card>
+  <p-card styleClass="summary-card"><span>Attendance %</span><strong>{{ summary.attendancePercentage || 0 }}%</strong></p-card>
+</div>
+
+<div class="report-table-card">
+  <h3>{{ reportTitle }}</h3>
+  <p-table
+    #teacherReportTable
+    [value]="rows"
+    styleClass="app-grid-table"
+    [loading]="isLoading"
+    [paginator]="true"
+    [rows]="20"
+    [rowsPerPageOptions]="[20, 50, 100]"
+    [globalFilterFields]="['teacherName', 'employeeCode', 'designation', 'attendanceDateNp', 'statusName', 'remarks']">
+
+    <ng-template pTemplate="caption">
+      <span class="p-input-icon-left app-page-search" *ngIf="rows.length > 0">
+        <i class="pi pi-search"></i>
+        <input #reportSearch pInputText type="text" placeholder="Search report..." (input)="teacherReportTable.filterGlobal(reportSearch.value, 'contains')" />
+      </span>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="attendanceDateNp">Date <p-sortIcon field="attendanceDateNp"></p-sortIcon></th>
+        <th pSortableColumn="employeeCode">Code <p-sortIcon field="employeeCode"></p-sortIcon></th>
+        <th pSortableColumn="teacherName">Teacher <p-sortIcon field="teacherName"></p-sortIcon></th>
+        <th pSortableColumn="statusName">Status <p-sortIcon field="statusName"></p-sortIcon></th>
+        <th>Check In</th>
+        <th>Check Out</th>
+        <th>Remarks</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="loadingbody">
+      <tr *ngFor="let item of [1,2,3,4,5]">
+        <td colspan="7"><p-skeleton height="2rem"></p-skeleton></td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.attendanceDateNp }}</td>
+        <td>{{ row.employeeCode || '-' }}</td>
+        <td>
+          <div class="teacher-cell">
+            <strong>{{ row.teacherName }}</strong>
+            <small>{{ row.designation || '-' }}</small>
+          </div>
+        </td>
+        <td><p-tag [severity]="getStatusSeverity(row.status)" [value]="row.statusName"></p-tag></td>
+        <td>{{ row.checkInTime || '-' }}</td>
+        <td>{{ row.checkOutTime || '-' }}</td>
+        <td>{{ row.remarks || '-' }}</td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="empty-state">Run a report to view attendance records.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

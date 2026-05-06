@@ -26,7 +26,11 @@ export class PromotionPreviewComponent implements OnInit {
   targetAcademicYearId: string | null = null;
   targetAcademicYearOptions: AcademicViewModel[] = [];
   classOptions: ClassRoomViewModel[] = [];
+  sourceSectionOptions: SectionViewModel[] = [];
   targetSectionOptions: SectionViewModel[] = [];
+  selectedSourceClassId: string | null = null;
+  selectedSourceClassSectionId: string | null = null;
+  selectedExamType: number = 4;
   manualTargetClassId: string | null = null;
   manualTargetClassSectionId: string | null = null;
   lastFilter: FilterSelection | null = null;
@@ -43,6 +47,23 @@ export class PromotionPreviewComponent implements OnInit {
     this.currentAcademicYearId = this._authService.getCurrentAcademicYearId();
     this.loadAcademicYears();
     this.loadClasses();
+  }
+
+  loadCandidates(): void {
+    if (!this.selectedSourceClassSectionId) {
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Filters Required',
+        detail: 'Select class and section to load promotion candidates.'
+      });
+      return;
+    }
+
+    this.onLoadCandidates({
+      classId: this.selectedSourceClassId ?? undefined,
+      classSectionId: this.selectedSourceClassSectionId,
+      examType: this.selectedExamType
+    });
   }
 
   onLoadCandidates(filter: FilterSelection) {
@@ -63,8 +84,12 @@ export class PromotionPreviewComponent implements OnInit {
         this.hasLoadedCandidates = true;
       },
       error: (err) => {
-        console.log(err);
         this.hasLoadedCandidates = true;
+        this._messageService.add({
+          severity: 'error',
+          summary: 'Preview Load Failed',
+          detail: err?.error?.message ?? 'Failed to load promotion candidates.'
+        });
       }
     });
   }
@@ -153,6 +178,18 @@ export class PromotionPreviewComponent implements OnInit {
 
     const selectedClass = this.classOptions.find(x => x.id === classId);
     this.targetSectionOptions = selectedClass?.sections ?? [];
+  }
+
+  onSourceClassChange(classId: string | null): void {
+    this.selectedSourceClassId = classId;
+    this.selectedSourceClassSectionId = null;
+    const selectedClass = this.classOptions.find(x => x.id === classId);
+    this.sourceSectionOptions = selectedClass?.sections ?? [];
+    this.clearPreview();
+  }
+
+  onSourceSectionChange(): void {
+    this.clearPreview();
   }
 
   getStatusSeverity(status: string): 'success' | 'warning' | 'danger' | 'info' {
@@ -384,5 +421,12 @@ export class PromotionPreviewComponent implements OnInit {
     this.manualTargetClassId = null;
     this.manualTargetClassSectionId = null;
     this.targetSectionOptions = [];
+  }
+
+  private clearPreview(): void {
+    this.candidates = [];
+    this.selectedCandidates = [];
+    this.hasLoadedCandidates = false;
+    this.visibilityFilter = 'all';
   }
 }

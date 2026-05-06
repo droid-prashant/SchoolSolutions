@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Security.Claims;
 
 namespace Infrastructure.Services;
@@ -21,16 +21,18 @@ public class UserResolver
 
         UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         Email = user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
-        Role = user.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var roles = user.FindAll(ClaimTypes.Role)
+            .Concat(user.FindAll("roles"))
+            .Select(x => x.Value)
+            .ToList();
+
+        Role = roles.FirstOrDefault() ?? string.Empty;
+        IsSuperAdmin = roles.Any(x =>
+            x.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase) ||
+            x.Equals("Super Admin", StringComparison.OrdinalIgnoreCase));
 
         UserName = user.FindFirst("name")?.Value ?? string.Empty;
         AcademicYearId = user.FindFirst("academicYear")?.Value ?? string.Empty;
-    }
-
-    public bool HasPermission(string permissionName)
-    {
-        // Add logic here later
-        return false;
     }
 
     public Guid GetAcademicYearGuidOrThrow()

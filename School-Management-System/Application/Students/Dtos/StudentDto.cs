@@ -30,4 +30,10 @@ namespace Application.Students.Dtos
         public string SectionId { get; set; }
         public int? RollNumber { get; set; }
     }
+
+    public class StudentStatusDto
+    {
+        public bool IsActive { get; set; }
+        public string? Remarks { get; set; }
+    }
 }

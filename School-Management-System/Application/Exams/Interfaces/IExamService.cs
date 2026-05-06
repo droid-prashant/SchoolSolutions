@@ -1,5 +1,5 @@
-﻿using Application.Exams.ViewModels;
-using Application.SubjectMarks.Dtos;
+﻿using Application.Exams.Dtos;
+using Application.Exams.ViewModels;
 using Domain;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.SubjectMarks.Interfaces
+namespace Application.Exams.Interfaces
 {
     public interface IExamService
     {

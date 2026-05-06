@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using Application.Common.Interfaces;
+using Application.Exams.Dtos;
+using Application.Exams.Interfaces;
 using Application.Exams.ViewModels;
-using Application.SubjectMarks.Dtos;
-using Application.SubjectMarks.Interfaces;
 using Domain;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -33,11 +33,16 @@ namespace Infrastructure.Services.SubjectMarks
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var isValidEnrollment = await _context.StudentEnrollments
-                .AnyAsync(x => x.Id == studentEnrollmentId && x.AcademicYearId == currentAcademicYearId, cancellationToken);
+                .AnyAsync(x => x.Id == studentEnrollmentId &&
+                               x.AcademicYearId == currentAcademicYearId &&
+                               x.IsActive &&
+                               !x.IsDeleted &&
+                               !x.Student.IsDeleted,
+                    cancellationToken);
 
             if (!isValidEnrollment)
             {
-                throw new Exception("The selected student enrollment does not belong to the current academic year.");
+                throw new Exception("The selected active student enrollment does not belong to the current academic year.");
             }
         }
 
@@ -361,21 +366,31 @@ namespace Infrastructure.Services.SubjectMarks
 
         public async Task<List<TeacherMarksAssignmentViewModel>> GetTeacherMarksAssignments(CancellationToken cancellationToken)
         {
-            var teacherId = await GetCurrentTeacherId(cancellationToken);
             var currentAcademicYearId = GetCurrentAcademicYearId();
 
-            return await _context.TeacherClassSections
+            var assignmentQuery = _context.TeacherClassSections
                 .Where(x =>
-                    x.TeacherId == teacherId &&
                     x.AcademicYearId == currentAcademicYearId &&
                     x.IsActive &&
-                    !x.IsDeleted)
+                    !x.IsDeleted &&
+                    x.Teacher.IsActive &&
+                    !x.Teacher.IsDeleted);
+
+            if (!_userResolver.IsSuperAdmin)
+            {
+                var teacherId = await GetCurrentTeacherId(cancellationToken);
+                assignmentQuery = assignmentQuery.Where(x => x.TeacherId == teacherId);
+            }
+
+            return await assignmentQuery
                 .Join(_context.ClassCourses.Where(x => !x.IsDeleted),
                     assignment => new { assignment.CourseId, ClassRoomId = assignment.ClassSection.ClassId },
                     classCourse => new { classCourse.CourseId, classCourse.ClassRoomId },
                     (assignment, classCourse) => new TeacherMarksAssignmentViewModel
                     {
                         AssignmentId = assignment.Id,
+                        TeacherId = assignment.TeacherId,
+                        TeacherName = (assignment.Teacher.FirstName + " " + assignment.Teacher.LastName).Trim(),
                         ClassSectionId = assignment.ClassSectionId,
                         ClassRoomId = assignment.ClassSection.ClassId,
                         ClassRoomName = assignment.ClassSection.ClassRoom.Name,
@@ -393,6 +408,7 @@ namespace Infrastructure.Services.SubjectMarks
                     })
                 .OrderBy(x => x.ClassRoomName)
                 .ThenBy(x => x.SectionName)
+                .ThenBy(x => x.TeacherName)
                 .ThenBy(x => x.CourseName)
                 .ToListAsync(cancellationToken);
         }
@@ -402,19 +418,27 @@ namespace Infrastructure.Services.SubjectMarks
             var classSectionGuid = Guid.Parse(classSectionId);
             var classCourseGuid = Guid.Parse(classCourseId);
             var currentAcademicYearId = GetCurrentAcademicYearId();
-            var teacherId = await GetCurrentTeacherId(cancellationToken);
 
-            var isAssigned = await IsTeacherAssignedToSubject(teacherId, classSectionGuid, classCourseGuid, cancellationToken);
-            if (!isAssigned)
+            if (_userResolver.IsSuperAdmin)
             {
-                throw new UnauthorizedAccessException("You are not assigned to this subject.");
+                await EnsureClassCourseBelongsToClassSection(classSectionGuid, classCourseGuid, cancellationToken);
+            }
+            else
+            {
+                var teacherId = await GetCurrentTeacherId(cancellationToken);
+                var isAssigned = await IsTeacherAssignedToSubject(teacherId, classSectionGuid, classCourseGuid, cancellationToken);
+                if (!isAssigned)
+                {
+                    throw new UnauthorizedAccessException("You are not assigned to this subject.");
+                }
             }
 
             var query = _context.StudentEnrollments
                 .Where(x =>
                     x.AcademicYearId == currentAcademicYearId &&
                     x.ClassSectionId == classSectionGuid &&
-                    x.Student.IsActive &&
+                    x.IsActive &&
+                    !x.IsDeleted &&
                     !x.Student.IsDeleted);
 
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -511,22 +535,50 @@ namespace Infrastructure.Services.SubjectMarks
 
         private async Task EnsureCurrentTeacherCanEnterMarks(Guid studentEnrollmentId, Guid classCourseId, CancellationToken cancellationToken)
         {
-            var teacherId = await GetCurrentTeacherId(cancellationToken);
             var currentAcademicYearId = GetCurrentAcademicYearId();
 
             var enrollment = await _context.StudentEnrollments
+                .Include(x => x.Student)
                 .Include(x => x.ClassSection)
-                .FirstOrDefaultAsync(x => x.Id == studentEnrollmentId && x.AcademicYearId == currentAcademicYearId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == studentEnrollmentId &&
+                                          x.AcademicYearId == currentAcademicYearId &&
+                                          x.IsActive &&
+                                          !x.IsDeleted &&
+                                          !x.Student.IsDeleted,
+                    cancellationToken);
 
             if (enrollment == null)
             {
-                throw new Exception("The selected student enrollment does not belong to the current academic year.");
+                throw new Exception("The selected active student enrollment does not belong to the current academic year.");
             }
 
+            if (_userResolver.IsSuperAdmin)
+            {
+                await EnsureClassCourseBelongsToClassSection(enrollment.ClassSectionId, classCourseId, cancellationToken);
+                return;
+            }
+
+            var teacherId = await GetCurrentTeacherId(cancellationToken);
             var isAssigned = await IsTeacherAssignedToSubject(teacherId, enrollment.ClassSectionId, classCourseId, cancellationToken);
             if (!isAssigned)
             {
                 throw new UnauthorizedAccessException("You are not assigned to enter marks for this subject.");
+            }
+        }
+
+        private async Task EnsureClassCourseBelongsToClassSection(Guid classSectionId, Guid classCourseId, CancellationToken cancellationToken)
+        {
+            var isValidClassCourse = await _context.ClassSections
+                .Where(x => x.Id == classSectionId)
+                .Join(_context.ClassCourses.Where(x => x.Id == classCourseId && !x.IsDeleted),
+                    classSection => classSection.ClassId,
+                    classCourse => classCourse.ClassRoomId,
+                    (classSection, classCourse) => classCourse)
+                .AnyAsync(cancellationToken);
+
+            if (!isValidClassCourse)
+            {
+                throw new UnauthorizedAccessException("The selected subject is not mapped to this class section.");
             }
         }
 

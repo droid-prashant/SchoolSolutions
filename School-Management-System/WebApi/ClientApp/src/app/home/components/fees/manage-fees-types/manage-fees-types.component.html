@@ -4,26 +4,67 @@
     page="Manage Fee Type"
     subtitle="Configure fee structures class-wise in a consistent management grid.">
 </app-page-header>
-<div class="app-page-toolbar manage-fee-toolbar">
-    <div class="app-page-toolbar-left">
-        <span *ngIf="currentAcademicYearName" class="app-page-context-pill">Academic Year: {{ currentAcademicYearName }}</span>
-        <app-student-filter
-            [showClassFilter]="true"
-            (loadStudents)="onLoadStudents($event)">
-        </app-student-filter>
-    </div>
-    <div class="app-page-toolbar-right">
-        <p-button severity="success" label="New" icon="pi pi-plus" pTooltip="Add New Row"
-            (click)="addNewRow()" [disabled]="!isClassSelected" />
-    </div>
-</div>
-<div class="card app-page-table-card">
-        <div *ngIf="!hasLoadedClassFeeStructures" class="app-empty-state">
+<div class="manage-fee-page">
+    <p-toolbar styleClass="manage-fee-toolbar">
+        <div class="p-toolbar-group-start manage-fee-filter">
+            <div class="field">
+                <label for="classId">Class</label>
+                <p-dropdown
+                    inputId="classId"
+                    [options]="classOptions"
+                    optionLabel="name"
+                    optionValue="id"
+                    [(ngModel)]="selectedClassId"
+                    appendTo="body"
+                    placeholder="Select Class"
+                    (onChange)="onClassChange()">
+                </p-dropdown>
+            </div>
+            <div class="field filter-action">
+                <button
+                    pButton
+                    pRipple
+                    type="button"
+                    icon="pi pi-search"
+                    label="Load"
+                    [disabled]="!selectedClassId"
+                    (click)="loadSelectedClassFeeStructures()">
+                </button>
+            </div>
+        </div>
+
+        <div class="p-toolbar-group-end">
+            <button
+                pButton
+                pRipple
+                type="button"
+                icon="pi pi-plus"
+                label="New"
+                class="p-button-success"
+                pTooltip="Add New Row"
+                (click)="addNewRow()"
+                [disabled]="!isClassSelected">
+            </button>
+        </div>
+    </p-toolbar>
+
+    <div class="card app-page-table-card manage-fee-table-card">
+        <div *ngIf="!hasLoadedClassFeeStructures" class="app-empty-state manage-fee-empty-state">
             Select a class and click Load to view or create fee structures.
         </div>
         <form [formGroup]="feeStructureForm">
-            <p-table #feeStructureTable [value]="feeStrucures" styleClass="app-grid-table" [paginator]="true" [rows]="15"
-                [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{ 'min-width': '50rem' }"
+            <p-table
+                #feeStructureTable
+                *ngIf="hasLoadedClassFeeStructures"
+                [value]="feeStrucures"
+                styleClass="app-grid-table"
+                [paginator]="true"
+                [rows]="15"
+                [rowsPerPageOptions]="[15, 30, 50]"
+                [scrollable]="true"
+                scrollHeight="flex"
+                paginatorDropdownAppendTo="body"
+                [tableStyle]="{ 'min-width': '54rem' }"
                 [globalFilterFields]="['feeType', 'amount', 'description', 'academicYearName']">
                 <ng-template pTemplate="caption">
                     <span class="p-input-icon-left app-page-search" *ngIf="feeStrucures.length > 0">
@@ -80,7 +121,7 @@
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
-                    <tr *ngIf="hasLoadedClassFeeStructures">
+                    <tr>
                         <td colspan="5" class="text-center">No records found</td>
                     </tr>
                 </ng-template>
@@ -90,3 +131,4 @@
             No fee structure found for this class in the current academic year. Click New to create one.
         </div>
     </div>
+</div>

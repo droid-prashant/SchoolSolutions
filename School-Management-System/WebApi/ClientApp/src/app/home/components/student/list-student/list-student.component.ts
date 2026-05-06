@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../../../shared/api.service';
 import { StudentViewModel } from '../shared/models/viewModels/student.viewModel';
-import { StudentFilterComponent, FilterSelection } from '../../student-filter/student-filter.component';
+import { FilterSelection } from '../../student-filter/student-filter.component';
 import { LookupService } from '../../../../shared/common/lookup.service';
-import { Section } from '../../exam/shared/models/section.dto';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
 
 @Component({
@@ -22,8 +21,15 @@ export class ListStudentComponent implements OnInit {
   selectedStudent: StudentViewModel | null = null;
   currentFilter: FilterSelection = {};
   searchText: string = '';
+  studentView: 'active' | 'dropped' = 'active';
+  isLoadingStudents: boolean = false;
 
-  constructor(private _apiService: ApiService, private _messageService: MessageService, private _lookupService: LookupService) {
+  constructor(
+    private _apiService: ApiService,
+    private _messageService: MessageService,
+    private _lookupService: LookupService,
+    private _confirmationService: ConfirmationService
+  ) {
   }
   ngOnInit(): void {
   }
@@ -84,36 +90,125 @@ export class ListStudentComponent implements OnInit {
 
   onLoadStudents(filter: FilterSelection) {
     this.currentFilter = filter;
-    if (filter && filter.classSectionId) {
-      this.listStudentByClassSection(filter.classSectionId);
+    this.loadCurrentStudents();
+  }
+
+  setStudentView(view: 'active' | 'dropped') {
+    if (this.studentView === view) {
+      return;
     }
-    else if (filter && filter.classId) {
-      this.listStudentByClass(filter.classId);
+
+    this.studentView = view;
+    this.searchText = '';
+    this.loadCurrentStudents();
+  }
+
+  loadCurrentStudents() {
+    if (this.currentFilter && this.currentFilter.classSectionId) {
+      this.listStudentByClassSection(this.currentFilter.classSectionId);
+    }
+    else if (this.currentFilter && this.currentFilter.classId) {
+      this.listStudentByClass(this.currentFilter.classId);
+    }
+    else {
+      this.listStudent();
     }
   }
 
-  listStudentByClassSection(classSectionId: string) {
-    this._apiService.getStudentsByClassSectionId(classSectionId).subscribe(
+  private get isActiveView(): boolean {
+    return this.studentView === 'active';
+  }
+
+  listStudent() {
+    this.isLoadingStudents = true;
+    this._apiService.getStudents(this.isActiveView).subscribe(
       {
         next: (response) => {
           this.students = response;
           this.applyFilters();
         },
-        error: (err) => console.log(err)
+        error: () => this.showLoadError(),
+        complete: () => this.isLoadingStudents = false
+      }
+    )
+  }
+
+  listStudentByClassSection(classSectionId: string) {
+    this.isLoadingStudents = true;
+    this._apiService.getStudentsByClassSectionId(classSectionId, null, this.isActiveView).subscribe(
+      {
+        next: (response) => {
+          this.students = response;
+          this.applyFilters();
+        },
+        error: () => this.showLoadError(),
+        complete: () => this.isLoadingStudents = false
       }
     );
   }
 
   listStudentByClass(classId: string) {
-    this._apiService.getStudentsByClass(classId).subscribe(
+    this.isLoadingStudents = true;
+    this._apiService.getStudentsByClass(classId, this.isActiveView).subscribe(
       {
         next: (response) => {
           this.students = response;
           this.applyFilters();
         },
-        error: (err) => console.log(err)
+        error: () => this.showLoadError(),
+        complete: () => this.isLoadingStudents = false
       }
     );
+  }
+
+  updateStudentStatus(student: StudentViewModel, isActive: boolean) {
+    const action = isActive ? 'revive' : 'drop';
+    const studentName = `${student.firstName} ${student.lastName}`.trim();
+    this._confirmationService.confirm({
+      message: `Are you sure you want to ${action} ${studentName}?`,
+      header: isActive ? 'Revive Student' : 'Drop Student',
+      icon: isActive ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle',
+      acceptLabel: isActive ? 'Revive' : 'Drop',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        this._apiService.updateStudentEnrollmentStatus(student.studentEnrollmentId, { isActive }).subscribe({
+          next: () => {
+            this._messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: `Student ${isActive ? 'revived' : 'dropped'} successfully`
+            });
+            this.loadCurrentStudents();
+          },
+          error: () => this._messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Failed to ${action} student`
+          })
+        });
+      }
+    });
+  }
+
+  getViewTitle(): string {
+    return this.studentView === 'active' ? 'Active Students' : 'Dropped Students';
+  }
+
+  getEmptyMessage(): string {
+    return this.studentView === 'active' ? 'No active students found' : 'No dropped students found';
+  }
+
+  displayClassName(student: StudentViewModel): string {
+    return student.classRoomName || this.getClassName(student.classRoomId);
+  }
+
+  displaySectionName(student: StudentViewModel): string {
+    return student.sectionName || this.getSectionName(student.sectionId);
+  }
+
+  private showLoadError() {
+    this.isLoadingStudents = false;
+    this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load students' });
   }
 
   getClassName(classRoomId: string): string {
@@ -141,19 +236,4 @@ export class ListStudentComponent implements OnInit {
     this.isAddDialogVisible = false;
     this.selectedStudent = null;
   }
-  // listStudent() {
-  //   this._apiService.getStudents().subscribe(
-  //     {
-  //       next: (response) => {
-  //         this.students = response;
-  //         this.filteredStudents = response; // Initialize filtered
-  //         console.log(this.students);
-  //       },
-  //       error: (err) => {
-
-  //       },
-  //       complete: () => console.log("Req is completed")
-  //     }
-  //   )
-  // }
 }

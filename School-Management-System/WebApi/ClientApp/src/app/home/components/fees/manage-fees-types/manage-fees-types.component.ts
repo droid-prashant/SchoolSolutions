@@ -9,6 +9,7 @@ import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../../shared/auth.service';
 import { LookupService } from '../../../../shared/common/lookup.service';
 import { FilterSelection } from '../../student-filter/student-filter.component';
+import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
 
 @Component({
   selector: 'app-manage-fees-types',
@@ -26,8 +27,9 @@ export class ManageFeesTypesComponent implements OnInit {
   isClassSelected: boolean = false;
   feeStructureId: string = "";
   currentAcademicYearId: string = "";
-  currentAcademicYearName: string = "";
   hasLoadedClassFeeStructures: boolean = false;
+  classOptions: ClassRoomViewModel[] = [];
+  selectedClassId: string | null = null;
 
   constructor(
     private _apiService: ApiService,
@@ -47,14 +49,15 @@ export class ManageFeesTypesComponent implements OnInit {
   ngOnInit(): void {
     this.currentAcademicYearId = this._authService.getCurrentAcademicYearId();
     this.feeStructureForm.get('academicYearId')?.setValue(this.currentAcademicYearId);
-    if (this.currentAcademicYearId) {
-      this._lookupService.getAcademicYearById(this.currentAcademicYearId).subscribe({
-        next: (academicYear) => {
-          this.currentAcademicYearName = academicYear?.yearName ?? '';
-        }
-      });
-    }
     this.listFeeType();
+    this.loadClasses();
+  }
+
+  loadClasses(): void {
+    this._lookupService.getClassRooms().subscribe({
+      next: classes => this.classOptions = classes ?? [],
+      error: () => this._messageService.add({ severity: 'error', summary: 'Class Load Failed', detail: 'Failed to load classes.' })
+    });
   }
 
   listFeeType(forceRefresh = false) {
@@ -81,6 +84,22 @@ export class ManageFeesTypesComponent implements OnInit {
 
   onLoadStudents(filter: FilterSelection) {
     this.classId = filter.classId ?? "";
+    this.selectedClassId = this.classId || null;
+    this.loadSelectedClassFeeStructures();
+  }
+
+  onClassChange(): void {
+    this.classId = this.selectedClassId ?? "";
+    this.feeStrucures = [];
+    this.isClassSelected = !!this.classId;
+    this.isNewRow = false;
+    this.isUpdateRow = false;
+    this.hasLoadedClassFeeStructures = false;
+    this.resetForm();
+  }
+
+  loadSelectedClassFeeStructures(): void {
+    this.classId = this.selectedClassId ?? this.classId;
     this.feeStructureForm.get('classId')?.setValue(this.classId);
     this.isClassSelected = !!this.classId;
     this.isNewRow = false;
@@ -110,7 +129,9 @@ export class ManageFeesTypesComponent implements OnInit {
   }
 
   onRowCancel() {
-
+    this.isNewRow = false;
+    this.isUpdateRow = false;
+    this.resetForm();
   }
   onSave() {
     this.feeStructureForm.get('academicYearId')?.setValue(this.currentAcademicYearId);

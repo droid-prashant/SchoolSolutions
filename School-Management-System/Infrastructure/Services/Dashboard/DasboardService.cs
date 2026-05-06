@@ -26,7 +26,7 @@ namespace Infrastructure.Services.Dashboard
 
         public async Task<int> GetStudentCount(CancellationToken cancellationToken)
         {
-            int studentCount = await _context.StudentEnrollments.CountAsync(x => !x.IsDeleted && x.Student.IsActive && !x.Student.IsDeleted, cancellationToken);
+            int studentCount = await _context.StudentEnrollments.CountAsync(x => !x.IsDeleted && x.IsActive && !x.Student.IsDeleted, cancellationToken);
             return studentCount;
         }
 
@@ -73,7 +73,7 @@ namespace Infrastructure.Services.Dashboard
             var result = await _context.StudentEnrollments
                                  .Include(x => x.ClassSection)
                                  .ThenInclude(x => x.ClassRoom)
-                                 .Where(x => x.Student.IsActive == true)
+                                 .Where(x => x.IsActive && !x.IsDeleted && !x.Student.IsDeleted)
                                  .GroupBy(x => x.ClassSection.ClassRoom.Name)
                                  .Select(g => new StudentsByClassViewModel
                                  {
@@ -81,7 +81,7 @@ namespace Infrastructure.Services.Dashboard
                                      StudentsCountBySections = g.Select(x => new StudentCountBySection
                                      {
                                          SectionName = x.ClassSection.Section.Name,
-                                         StudentCount = x.ClassSection.StudentEnrollments.Count()
+                                         StudentCount = x.ClassSection.StudentEnrollments.Count(e => e.IsActive && !e.IsDeleted && !e.Student.IsDeleted)
                                      }).ToList()
                                  }).ToListAsync(cancellationToken);
 

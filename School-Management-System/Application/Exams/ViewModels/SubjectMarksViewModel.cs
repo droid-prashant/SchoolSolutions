@@ -1,4 +1,4 @@
-﻿using Application.SubjectMarks.Dtos;
+﻿using Application.Exams.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

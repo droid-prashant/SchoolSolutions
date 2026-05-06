@@ -145,7 +145,37 @@ export class HomeComponent implements OnInit {
         icon: 'pi pi-user-edit',
         items: [
           { label: 'All Teachers', icon: 'pi pi-id-card', routerLink: ['/home/teacher/list-teacher'], data: { permissions: [PermissionNames.TeacherView] } },
-          { label: 'Subject Marks Entry', icon: 'pi pi-pencil', routerLink: ['/home/teacher/marks-entry'], data: { permissions: [PermissionNames.ExamMarksEntry] } }
+          { label: 'Subject Marks Entry', icon: 'pi pi-pencil', routerLink: ['/home/teacher/marks-entry'], data: { permissions: [PermissionNames.SubjectMarksEntry] } }
+        ]
+      },
+      {
+        label: 'Attendance',
+        icon: 'pi pi-calendar-clock',
+        items: [
+          {
+            label: 'Student Entry',
+            icon: 'pi pi-user-check',
+            routerLink: ['/home/attendance/student-entry'],
+            data: { permissions: [PermissionNames.StudentAttendanceView, PermissionNames.StudentAttendanceTake, PermissionNames.StudentAttendanceEdit] }
+          },
+          {
+            label: 'Student Reports',
+            icon: 'pi pi-chart-bar',
+            routerLink: ['/home/attendance/student-report'],
+            data: { permissions: [PermissionNames.StudentAttendanceReport] }
+          },
+          {
+            label: 'Teacher Entry',
+            icon: 'pi pi-briefcase',
+            routerLink: ['/home/attendance/teacher-entry'],
+            data: { permissions: [PermissionNames.TeacherAttendanceView, PermissionNames.TeacherAttendanceTake, PermissionNames.TeacherAttendanceEdit, PermissionNames.TeacherAttendanceCheckInOut] }
+          },
+          {
+            label: 'Teacher Reports',
+            icon: 'pi pi-chart-line',
+            routerLink: ['/home/attendance/teacher-report'],
+            data: { permissions: [PermissionNames.TeacherAttendanceReport] }
+          }
         ]
       },
       {

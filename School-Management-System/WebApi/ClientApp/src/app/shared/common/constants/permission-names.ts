@@ -5,6 +5,7 @@ export const PermissionNames = {
   StudentDelete: 'Student.Delete',
   ExamView: 'Exam.View',
   ExamMarksEntry: 'Exam.MarksEntry',
+  SubjectMarksEntry: 'SubjectMarks.Entry',
   ResultView: 'Result.View',
   ResultPrint: 'Result.Print',
   FeeView: 'Fee.View',
@@ -15,5 +16,16 @@ export const PermissionNames = {
   TeacherView: 'Teacher.View',
   TeacherManage: 'Teacher.Manage',
   CourseManage: 'Course.Manage',
-  ClassManage: 'Class.Manage'
+  ClassManage: 'Class.Manage',
+  StudentAttendanceView: 'StudentAttendance.View',
+  StudentAttendanceTake: 'StudentAttendance.Take',
+  StudentAttendanceEdit: 'StudentAttendance.Edit',
+  StudentAttendanceDelete: 'StudentAttendance.Delete',
+  StudentAttendanceReport: 'StudentAttendance.Report',
+  TeacherAttendanceView: 'TeacherAttendance.View',
+  TeacherAttendanceTake: 'TeacherAttendance.Take',
+  TeacherAttendanceEdit: 'TeacherAttendance.Edit',
+  TeacherAttendanceDelete: 'TeacherAttendance.Delete',
+  TeacherAttendanceReport: 'TeacherAttendance.Report',
+  TeacherAttendanceCheckInOut: 'TeacherAttendance.CheckInOut'
 } as const;

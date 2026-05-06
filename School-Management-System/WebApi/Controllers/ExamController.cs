@@ -1,9 +1,9 @@
-﻿using Application.Exams.ViewModels;
+﻿using Application.Exams.Dtos;
+using Application.Exams.Interfaces;
+using Application.Exams.ViewModels;
 using Application.Students.Dtos;
 using Application.Students.Interfaces;
 using Application.Students.ViewModels;
-using Application.SubjectMarks.Dtos;
-using Application.SubjectMarks.Interfaces;
 using Domain.Constants;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +33,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("AddMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task Post([FromBody] SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken)
         {
             await _examService.AddSubjectMarks(subjectMarkDto, cancellationToken);
@@ -41,7 +41,7 @@ namespace WebApi.Controllers
 
         [HttpPut]
         [Route("UpdateMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task UpdateSubjectMarks([FromBody] SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken)
         {
             await _examService.UpdateSubjectMarks(subjectMarkDto, cancellationToken);
@@ -49,7 +49,7 @@ namespace WebApi.Controllers
 
         [HttpPost]
         [Route("UpsertTeacherSubjectMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task UpsertTeacherSubjectMarks([FromBody] SubjectMarkDto subjectMarkDto, CancellationToken cancellationToken)
         {
             await _examService.UpsertTeacherSubjectMarks(subjectMarkDto, cancellationToken);
@@ -57,7 +57,7 @@ namespace WebApi.Controllers
 
         [HttpDelete]
         [Route("DeleteTeacherSubjectMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task DeleteTeacherSubjectMarks([FromQuery] string studentEnrollmentId, [FromQuery] int examType, [FromQuery] string classCourseId, CancellationToken cancellationToken)
         {
             await _examService.DeleteTeacherSubjectMarks(studentEnrollmentId, examType, classCourseId, cancellationToken);
@@ -65,7 +65,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetStudentMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry, PermissionNames.ResultView)]
+        [HasPermission(PermissionNames.SubjectMarksEntry, PermissionNames.ResultView)]
         public async Task<SubjectMarksViewModel> GetStudentMarks([FromQuery] string studentEnrollmentId, [FromQuery] int examType, CancellationToken cancellationToken)
         {
             var result = await _examService.GetStudentMarks(studentEnrollmentId, examType, cancellationToken);
@@ -74,7 +74,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetTeacherStudentSubjectMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task<SubjectMarksViewModel?> GetTeacherStudentSubjectMarks([FromQuery] string studentEnrollmentId, [FromQuery] int examType, [FromQuery] string classCourseId, CancellationToken cancellationToken)
         {
             return await _examService.GetTeacherStudentSubjectMarks(studentEnrollmentId, examType, classCourseId, cancellationToken);
@@ -82,7 +82,7 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetTeacherMarksAssignments")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task<List<TeacherMarksAssignmentViewModel>> GetTeacherMarksAssignments(CancellationToken cancellationToken)
         {
             return await _examService.GetTeacherMarksAssignments(cancellationToken);
@@ -90,20 +90,11 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("GetTeacherSubjectStudentMarks")]
-        [HasPermission(PermissionNames.ExamMarksEntry)]
+        [HasPermission(PermissionNames.SubjectMarksEntry)]
         public async Task<List<TeacherSubjectStudentMarksViewModel>> GetTeacherSubjectStudentMarks([FromQuery] string classSectionId, [FromQuery] string classCourseId, [FromQuery] int examType, [FromQuery] string? keyword, CancellationToken cancellationToken)
         {
             return await _examService.GetTeacherSubjectStudentMarks(classSectionId, classCourseId, examType, keyword, cancellationToken);
         }
 
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

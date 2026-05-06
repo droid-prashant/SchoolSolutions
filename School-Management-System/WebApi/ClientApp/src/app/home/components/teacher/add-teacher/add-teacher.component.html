@@ -199,6 +199,6 @@
 
   <div class="teacher-actions">
     <button type="submit" pButton [label]="isEditMode ? 'Update Teacher' : 'Add Teacher'" icon="pi pi-save"
-      class="p-button-success" [disabled]="teacherForm.invalid || isSaving"></button>
+      [disabled]="teacherForm.invalid || isSaving"></button>
   </div>
 </form>

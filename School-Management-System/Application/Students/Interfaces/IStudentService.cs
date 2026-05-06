@@ -14,13 +14,14 @@ namespace Application.Students.Interfaces
         Task AddStudentAsync(StudentDto addStudent, CancellationToken cancellationToken);
         Task AssignRegistrationAndSymbolNumber(StudentEnrollmentDto studentEnrollmentDto, string studentEnrollmentId, CancellationToken cancellationToken);
         Task UpdateStudentAsync(StudentDto addStudent, CancellationToken cancellationToken);
+        Task UpdateStudentEnrollmentStatusAsync(string studentEnrollmentId, StudentStatusDto studentStatusDto, CancellationToken cancellationToken);
         Task AssignRollNumbersAsync(string classSectionId, CancellationToken cancellationToken);
         Task AddStudentCertificateLog(StudentCertificateDto studentCertificateDto, CancellationToken cancellationToken);
         Task<StudentCertificateLogViewModel> GetStudentCertificateLog(CertificateType certificateType, CancellationToken cancellationToken);
-        Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken);
+        Task<List<StudentViewModel>> GetStudentAsync(bool isActive, CancellationToken cancellationToken);
         Task<List<StudentCertificateViewModel>> GetStudentCertificateDataAsync(string classSectionId, CancellationToken cancellationToken);
-        Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRommId, CancellationToken cancellationToken);
-        Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, CancellationToken cancellationToken);
+        Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRommId, bool isActive, CancellationToken cancellationToken);
+        Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, bool isActive, CancellationToken cancellationToken);
         Task<List<StudentEnrollmentViewModel>> GetRegAndSymCompliantEnrolledStudents(string classSectionId, CancellationToken cancellationToken);
         Task<List<PromotionCandidateViewModel>> GetPromotionCandidates(string classSectionId, int examType, CancellationToken cancellationToken);
         Task<PromotionExecutionResultViewModel> PromoteStudentsAsync(PromoteStudentsDto request, CancellationToken cancellationToken);

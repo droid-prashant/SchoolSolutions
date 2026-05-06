@@ -1,0 +1,199 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<app-page-header
+  section="Attendance"
+  page="Teacher Attendance Entry"
+  subtitle="Record teacher attendance and local check-in/check-out times.">
+</app-page-header>
+
+<form [formGroup]="filterForm" class="attendance-filter p-fluid">
+  <p-toolbar styleClass="attendance-toolbar">
+    <div class="p-toolbar-group-start toolbar-grid">
+      <div class="field">
+        <label>Attendance Date</label>
+        <app-np-datepicker
+          [selectedDate]="selectedNpDate"
+          selectedDateType="bs"
+          calendarVariant="bs"
+          [unicodeDate]="false"
+          (dateChange)="onDateChange($event)">
+        </app-np-datepicker>
+      </div>
+
+      <div class="field filter-action">
+        <button pButton pRipple type="button" icon="pi pi-search" label="Load" (click)="loadAttendance()" [loading]="isLoading"></button>
+      </div>
+
+      <div class="field filter-action">
+        <button
+          *appHasPermission="permissions.TeacherAttendanceCheckInOut"
+          pButton
+          pRipple
+          type="button"
+          icon="pi pi-sign-in"
+          label="Check In"
+          class="p-button-outlined"
+          (click)="checkIn()">
+        </button>
+      </div>
+
+      <div class="field filter-action">
+        <button
+          *appHasPermission="permissions.TeacherAttendanceCheckInOut"
+          pButton
+          pRipple
+          type="button"
+          icon="pi pi-sign-out"
+          label="Check Out"
+          class="p-button-outlined"
+          (click)="checkOut()">
+        </button>
+      </div>
+    </div>
+  </p-toolbar>
+</form>
+
+<div class="attendance-table-card">
+  <p-toolbar styleClass="table-commandbar">
+    <div class="p-toolbar-group-start">
+      <button
+        *appHasAnyPermission="[permissions.TeacherAttendanceTake, permissions.TeacherAttendanceEdit]"
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-check-circle"
+        label="Mark All Present"
+        class="p-button-sm"
+        [disabled]="teachers.length === 0 || isSaving"
+        (click)="markAll(1)">
+      </button>
+      <button
+        *appHasAnyPermission="[permissions.TeacherAttendanceTake, permissions.TeacherAttendanceEdit]"
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-times-circle"
+        label="Mark All Absent"
+        class="p-button-sm p-button-outlined"
+        [disabled]="teachers.length === 0 || isSaving"
+        (click)="markAll(2)">
+      </button>
+    </div>
+
+    <div class="p-toolbar-group-center summary-strip">
+      <span><b>{{ summary.total }}</b> Total</span>
+      <span class="present"><b>{{ summary.present }}</b> Present</span>
+      <span class="absent"><b>{{ summary.absent }}</b> Absent</span>
+      <span><b>{{ summary.attendancePercentage || 0 }}%</b> Attendance</span>
+    </div>
+
+    <div class="p-toolbar-group-end">
+      <button
+        *appHasAnyPermission="[permissions.TeacherAttendanceTake, permissions.TeacherAttendanceEdit]"
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-save"
+        label="Save Attendance"
+        [disabled]="teachers.length === 0 || isSaving"
+        [loading]="isSaving"
+        (click)="saveAttendance()">
+      </button>
+    </div>
+  </p-toolbar>
+
+  <p-table
+    #teacherAttendanceTable
+    [value]="teachers"
+    styleClass="app-grid-table attendance-grid"
+    [loading]="isLoading"
+    [paginator]="true"
+    [rows]="20"
+    [rowsPerPageOptions]="[20, 50, 100]"
+    [globalFilterFields]="['teacherName', 'employeeCode', 'designation', 'remarks']"
+    [scrollable]="true"
+    scrollHeight="flex"
+    paginatorDropdownAppendTo="body"
+    [tableStyle]="{ 'min-width': '82rem' }">
+
+    <ng-template pTemplate="caption">
+      <span class="p-input-icon-left app-page-search" *ngIf="teachers.length > 0">
+        <i class="pi pi-search"></i>
+        <input
+          #teacherSearch
+          type="text"
+          pInputText
+          placeholder="Search teacher..."
+          (input)="teacherAttendanceTable.filterGlobal(teacherSearch.value, 'contains')" />
+      </span>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="employeeCode">Code <p-sortIcon field="employeeCode"></p-sortIcon></th>
+        <th pSortableColumn="teacherName">Teacher <p-sortIcon field="teacherName"></p-sortIcon></th>
+        <th>Status</th>
+        <th>Check In</th>
+        <th>Check Out</th>
+        <th>Remarks</th>
+        <th style="width: 120px">Record</th>
+        <th style="width: 90px">Action</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="loadingbody">
+      <tr *ngFor="let item of [1,2,3,4,5]">
+        <td colspan="8"><p-skeleton height="2rem"></p-skeleton></td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-teacher>
+      <tr [class.inactive-row]="!teacher.isTeacherActive">
+        <td>{{ teacher.employeeCode || '-' }}</td>
+        <td>
+          <div class="teacher-cell">
+            <strong>{{ teacher.teacherName }}</strong>
+            <small>{{ teacher.designation || '-' }}</small>
+          </div>
+        </td>
+        <td>
+          <div class="status-pills">
+            <button
+              *ngFor="let status of statusOptions"
+              type="button"
+              class="status-pill"
+              [class.active]="teacher.status === status.value"
+              (click)="teacher.status = status.value; onStatusChange(teacher)">
+              {{ status.shortLabel }}
+            </button>
+          </div>
+        </td>
+        <td><input pInputText type="time" [(ngModel)]="teacher.checkInTime" [ngModelOptions]="{ standalone: true }" /></td>
+        <td><input pInputText type="time" [(ngModel)]="teacher.checkOutTime" [ngModelOptions]="{ standalone: true }" /></td>
+        <td><input pInputText type="text" [(ngModel)]="teacher.remarks" [ngModelOptions]="{ standalone: true }" maxlength="500" placeholder="Optional remarks" /></td>
+        <td><p-tag [severity]="teacher.hasAttendance ? 'success' : 'warning'" [value]="teacher.hasAttendance ? 'Saved' : 'New'"></p-tag></td>
+        <td>
+          <button
+            *appHasPermission="permissions.TeacherAttendanceDelete"
+            pButton
+            pRipple
+            type="button"
+            icon="pi pi-trash"
+            class="p-button-rounded p-button-text p-button-danger"
+            [disabled]="!teacher.attendanceId"
+            (click)="deleteAttendance(teacher)">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8" class="empty-state">
+          {{ hasLoaded ? 'No active teachers found.' : 'Select filters and load attendance.' }}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

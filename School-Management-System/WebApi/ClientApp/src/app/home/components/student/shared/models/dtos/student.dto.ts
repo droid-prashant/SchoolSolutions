@@ -18,3 +18,8 @@ export interface StudentDto {
   municipalityId: string; 
   rollNumber: string;
 }
+
+export interface StudentStatusDto {
+  isActive: boolean;
+  remarks?: string;
+}

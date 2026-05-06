@@ -16,5 +16,6 @@ namespace Domain
         public ICollection<Student> Students { get; set; } = new List<Student>();
         public ICollection<TeacherClassSection> TeacherClassSections { get; set; } = new List<TeacherClassSection>();
         public ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
+        public ICollection<StudentAttendance> StudentAttendances { get; set; } = new List<StudentAttendance>();
     }
 }

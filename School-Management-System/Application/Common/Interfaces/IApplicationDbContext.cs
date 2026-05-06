@@ -13,6 +13,8 @@ namespace Application.Common.Interfaces
     {
         DbSet<AcademicYear> AcademicYears { get; }
         DbSet<StudentEnrollment> StudentEnrollments { get; }
+        DbSet<StudentAttendance> StudentAttendances { get; }
+        DbSet<TeacherAttendance> TeacherAttendances { get; }
         DbSet<Teacher> Teachers { get; }
         DbSet<TeacherClassSection> TeacherClassSections { get; }
         DbSet<TeacherQualification> TeacherQualifications { get; }

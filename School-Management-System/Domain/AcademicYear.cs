@@ -15,5 +15,7 @@ namespace Domain
         public string EndDateEn { get; set; }
         public ICollection<StudentEnrollment> Enrollments { get; set; } = new List<StudentEnrollment>();
         public ICollection<TeacherClassSection> TeacherClassSections { get; set; } = new List<TeacherClassSection>();
+        public ICollection<StudentAttendance> StudentAttendances { get; set; } = new List<StudentAttendance>();
+        public ICollection<TeacherAttendance> TeacherAttendances { get; set; } = new List<TeacherAttendance>();
     }
 }

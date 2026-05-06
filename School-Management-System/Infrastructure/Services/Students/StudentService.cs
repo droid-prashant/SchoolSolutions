@@ -43,13 +43,24 @@ namespace Infrastructure.Services.Students
             var isCertificateTaken = _context.studentTransferCertificateLogs.Any(x => x.StudentId == studentId);
             return isCertificateTaken;
         }
-        private async Task SetStudentInActive(Guid studentId, CancellationToken cancellationToken)
+        private async Task SetCurrentEnrollmentInactive(Guid studentId, CancellationToken cancellationToken)
         {
-            var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == studentId);
-            if (student != null)
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var currentEnrollment = await _context.StudentEnrollments
+                .FirstOrDefaultAsync(x => x.StudentId == studentId && x.AcademicYearId == currentAcademicYearId && !x.IsDeleted, cancellationToken);
+
+            if (currentEnrollment != null)
             {
-                student.IsActive = false;
+                currentEnrollment.IsActive = false;
+                currentEnrollment.EnrollmentStatus = StudentEnrollmentStatus.Dropped;
+                currentEnrollment.StatusDate = DateTime.UtcNow;
+                currentEnrollment.StatusRemarks = "Marked inactive after certificate completion.";
+                currentEnrollment.RollNumber = null;
+                currentEnrollment.ModifiedBy = Guid.Parse(_userResolver.UserId);
+                currentEnrollment.ModifiedDate = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync(cancellationToken);
+                await AssignRollNumbersInternalAsync(currentEnrollment.ClassSectionId, currentAcademicYearId, cancellationToken);
             }
         }
         private async Task MapStudentFeesAsync(StudentEnrollment studentEnrollment, CancellationToken cancellationToken)
@@ -130,7 +141,9 @@ namespace Infrastructure.Services.Students
                 RollNumber = null,
                 CreatedDate = DateTime.UtcNow,
                 EnrollmentDate = DateTime.UtcNow,
-                IsPromoted = isPromoted
+                IsPromoted = isPromoted,
+                IsActive = true,
+                EnrollmentStatus = StudentEnrollmentStatus.Active
             };
             await _context.StudentEnrollments.AddAsync(studentEnrollment);
             await _context.SaveChangesAsync(cancellationToken);
@@ -256,7 +269,11 @@ namespace Infrastructure.Services.Students
             {
                 var enrollments = await _context.StudentEnrollments
                     .Include(x => x.Student)
-                    .Where(x => x.ClassSectionId == classSectionId && x.AcademicYearId == academicYearId)
+                    .Where(x => x.ClassSectionId == classSectionId &&
+                                x.AcademicYearId == academicYearId &&
+                                x.IsActive &&
+                                !x.IsDeleted &&
+                                !x.Student.IsDeleted)
                     .OrderBy(x => x.Student.FirstName.ToLower())
                     .ThenBy(x => x.Student.LastName.ToLower())
                     .ToListAsync(cancellationToken);
@@ -282,6 +299,47 @@ namespace Infrastructure.Services.Students
                 throw;
             }
         }
+
+        public async Task UpdateStudentEnrollmentStatusAsync(string studentEnrollmentId, StudentStatusDto studentStatusDto, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(studentEnrollmentId, out var studentEnrollmentGuid))
+            {
+                throw new Exception("Invalid student enrollment id");
+            }
+
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var currentEnrollment = await _context.StudentEnrollments
+                .Include(x => x.Student)
+                .FirstOrDefaultAsync(x => x.Id == studentEnrollmentGuid &&
+                                          x.AcademicYearId == currentAcademicYearId &&
+                                          !x.IsDeleted &&
+                                          !x.Student.IsDeleted,
+                    cancellationToken);
+
+            if (currentEnrollment == null)
+            {
+                throw new Exception("Student enrollment not found for the current academic year.");
+            }
+
+            currentEnrollment.IsActive = studentStatusDto.IsActive;
+            currentEnrollment.EnrollmentStatus = studentStatusDto.IsActive
+                ? StudentEnrollmentStatus.Active
+                : StudentEnrollmentStatus.Dropped;
+            currentEnrollment.StatusDate = DateTime.UtcNow;
+            currentEnrollment.StatusRemarks = studentStatusDto.Remarks ?? string.Empty;
+            currentEnrollment.ModifiedBy = Guid.Parse(_userResolver.UserId);
+            currentEnrollment.ModifiedDate = DateTime.UtcNow;
+
+            if (!studentStatusDto.IsActive)
+            {
+                currentEnrollment.RollNumber = null;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await AssignRollNumbersInternalAsync(currentEnrollment.ClassSectionId, currentAcademicYearId, cancellationToken);
+        }
+
         public async Task AssignRegistrationAndSymbolNumber(StudentEnrollmentDto studentEnrollmentDto, string studentEnrollmentId, CancellationToken cancellationToken)
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
@@ -294,12 +352,15 @@ namespace Infrastructure.Services.Students
                 await _context.SaveChangesAsync(cancellationToken);
             }
         }
-        public async Task<List<StudentViewModel>> GetStudentAsync(CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> GetStudentAsync(bool isActive, CancellationToken cancellationToken)
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var students = await _context.StudentEnrollments.Include(x => x.Student).Include(x => x.ClassSection)
                                                             .ThenInclude(x => x.ClassRoom)
-                                                            .Where(x => x.Student.IsActive == true && x.AcademicYearId == currentAcademicYearId)
+                                                            .Where(x => x.IsActive == isActive &&
+                                                                        !x.IsDeleted &&
+                                                                        !x.Student.IsDeleted &&
+                                                                        x.AcademicYearId == currentAcademicYearId)
                                                             .Select(x => new StudentViewModel
                                                             {
                                                                 Id = x.StudentId,
@@ -331,7 +392,11 @@ namespace Infrastructure.Services.Students
                                                                 DateOfBirthEn = x.Student.DateOfBirthEn,
                                                                 ClassRoomName = x.ClassSection.ClassRoom.Name,
                                                                 SectionName = x.ClassSection.Section.Name,
-                                                                RollNumber = (int)(x.RollNumber)
+                                                                RollNumber = x.RollNumber ?? 0,
+                                                                IsActive = x.IsActive,
+                                                                EnrollmentStatus = (int)x.EnrollmentStatus,
+                                                                StatusDate = x.StatusDate,
+                                                                StatusRemarks = x.StatusRemarks
                                                             }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
               .ToListAsync(cancellationToken);
             return students;
@@ -354,7 +419,9 @@ namespace Infrastructure.Services.Students
                 var studentFirstEnrollment = await _context.StudentEnrollments.Include(x => x.ClassSection).ThenInclude(x => x.ClassRoom).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == enrolledStudent.StudentId);
                 var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                                 .ThenInclude(x => x.ClassRoom)
-                                                                .Where(x => x.Student.IsActive == true &&
+                                                                .Where(x => x.IsActive &&
+                                                                            !x.IsDeleted &&
+                                                                            !x.Student.IsDeleted &&
                                                                             x.ClassSection.Id == classSectionGuid &&
                                                                             x.AcademicYearId == currentAcademicYearId)
                                                                 .Select(x => new StudentCertificateViewModel
@@ -406,7 +473,9 @@ namespace Infrastructure.Services.Students
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var result = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                           .Include(x => x.Student)
-                                                          .Where(x => x.Student.IsActive == true &&
+                                                          .Where(x => x.IsActive &&
+                                                                      !x.IsDeleted &&
+                                                                      !x.Student.IsDeleted &&
                                                                       x.AcademicYearId == currentAcademicYearId &&
                                                                       x.ClassSectionId == Guid.Parse(classSectionId) &&
                                                                      (x.ClassSection.ClassRoom.OrderNumber == 8 || x.ClassSection.ClassRoom.OrderNumber == 10))
@@ -461,7 +530,11 @@ namespace Infrastructure.Services.Students
                     .ThenInclude(x => x.Section)
                 .Include(x => x.ExamResults.Where(er => er.ExamType == examType))
                     .ThenInclude(er => er.SubjectMarks)
-                .Where(x => x.AcademicYearId == currentAcademicYearId && x.ClassSectionId == classSectionGuid && x.Student.IsActive)
+                .Where(x => x.AcademicYearId == currentAcademicYearId &&
+                            x.ClassSectionId == classSectionGuid &&
+                            x.IsActive &&
+                            !x.IsDeleted &&
+                            !x.Student.IsDeleted)
                 .OrderBy(x => x.RollNumber ?? int.MaxValue)
                 .ThenBy(x => x.Student.FirstName)
                 .ThenBy(x => x.Student.LastName)
@@ -657,7 +730,11 @@ namespace Infrastructure.Services.Students
                 .Include(x => x.Student)
                 .Include(x => x.ExamResults.Where(er => er.ExamType == request.ExamType))
                     .ThenInclude(er => er.SubjectMarks)
-                .Where(x => x.AcademicYearId == currentAcademicYearId && x.ClassSectionId == sourceClassSectionId && x.Student.IsActive);
+                .Where(x => x.AcademicYearId == currentAcademicYearId &&
+                            x.ClassSectionId == sourceClassSectionId &&
+                            x.IsActive &&
+                            !x.IsDeleted &&
+                            !x.Student.IsDeleted);
 
             if (!request.PromoteAllEligible)
             {
@@ -806,36 +883,65 @@ namespace Infrastructure.Services.Students
 
             return "Eligible for normal promotion.";
         }
-        public async Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRooomId, CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> GetStudentByClassIdAsync(Guid classRooomId, bool isActive, CancellationToken cancellationToken)
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var students = await _context.StudentEnrollments.Include(x => x.ClassSection)
                                                    .ThenInclude(x => x.ClassRoom)
-                                                  .Where(x => x.ClassSection.ClassId == classRooomId && x.AcademicYearId == currentAcademicYearId)
+                                                  .Where(x => x.IsActive == isActive &&
+                                                              !x.IsDeleted &&
+                                                              !x.Student.IsDeleted &&
+                                                              x.ClassSection.ClassId == classRooomId &&
+                                                              x.AcademicYearId == currentAcademicYearId)
                                                   .Select(x => new StudentViewModel
                                                   {
-                                                      Id = x.Id,
+                                                      Id = x.StudentId,
+                                                      StudentEnrollmentId = x.Id,
                                                       FirstName = x.Student.FirstName,
                                                       LastName = x.Student.LastName,
                                                       Address = x.Student.Province.ProvinceName + ", " + x.Student.District.DistrictName + ", " + x.Student.Municipality.MunicipalityName + " - " + x.Student.WardNo,
                                                       Age = x.Student.Age,
+                                                      GrandFatherName = x.Student.GrandFatherName,
+                                                      FatherName = x.Student.FatherName,
+                                                      MotherName = x.Student.MotherName,
                                                       ClassRoomId = x.ClassSection.ClassRoom.Id.ToString(),
                                                       SectionId = x.ClassSection.Section.Id.ToString(),
+                                                      ClassSectionId = x.ClassSection.Id.ToString(),
+                                                      ContactNumber = x.Student.ContactNumber,
+                                                      ParentContactNumber = x.Student.ParentContactNumber,
+                                                      ParentEmail = x.Student.ParentEmail,
                                                       Gender = x.Student.Gender,
+                                                      ProvinceName = x.Student.Province.ProvinceName,
+                                                      ProvinceId = x.Student.ProvinceId,
+                                                      DistrictName = x.Student.District.DistrictName,
+                                                      DistrictId = x.Student.DistrictId,
+                                                      MunicipalityName = x.Student.Municipality.MunicipalityName,
+                                                      MunicipalityId = x.Student.MunicipalityId,
                                                       WardNo = x.Student.WardNo,
+                                                      RegistrationNumber = x.RegistrationNumber != null ? x.RegistrationNumber : "",
+                                                      SymbolNumber = x.SymbolNumber != null ? x.SymbolNumber : x.RollNumber.ToString(),
                                                       DateOfBirthNp = x.Student.DateOfBirthNp,
-                                                      DateOfBirthEn = x.Student.DateOfBirthEn
+                                                      DateOfBirthEn = x.Student.DateOfBirthEn,
+                                                      ClassRoomName = x.ClassSection.ClassRoom.Name,
+                                                      SectionName = x.ClassSection.Section.Name,
+                                                      RollNumber = x.RollNumber ?? 0,
+                                                      IsActive = x.IsActive,
+                                                      EnrollmentStatus = (int)x.EnrollmentStatus,
+                                                      StatusDate = x.StatusDate,
+                                                      StatusRemarks = x.StatusRemarks
                                                   }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                     .ToListAsync(cancellationToken);
             return students;
         }
-        public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> GetStudentByClassSectionId(string classSectionId, int? examType, bool isActive, CancellationToken cancellationToken)
         {
             var classSectionGuid = Guid.Parse(classSectionId);
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var studentQuery = _context.StudentEnrollments.Include(x => x.ClassSection)
                                                           .ThenInclude(x => x.ClassRoom)
-                                                          .Where(x => x.Student.IsActive == true &&
+                                                          .Where(x => x.IsActive == isActive &&
+                                                                 !x.IsDeleted &&
+                                                                 !x.Student.IsDeleted &&
                                                                  x.AcademicYearId == currentAcademicYearId &&
                                                                  x.ClassSection.Id == classSectionGuid);
 
@@ -876,7 +982,11 @@ namespace Infrastructure.Services.Students
                                                                 DateOfBirthEn = x.Student.DateOfBirthEn,
                                                                 ClassRoomName = x.ClassSection.ClassRoom.Name,
                                                                 SectionName = x.ClassSection.Section.Name,
-                                                                RollNumber = (int)(x.RollNumber)
+                                                                RollNumber = x.RollNumber ?? 0,
+                                                                IsActive = x.IsActive,
+                                                                EnrollmentStatus = (int)x.EnrollmentStatus,
+                                                                StatusDate = x.StatusDate,
+                                                                StatusRemarks = x.StatusRemarks
                                                             }).OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
                                                    .ToListAsync(cancellationToken);
             return students;
@@ -898,7 +1008,7 @@ namespace Infrastructure.Services.Students
                 await _context.studentCharacterCertificateLogs.AddAsync(characterCertificate);
                 if (isTransferCertificateLogged)
                 {
-                    await SetStudentInActive(enrolledStudent.StudentId, cancellationToken);
+                    await SetCurrentEnrollmentInactive(enrolledStudent.StudentId, cancellationToken);
                 }
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -914,7 +1024,7 @@ namespace Infrastructure.Services.Students
                 await _context.studentTransferCertificateLogs.AddAsync(transferCertificate);
                 if (isCharacterCertificateLogged)
                 {
-                    await SetStudentInActive(enrolledStudent.StudentId, cancellationToken);
+                    await SetCurrentEnrollmentInactive(enrolledStudent.StudentId, cancellationToken);
                 }
                 await _context.SaveChangesAsync(cancellationToken);
             }

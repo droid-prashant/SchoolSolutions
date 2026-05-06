@@ -18,6 +18,7 @@ const routes: Routes = [
                 { path: "exam", loadChildren:()=>import('./components/exam/exam.module').then(m=>m.ExamModule)},
                 { path: "certificate", loadChildren:()=>import('./components/certificate/certificate.module').then(m=>m.CertificateModule)},
                 { path: "fees", loadChildren:()=>import('./components/fees/fees.module').then(m=>m.FeesModule)},
+                { path: "attendance", loadChildren:()=>import('./components/attendance/attendance.module').then(m=>m.AttendanceModule)},
                 { path: "security", loadChildren:()=>import('./components/security/security.module').then(m=>m.SecurityModule)}
             ]
     }

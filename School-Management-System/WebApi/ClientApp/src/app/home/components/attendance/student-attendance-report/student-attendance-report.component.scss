@@ -1,0 +1,127 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.report-filter,
+.report-table-card {
+  margin-top: .75rem;
+}
+
+.filter-grid {
+  align-items: end;
+  display: grid;
+  grid-template-columns: minmax(10rem, 13rem) minmax(9rem, 12rem) minmax(9rem, 12rem) minmax(10rem, 13rem) auto;
+  gap: .75rem;
+  width: auto;
+}
+
+.filter-action {
+  min-width: 6.5rem;
+}
+
+.filter-action button {
+  width: 100%;
+}
+
+::ng-deep .report-toolbar.p-toolbar {
+  align-items: end;
+  justify-content: flex-start;
+  padding: .75rem;
+}
+
+::ng-deep .report-toolbar .field {
+  margin-bottom: 0;
+}
+
+.report-table-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.report-heading {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+}
+
+.report-heading h3 {
+  color: #0f172a;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.summary-strip span {
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 6px;
+  color: #475569;
+  font-size: .85rem;
+  padding: .35rem .55rem;
+}
+
+.summary-strip b {
+  color: #0f172a;
+}
+
+.summary-strip .present b {
+  color: #15803d;
+}
+
+.summary-strip .absent b {
+  color: #b91c1c;
+}
+
+::ng-deep .report-table-card p-table,
+::ng-deep .report-table-card .p-datatable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .report-table-card .app-grid-table .p-datatable-wrapper {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+}
+
+::ng-deep .report-table-card .p-paginator {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.empty-state {
+  color: #64748b;
+  padding: 2rem;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  :host {
+    overflow-y: auto;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-table-card {
+    min-height: 34rem;
+  }
+}

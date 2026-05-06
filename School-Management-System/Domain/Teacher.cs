@@ -35,5 +35,6 @@ namespace Domain
         public ICollection<TeacherQualification> Qualifications { get; set; } = new List<TeacherQualification>();
         public ICollection<TeacherExperience> Experiences { get; set; } = new List<TeacherExperience>();
         public ICollection<TeacherDocument> Documents { get; set; } = new List<TeacherDocument>();
+        public ICollection<TeacherAttendance> Attendances { get; set; } = new List<TeacherAttendance>();
     }
 }

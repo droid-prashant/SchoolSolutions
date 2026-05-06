@@ -2,6 +2,16 @@
   cursor: pointer;
 }
 
+.assignment-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.assignment-teacher {
+  font-weight: 600;
+}
+
 :host ::ng-deep .p-dialog .field label {
   font-weight: 600;
 }

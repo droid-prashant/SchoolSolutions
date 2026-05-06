@@ -22,6 +22,8 @@ namespace Infrastructure.Persistance
         public DbSet<TeacherExperience> TeacherExperiences => Set<TeacherExperience>();
         public DbSet<TeacherDocument> TeacherDocuments => Set<TeacherDocument>();
         public DbSet<Student> Students => Set<Student>();
+        public DbSet<StudentAttendance> StudentAttendances => Set<StudentAttendance>();
+        public DbSet<TeacherAttendance> TeacherAttendances => Set<TeacherAttendance>();
         public DbSet<Course> Courses => Set<Course>();
 
         public DbSet<ClassRoom> ClassRooms => Set<ClassRoom>();

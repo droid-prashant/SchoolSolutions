@@ -73,7 +73,7 @@
   padding: 2.2rem;
   border-radius: 1.6rem;
   background:
-    linear-gradient(155deg, rgba(15, 118, 110, 0.54) 0%, rgba(22, 50, 79, 0.64) 48%, rgba(29, 78, 216, 0.5) 100%);
+    linear-gradient(155deg, rgba(37, 99, 235, 0.76) 0%, rgba(30, 64, 175, 0.72) 48%, rgba(15, 23, 42, 0.58) 100%);
   color: #eff6ff;
   border: 1px solid rgba(255, 255, 255, 0.34);
   backdrop-filter: blur(22px) saturate(135%);
@@ -113,7 +113,7 @@
   color: #dbeafe;
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -245,13 +245,14 @@
   min-height: 3.25rem;
   margin-top: 1.15rem;
   border-radius: 0.95rem;
-  background: linear-gradient(135deg, var(--app-accent) 0%, #0b5f58 100%);
-  border-color: var(--app-accent);
+  background: var(--app-primary, #2563eb);
+  border-color: var(--app-primary, #2563eb);
+  color: #ffffff;
 }
 
 :host ::ng-deep .login-card .p-button:enabled:hover {
-  background: linear-gradient(135deg, #0d6b64 0%, #084c47 100%);
-  border-color: #0d6b64;
+  background: var(--app-primary-hover, #1d4ed8);
+  border-color: var(--app-primary-hover, #1d4ed8);
 }
 
 @keyframes fadeIn {

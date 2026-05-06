@@ -639,3 +639,139 @@ BEGIN
 
     END IF;
 END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260506080000_StudentEnrollmentStatus'
+    ) THEN
+
+        ALTER TABLE "StudentEnrollments"
+            ADD COLUMN IF NOT EXISTS "EnrollmentStatus" integer NOT NULL DEFAULT 1;
+
+        ALTER TABLE "StudentEnrollments"
+            ADD COLUMN IF NOT EXISTS "StatusDate" timestamp with time zone;
+
+        ALTER TABLE "StudentEnrollments"
+            ADD COLUMN IF NOT EXISTS "StatusRemarks" character varying(500);
+
+        UPDATE "StudentEnrollments"
+        SET "IsActive" = TRUE,
+            "EnrollmentStatus" = 1
+        WHERE "IsDeleted" = FALSE;
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentEnrollments_AcademicYearId_ClassSectionId_IsActive_IsDeleted"
+            ON "StudentEnrollments" ("AcademicYearId", "ClassSectionId", "IsActive", "IsDeleted");
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentEnrollments_StudentId_AcademicYearId"
+            ON "StudentEnrollments" ("StudentId", "AcademicYearId");
+
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+        VALUES ('20260506080000_StudentEnrollmentStatus', '8.0.15');
+
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260506090000_AddAttendanceModule'
+    ) THEN
+
+        CREATE TABLE IF NOT EXISTS "StudentAttendances" (
+            "Id" uuid NOT NULL,
+            "StudentEnrollmentId" uuid NOT NULL,
+            "StudentId" uuid NOT NULL,
+            "ClassSectionId" uuid NOT NULL,
+            "AcademicYearId" uuid NOT NULL,
+            "AttendanceDateEn" date NOT NULL,
+            "AttendanceDateNp" character varying(20) NOT NULL,
+            "Status" integer NOT NULL,
+            "Remarks" character varying(500) NOT NULL,
+            "RecordedByUserId" uuid NOT NULL,
+            "IsActive" boolean NOT NULL,
+            "IsDeleted" boolean NOT NULL,
+            "CreatedDate" timestamp with time zone NOT NULL,
+            "ModifiedDate" timestamp with time zone NOT NULL,
+            "DeletedOn" timestamp with time zone,
+            "CreatedBy" uuid NOT NULL,
+            "ModifiedBy" uuid NOT NULL,
+            "DeletedBy" uuid,
+            CONSTRAINT "PK_StudentAttendances" PRIMARY KEY ("Id"),
+            CONSTRAINT "FK_StudentAttendances_AcademicYears_AcademicYearId"
+                FOREIGN KEY ("AcademicYearId") REFERENCES "AcademicYears" ("Id") ON DELETE CASCADE,
+            CONSTRAINT "FK_StudentAttendances_ClassSections_ClassSectionId"
+                FOREIGN KEY ("ClassSectionId") REFERENCES "ClassSections" ("Id") ON DELETE CASCADE,
+            CONSTRAINT "FK_StudentAttendances_StudentEnrollments_StudentEnrollmentId"
+                FOREIGN KEY ("StudentEnrollmentId") REFERENCES "StudentEnrollments" ("Id") ON DELETE CASCADE,
+            CONSTRAINT "FK_StudentAttendances_Students_StudentId"
+                FOREIGN KEY ("StudentId") REFERENCES "Students" ("Id") ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS "TeacherAttendances" (
+            "Id" uuid NOT NULL,
+            "TeacherId" uuid NOT NULL,
+            "AcademicYearId" uuid NOT NULL,
+            "AttendanceDateEn" date NOT NULL,
+            "AttendanceDateNp" character varying(20) NOT NULL,
+            "Status" integer NOT NULL,
+            "CheckInTime" time without time zone,
+            "CheckOutTime" time without time zone,
+            "Remarks" character varying(500) NOT NULL,
+            "RecordedByUserId" uuid NOT NULL,
+            "IsActive" boolean NOT NULL,
+            "IsDeleted" boolean NOT NULL,
+            "CreatedDate" timestamp with time zone NOT NULL,
+            "ModifiedDate" timestamp with time zone NOT NULL,
+            "DeletedOn" timestamp with time zone,
+            "CreatedBy" uuid NOT NULL,
+            "ModifiedBy" uuid NOT NULL,
+            "DeletedBy" uuid,
+            CONSTRAINT "PK_TeacherAttendances" PRIMARY KEY ("Id"),
+            CONSTRAINT "FK_TeacherAttendances_AcademicYears_AcademicYearId"
+                FOREIGN KEY ("AcademicYearId") REFERENCES "AcademicYears" ("Id") ON DELETE CASCADE,
+            CONSTRAINT "FK_TeacherAttendances_Teachers_TeacherId"
+                FOREIGN KEY ("TeacherId") REFERENCES "Teachers" ("Id") ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentAttendances_AcademicYearId_ClassSectionId_AttendanceDateEn"
+            ON "StudentAttendances" ("AcademicYearId", "ClassSectionId", "AttendanceDateEn");
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentAttendances_ClassSectionId"
+            ON "StudentAttendances" ("ClassSectionId");
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentAttendances_Status_AttendanceDateEn"
+            ON "StudentAttendances" ("Status", "AttendanceDateEn");
+
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_StudentAttendances_StudentEnrollmentId_AttendanceDateEn"
+            ON "StudentAttendances" ("StudentEnrollmentId", "AttendanceDateEn")
+            WHERE "IsDeleted" = false;
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentAttendances_StudentEnrollmentId_AttendanceDateEn_IsDeleted"
+            ON "StudentAttendances" ("StudentEnrollmentId", "AttendanceDateEn", "IsDeleted");
+
+        CREATE INDEX IF NOT EXISTS "IX_StudentAttendances_StudentId_AcademicYearId"
+            ON "StudentAttendances" ("StudentId", "AcademicYearId");
+
+        CREATE INDEX IF NOT EXISTS "IX_TeacherAttendances_AcademicYearId_AttendanceDateEn"
+            ON "TeacherAttendances" ("AcademicYearId", "AttendanceDateEn");
+
+        CREATE INDEX IF NOT EXISTS "IX_TeacherAttendances_Status_AttendanceDateEn"
+            ON "TeacherAttendances" ("Status", "AttendanceDateEn");
+
+        CREATE INDEX IF NOT EXISTS "IX_TeacherAttendances_TeacherId_AcademicYearId"
+            ON "TeacherAttendances" ("TeacherId", "AcademicYearId");
+
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_TeacherAttendances_TeacherId_AcademicYearId_AttendanceDateEn"
+            ON "TeacherAttendances" ("TeacherId", "AcademicYearId", "AttendanceDateEn")
+            WHERE "IsDeleted" = false;
+
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+        VALUES ('20260506090000_AddAttendanceModule', '8.0.15');
+
+    END IF;
+END $$;

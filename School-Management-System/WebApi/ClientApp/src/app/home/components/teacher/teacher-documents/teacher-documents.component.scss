@@ -65,14 +65,14 @@
 .teacher-upload-btn {
   width: 100%;
   min-height: 2.55rem;
-  background: linear-gradient(135deg, var(--app-accent, #0f766e) 0%, #0d9488 100%) !important;
-  border-color: var(--app-accent, #0f766e) !important;
+  background: var(--app-primary, #2563eb) !important;
+  border-color: var(--app-primary, #2563eb) !important;
   color: #ffffff !important;
 }
 
 .teacher-upload-btn:hover {
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
-  border-color: #0d9488 !important;
+  background: var(--app-primary-hover, #1d4ed8) !important;
+  border-color: var(--app-primary-hover, #1d4ed8) !important;
 }
 
 .teacher-documents-table-card {

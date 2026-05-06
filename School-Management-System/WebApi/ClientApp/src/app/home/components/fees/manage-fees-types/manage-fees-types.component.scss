@@ -1,3 +1,117 @@
-::ng-deep .manage-fee-toolbar .p-dropdown .p-dropdown-label {
-    width: 12rem;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.manage-fee-page {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .manage-fee-toolbar.p-toolbar {
+  align-items: end;
+  gap: .75rem;
+  justify-content: space-between;
+  margin-top: .75rem;
+  padding: .75rem;
+}
+
+.manage-fee-filter {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.manage-fee-filter .field {
+  margin-bottom: 0;
+  min-width: 11rem;
+}
+
+.manage-fee-filter label {
+  color: #334155;
+  display: block;
+  font-size: .8rem;
+  font-weight: 700;
+  margin-bottom: .3rem;
+}
+
+.filter-action {
+  min-width: 0;
+}
+
+::ng-deep .manage-fee-filter .p-dropdown {
+  width: 12rem;
+}
+
+.manage-fee-table-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin-top: .75rem;
+  min-height: 0;
+}
+
+.manage-fee-empty-state {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-height: 18rem;
+}
+
+.manage-fee-table-card form {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+::ng-deep .manage-fee-table-card p-table,
+::ng-deep .manage-fee-table-card .p-datatable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .manage-fee-table-card .app-grid-table .p-datatable-wrapper {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+}
+
+::ng-deep .manage-fee-table-card .p-paginator {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+::ng-deep .manage-fee-table-card .p-dropdown,
+::ng-deep .manage-fee-table-card .p-inputtext {
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  :host {
+    overflow-y: auto;
+  }
+
+  ::ng-deep .manage-fee-toolbar.p-toolbar {
+    align-items: stretch;
+  }
+
+  .manage-fee-filter,
+  .manage-fee-filter .field,
+  ::ng-deep .manage-fee-filter .p-dropdown {
+    width: 100%;
+  }
+
+  .manage-fee-table-card {
+    min-height: 34rem;
+  }
 }

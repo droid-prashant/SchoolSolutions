@@ -15,7 +15,7 @@ const routes: Routes = [
   { path: 'details/:teacherId', component: TeacherDetailComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.TeacherView] } },
   { path: 'documents/:teacherId', component: TeacherDocumentsComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.TeacherView] } },
   { path: 'user/:teacherId', component: TeacherAccountComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.UserManage] } },
-  { path: 'marks-entry', component: TeacherMarksEntryComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.ExamMarksEntry] } }
+  { path: 'marks-entry', component: TeacherMarksEntryComponent, canActivate: [PermissionGuardService], data: { permissions: [PermissionNames.SubjectMarksEntry] } }
 ];
 
 @NgModule({

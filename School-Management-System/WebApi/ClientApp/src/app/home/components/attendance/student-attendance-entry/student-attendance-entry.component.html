@@ -1,0 +1,201 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<app-page-header
+  section="Attendance"
+  page="Student Attendance Entry"
+  subtitle="Take daily attendance class-wise using the selected academic year.">
+</app-page-header>
+
+<form [formGroup]="filterForm" class="attendance-filter p-fluid">
+  <p-toolbar styleClass="attendance-toolbar">
+    <div class="p-toolbar-group-start toolbar-grid">
+      <div class="field">
+        <label for="classRoomId">Class</label>
+        <p-dropdown
+          inputId="classRoomId"
+          [options]="classRooms"
+          optionLabel="name"
+          optionValue="id"
+          formControlName="classRoomId"
+          appendTo="body"
+          placeholder="Select Class"
+          (onChange)="onClassRoomChange()">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="classSectionId">Section</label>
+        <p-dropdown
+          inputId="classSectionId"
+          [options]="sections"
+          optionLabel="name"
+          optionValue="classSectionId"
+          formControlName="classSectionId"
+          appendTo="body"
+          placeholder="Select Section"
+          (onChange)="resetRows()">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label>Attendance Date</label>
+        <app-np-datepicker
+          [selectedDate]="selectedNpDate"
+          selectedDateType="bs"
+          calendarVariant="bs"
+          [unicodeDate]="false"
+          (dateChange)="onDateChange($event)">
+        </app-np-datepicker>
+      </div>
+
+      <div class="field filter-action">
+        <button pButton pRipple type="button" icon="pi pi-search" label="Load" (click)="loadAttendance()" [loading]="isLoading"></button>
+      </div>
+    </div>
+  </p-toolbar>
+</form>
+
+<div class="attendance-table-card">
+  <p-toolbar styleClass="table-commandbar">
+    <div class="p-toolbar-group-start">
+      <button
+        *appHasAnyPermission="[permissions.StudentAttendanceTake, permissions.StudentAttendanceEdit]"
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-check-circle"
+        label="Mark All Present"
+        class="p-button-sm"
+        [disabled]="students.length === 0 || isSaving"
+        (click)="markAll(1)">
+      </button>
+      <button
+        *appHasAnyPermission="[permissions.StudentAttendanceTake, permissions.StudentAttendanceEdit]"
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-times-circle"
+        label="Mark All Absent"
+        class="p-button-sm p-button-outlined"
+        [disabled]="students.length === 0 || isSaving"
+        (click)="markAll(2)">
+      </button>
+    </div>
+
+    <div class="p-toolbar-group-center summary-strip">
+      <span><b>{{ summary.total }}</b> Total</span>
+      <span class="present"><b>{{ summary.present }}</b> Present</span>
+      <span class="absent"><b>{{ summary.absent }}</b> Absent</span>
+      <span><b>{{ summary.attendancePercentage || 0 }}%</b> Attendance</span>
+    </div>
+
+    <div class="p-toolbar-group-end">
+      <button
+        *appHasAnyPermission="[permissions.StudentAttendanceTake, permissions.StudentAttendanceEdit]"
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-save"
+        label="Save Attendance"
+        [disabled]="students.length === 0 || isSaving"
+        [loading]="isSaving"
+        (click)="saveAttendance()">
+      </button>
+    </div>
+  </p-toolbar>
+
+  <p-table
+    #studentAttendanceTable
+    [value]="students"
+    styleClass="app-grid-table attendance-grid"
+    [loading]="isLoading"
+    [paginator]="true"
+    [rows]="20"
+    [rowsPerPageOptions]="[20, 50, 100]"
+    [globalFilterFields]="['studentName', 'rollNumber', 'remarks']"
+    [scrollable]="true"
+    scrollHeight="flex"
+    paginatorDropdownAppendTo="body"
+    [tableStyle]="{ 'min-width': '68rem' }">
+
+    <ng-template pTemplate="caption">
+      <span class="p-input-icon-left app-page-search" *ngIf="students.length > 0">
+        <i class="pi pi-search"></i>
+        <input
+          #studentSearch
+          type="text"
+          pInputText
+          placeholder="Search student..."
+          (input)="studentAttendanceTable.filterGlobal(studentSearch.value, 'contains')" />
+      </span>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 70px">Roll</th>
+        <th pSortableColumn="studentName">Student <p-sortIcon field="studentName"></p-sortIcon></th>
+        <th>Status</th>
+        <th>Remarks</th>
+        <th style="width: 120px">Record</th>
+        <th style="width: 90px">Action</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="loadingbody">
+      <tr *ngFor="let item of [1,2,3,4,5]">
+        <td colspan="6"><p-skeleton height="2rem"></p-skeleton></td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-student>
+      <tr [class.inactive-row]="!student.isEnrollmentActive">
+        <td>{{ student.rollNumber || '-' }}</td>
+        <td>
+          <div class="student-cell">
+            <strong>{{ student.studentName }}</strong>
+            <small>{{ student.classRoomName }} - {{ student.sectionName }}</small>
+          </div>
+        </td>
+        <td>
+          <div class="status-pills">
+            <button
+              *ngFor="let status of statusOptions"
+              type="button"
+              class="status-pill"
+              [class.active]="student.status === status.value"
+              (click)="student.status = status.value; onStatusChange(student)">
+              {{ status.shortLabel }}
+            </button>
+          </div>
+        </td>
+        <td>
+          <input pInputText type="text" [(ngModel)]="student.remarks" [ngModelOptions]="{ standalone: true }" maxlength="500" placeholder="Optional remarks" />
+        </td>
+        <td>
+          <p-tag [severity]="student.hasAttendance ? 'success' : 'warning'" [value]="student.hasAttendance ? 'Saved' : 'New'"></p-tag>
+        </td>
+        <td>
+          <button
+            *appHasPermission="permissions.StudentAttendanceDelete"
+            pButton
+            pRipple
+            type="button"
+            icon="pi pi-trash"
+            class="p-button-rounded p-button-text p-button-danger"
+            [disabled]="!student.attendanceId"
+            (click)="deleteAttendance(student)">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="empty-state">
+          {{ hasLoaded ? 'No students found for this class section.' : 'Select filters and load attendance.' }}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

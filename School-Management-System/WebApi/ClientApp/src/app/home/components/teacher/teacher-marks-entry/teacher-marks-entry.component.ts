@@ -203,7 +203,7 @@ export class TeacherMarksEntryComponent implements OnInit {
       return 'Select an assigned subject';
     }
 
-    return `${this.selectedAssignment.classRoomName} - ${this.selectedAssignment.sectionName} / ${this.selectedAssignment.courseName}`;
+    return `${this.selectedAssignment.teacherName} / ${this.selectedAssignment.classRoomName} - ${this.selectedAssignment.sectionName} / ${this.selectedAssignment.courseName}`;
   }
 
   private applyMarkValidators(): void {

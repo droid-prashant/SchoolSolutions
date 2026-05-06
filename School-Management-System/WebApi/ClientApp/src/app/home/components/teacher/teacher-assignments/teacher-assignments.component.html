@@ -92,7 +92,6 @@
         type="button"
         [label]="isEditMode ? 'Update' : 'Add'"
         [icon]="isEditMode ? 'pi pi-check' : 'pi pi-plus'"
-        class="p-button-success"
         [loading]="isSaving"
         [disabled]="assignmentForm.invalid || isSaving"
         (click)="saveAssignment()">

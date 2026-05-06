@@ -28,6 +28,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { FormsModule } from "@angular/forms";
 import { ChartModule } from 'primeng/chart';
+import { ToolbarModule } from 'primeng/toolbar';
+import { SkeletonModule } from 'primeng/skeleton';
 import { StudentFilterComponent } from "../home/components/student-filter/student-filter.component";
 import { PageHeaderComponent } from "./page-header/page-header.component";
 import { HasPermissionDirective } from "./has-permission.directive";
@@ -68,6 +70,8 @@ import { HasAnyPermissionDirective } from "./has-any-permission.directive";
         OverlayPanelModule,
         FormsModule,
         ChartModule,
+        ToolbarModule,
+        SkeletonModule,
         StudentFilterComponent,
         PageHeaderComponent
         
@@ -101,6 +105,8 @@ import { HasAnyPermissionDirective } from "./has-any-permission.directive";
         ConfirmDialogModule,
         OverlayPanelModule,
         ChartModule,
+        ToolbarModule,
+        SkeletonModule,
         StudentFilterComponent,
         PageHeaderComponent,
         HasPermissionDirective,

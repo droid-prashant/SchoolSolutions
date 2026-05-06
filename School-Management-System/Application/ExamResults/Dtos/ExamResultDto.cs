@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Application.SubjectMarks.Dtos;
+using Application.Exams.Dtos;
 
-namespace Application.Courses.Dtos
+namespace Application.ExamResults.Dtos
 {
     public class ExamResultDto
     {

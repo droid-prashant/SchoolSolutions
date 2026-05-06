@@ -3,7 +3,7 @@ export interface StudentViewModel {
     studentEnrollmentId: string;
     firstName: string;
     lastName: string;
-    gender: string;
+    gender: number;
     age: number;
     grandGatherName: string;
     fatherName: string;
@@ -21,4 +21,11 @@ export interface StudentViewModel {
     municipalityId: number;
     municipalityName: string;
     wardNo: number;
+    classSectionId?: string;
+    rollNumber?: number;
+    isActive: boolean;
+    enrollmentStatus?: number;
+    enrollmentStatusName?: string;
+    statusDate?: string;
+    statusRemarks?: string;
 }

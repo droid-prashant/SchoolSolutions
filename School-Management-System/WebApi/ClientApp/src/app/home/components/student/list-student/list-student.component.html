@@ -1,8 +1,9 @@
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 <app-page-header
     section="Student Section"
-    page="All Students"
-    subtitle="Load, search, and manage student records from one place.">
+    [page]="getViewTitle()"
+    subtitle="Load, search, and manage active or dropped student records separately.">
 </app-page-header>
 <p-card class="app-page-filter-card">
     <app-student-filter [showClassFilter]="true" [showSectionFilter]="true"
@@ -11,6 +12,26 @@
 
 <div class="app-page-toolbar">
     <div class="app-page-toolbar-left">
+        <div class="student-view-switch" role="group" aria-label="Student list view">
+            <button
+                pButton
+                type="button"
+                label="Active"
+                icon="pi pi-users"
+                class="p-button-sm"
+                [class.p-button-outlined]="studentView !== 'active'"
+                (click)="setStudentView('active')">
+            </button>
+            <button
+                pButton
+                type="button"
+                label="Dropped"
+                icon="pi pi-ban"
+                class="p-button-sm"
+                [class.p-button-outlined]="studentView !== 'dropped'"
+                (click)="setStudentView('dropped')">
+            </button>
+        </div>
         <span class="p-input-icon-left app-page-search" *ngIf="students.length > 0">
             <i class="pi pi-search"></i>
             <input type="text" pInputText placeholder="Search students..." [(ngModel)]="searchText"
@@ -19,15 +40,18 @@
     </div>
 
     <div class="app-page-toolbar-right">
-        <button pButton type="button" label="Add Student" icon="pi pi-plus" class="p-button-success p-button-sm"
-            (click)="openAddStudentDialog()"></button>
+        <ng-container *appHasPermission="'Student.Create'">
+            <button *ngIf="studentView === 'active'" pButton type="button" label="Add Student" icon="pi pi-plus" class="p-button-sm"
+                (click)="openAddStudentDialog()"></button>
+        </ng-container>
     </div>
 </div>
 
 <div class="card app-page-table-card">
-    <p-table [value]="filteredStudents" styleClass="app-grid-table" [paginator]="true" [rows]="6"
+    <p-table [value]="filteredStudents" styleClass="app-grid-table" [paginator]="true" [rows]="15"
         [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem"
-        [tableStyle]="{ 'min-width': '50rem' }">
+        [loading]="isLoadingStudents"
+        [tableStyle]="{ 'min-width': '58rem' }">
         <ng-template pTemplate="header">
             <tr>
                 <th>Id</th>
@@ -36,22 +60,28 @@
                 <th>Section</th>
                 <th>Roll Number</th>
                 <th>Gender</th>
+                <th>Status</th>
                 <th>Address</th>
-                <th>Action</th>
+                <th *appHasPermission="'Student.Update'">Action</th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
             <tr>
                 <td>{{ rowIndex + 1 }}</td>
                 <td>{{ student.firstName }} {{ student.lastName }}</td>
-                <td>{{ getClassName(student.classRoomId) }}</td>
-                <td>{{ getSectionName(student.sectionId) }}</td>
-                <td>{{ student.rollNumber }}</td>
+                <td>{{ displayClassName(student) }}</td>
+                <td>{{ displaySectionName(student) }}</td>
+                <td>{{ student.rollNumber || '-' }}</td>
                 <td>{{ getGender(student.gender) }}</td>
-                <td>{{ student.address }}</td>
                 <td>
+                    <p-tag [value]="student.isActive ? 'Active' : 'Dropped'"
+                        [severity]="student.isActive ? 'success' : 'danger'"></p-tag>
+                </td>
+                <td>{{ student.address }}</td>
+                <td *appHasPermission="'Student.Update'">
                     <div class="app-grid-actions">
                         <button
+                            *ngIf="studentView === 'active'"
                             pButton
                             pRipple
                             type="button"
@@ -61,26 +91,52 @@
                             class="p-button-text app-grid-action-btn"
                             (click)="editStudent(student)">
                         </button>
+                        <button
+                            *ngIf="studentView === 'active'"
+                            pButton
+                            pRipple
+                            type="button"
+                            icon="pi pi-ban"
+                            pTooltip="Drop student"
+                            tooltipPosition="top"
+                            class="p-button-text p-button-danger app-grid-action-btn"
+                            (click)="updateStudentStatus(student, false)">
+                        </button>
+                        <button
+                            *ngIf="studentView === 'dropped'"
+                            pButton
+                            pRipple
+                            type="button"
+                            icon="pi pi-refresh"
+                            pTooltip="Revive student"
+                            tooltipPosition="top"
+                            class="p-button-text p-button-success app-grid-action-btn"
+                            (click)="updateStudentStatus(student, true)">
+                        </button>
                     </div>
                 </td>
             </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="8" class="text-center">No records found</td>
+                <td colspan="9" class="text-center">{{ getEmptyMessage() }}</td>
             </tr>
         </ng-template>
     </p-table>
 </div>
 
 <!-- Add Student Dialog -->
-<p-dialog header="Add Student" [modal]="true" [(visible)]="isAddDialogVisible" [style]="{ width: '70vw' }">
-    <app-add-student *ngIf="isAddDialogVisible" [isEditMode]="false" (studentSaved)="onStudentSaved()">
-    </app-add-student>
-</p-dialog>
+<ng-container *appHasPermission="'Student.Create'">
+    <p-dialog header="Add Student" [modal]="true" [(visible)]="isAddDialogVisible" [style]="{ width: '70vw' }">
+        <app-add-student *ngIf="isAddDialogVisible" [isEditMode]="false" (studentSaved)="onStudentSaved()">
+        </app-add-student>
+    </p-dialog>
+</ng-container>
 
 <!-- Edit Student Dialog -->
-<p-dialog header="Edit Student" [modal]="true" [(visible)]="isEditDialogVisible" [style]="{ width: '70vw' }">
-    <app-add-student *ngIf="isEditDialogVisible" [isEditMode]="true" [studentToEdit]="selectedStudent" (studentSaved)="onStudentSaved()">
-    </app-add-student>
-</p-dialog>
+<ng-container *appHasPermission="'Student.Update'">
+    <p-dialog header="Edit Student" [modal]="true" [(visible)]="isEditDialogVisible" [style]="{ width: '70vw' }">
+        <app-add-student *ngIf="isEditDialogVisible" [isEditMode]="true" [studentToEdit]="selectedStudent" (studentSaved)="onStudentSaved()">
+        </app-add-student>
+    </p-dialog>
+</ng-container>

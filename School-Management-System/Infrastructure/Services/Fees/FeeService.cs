@@ -74,8 +74,13 @@ namespace Infrastructure.Services.Fees
             }
 
             var enrollments = await _dbContext.StudentEnrollments
+                .Include(x => x.Student)
                 .Include(x => x.ClassSection)
-                .Where(x => x.AcademicYearId == currentAcademicYearId && x.ClassSection.ClassId == classId)
+                .Where(x => x.AcademicYearId == currentAcademicYearId &&
+                            x.ClassSection.ClassId == classId &&
+                            x.IsActive &&
+                            !x.IsDeleted &&
+                            !x.Student.IsDeleted)
                 .ToListAsync(cancellationToken);
 
             if (!enrollments.Any())
@@ -210,7 +215,11 @@ namespace Infrastructure.Services.Fees
                 .Include(se => se.ClassSection)
                     .ThenInclude(cs => cs.Section)
                 .Include(se => se.AcademicYear)
-                .Where(se => se.ClassSectionId == parsedClassSectionId && se.AcademicYearId == currentAcademicYearId)
+                .Where(se => se.ClassSectionId == parsedClassSectionId &&
+                             se.AcademicYearId == currentAcademicYearId &&
+                             se.IsActive &&
+                             !se.IsDeleted &&
+                             !se.Student.IsDeleted)
                 .OrderBy(se => se.RollNumber ?? int.MaxValue)
                 .ThenBy(se => se.Student.FirstName)
                 .ThenBy(se => se.Student.LastName)

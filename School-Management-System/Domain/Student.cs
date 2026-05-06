@@ -29,5 +29,6 @@ namespace Domain
         public StudentCharacterCertificateLog StudentCharacterCertificateLog { get; set; }
         public StudentTransferCertificateLog studentTransferCertificateLog { get; set; }
         public ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
+        public ICollection<StudentAttendance> Attendances { get; set; } = new List<StudentAttendance>();
     }
 }

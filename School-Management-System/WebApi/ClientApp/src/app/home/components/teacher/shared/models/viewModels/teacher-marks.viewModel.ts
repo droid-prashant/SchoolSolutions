@@ -2,6 +2,8 @@ import { StudentMarksList } from '../../../../exam/shared/viewModels/student-mar
 
 export interface TeacherMarksAssignmentViewModel {
   assignmentId: string;
+  teacherId: string;
+  teacherName: string;
   classSectionId: string;
   classRoomId: string;
   classRoomName: string;

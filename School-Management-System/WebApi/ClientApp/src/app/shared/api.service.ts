@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { StudentDto } from '../home/components/student/shared/models/dtos/student.dto';
+import { StudentDto, StudentStatusDto } from '../home/components/student/shared/models/dtos/student.dto';
 import { StudentViewModel } from '../home/components/student/shared/models/viewModels/student.viewModel';
 import { CourseDto } from '../home/components/course/shared/models/course.dto';
 import { CourseViewModel } from '../home/components/course/shared/models/course.viewModel';
@@ -138,6 +138,10 @@ export class ApiService {
     return this._httpClient.put<void>(this.baseUrl + "api/Student/UpdateStudent", student);
   }
 
+  updateStudentEnrollmentStatus(studentEnrollmentId: string, status: StudentStatusDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Student/UpdateStudentEnrollmentStatus?studentEnrollmentId=${studentEnrollmentId}`, status);
+  }
+
   postTeacher(teacher: TeacherDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + "api/Teacher/AddTeacher", teacher);
   }
@@ -208,16 +212,16 @@ export class ApiService {
     return this._httpClient.put<void>(this.baseUrl + `api/Teacher/ResetTeacherUserPassword?teacherId=${teacherId}`, payload);
   }
 
-  getStudents(): Observable<StudentViewModel[]> {
-    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + "api/Student/GetStudent");
+  getStudents(isActive = true): Observable<StudentViewModel[]> {
+    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudent?isActive=${isActive}`);
   }
-  getStudentsByClass(classId: string): Observable<StudentViewModel[]> {
-    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassId?classId=${classId}`);
+  getStudentsByClass(classId: string, isActive = true): Observable<StudentViewModel[]> {
+    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassId?classId=${classId}&isActive=${isActive}`);
   }
 
-  getStudentsByClassSectionId(classSectionId: string, examType?: number | null): Observable<StudentViewModel[]> {
+  getStudentsByClassSectionId(classSectionId: string, examType?: number | null, isActive = true): Observable<StudentViewModel[]> {
     const examTypeQuery = examType ? `&examType=${examType}` : '';
-    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}${examTypeQuery}`);
+    return this._httpClient.get<StudentViewModel[]>(this.baseUrl + `api/Student/GetStudentByClassSectionId?classSectionId=${classSectionId}${examTypeQuery}&isActive=${isActive}`);
   }
   getStudentCertificateDataByClassSectionId(classSectionId: string): Observable<StudentCertificateViewModel[]> {
     return this._httpClient.get<StudentCertificateViewModel[]>(this.baseUrl + `api/Student/GetStudentCertificateData?classSectionId=${classSectionId}`);

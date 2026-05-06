@@ -39,5 +39,10 @@ namespace Application.Students.ViewModels
         public string SectionId { get; set; }
         public string SectionName { get; set; }
         public int RollNumber { get; set; }
+        public bool IsActive { get; set; }
+        public int EnrollmentStatus { get; set; }
+        public string EnrollmentStatusName { get; set; } = string.Empty;
+        public DateTime? StatusDate { get; set; }
+        public string? StatusRemarks { get; set; }
     }
 }

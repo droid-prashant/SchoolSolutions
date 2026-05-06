@@ -1,5 +1,106 @@
+.academic-year-form-card {
+  margin-bottom: 1rem;
+}
+
+.app-form-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--app-border, #dbe5f0);
+}
+
+.app-form-card-header h2,
+.app-form-card-header p,
+.table-caption h3,
+.table-caption span {
+  margin: 0;
+}
+
+.app-form-card-header h2 {
+  color: var(--app-text, #0f172a);
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.app-form-card-header p {
+  margin-top: 0.2rem;
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.86rem;
+}
+
+.app-form-card-header i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 0.8rem;
+  background: var(--app-primary-soft, #e8f0ff);
+  color: var(--app-primary-strong, #1e40af);
+  font-size: 1.15rem;
+}
+
+.app-form-grid {
+  row-gap: 0.35rem;
+}
+
+.academic-year-active-field {
+  display: flex;
+  flex-direction: column;
+}
+
 .switch-container {
   display: flex;
   align-items: center;
-  height: 3px; /* same as input height */
+  min-height: 2.4rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+}
+
+.table-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.table-caption h3 {
+  color: var(--app-text, #0f172a);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.table-caption span {
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.table-empty-state {
+  padding: 1.4rem;
+  color: var(--app-text-muted, #64748b);
+  font-weight: 700;
+}
+
+@media screen and (max-width: 768px) {
+  .app-form-card-header,
+  .table-caption {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .p-button {
+    width: 100%;
+  }
 }

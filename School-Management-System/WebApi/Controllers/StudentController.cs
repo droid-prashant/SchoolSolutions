@@ -21,9 +21,9 @@ namespace WebApi.Controllers
         [HttpGet]
         [Route("GetStudent")]
         [HasPermission(PermissionNames.StudentView)]
-        public async Task<List<StudentViewModel>> Get(CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> Get([FromQuery] bool isActive = true, CancellationToken cancellationToken = default)
         {
-            var result = await _studentService.GetStudentAsync(cancellationToken);
+            var result = await _studentService.GetStudentAsync(isActive, cancellationToken);
             return result;
         }
 
@@ -39,19 +39,19 @@ namespace WebApi.Controllers
         [HttpGet()]
         [Route("GetStudentByClassId")]
         [HasPermission(PermissionNames.StudentView, PermissionNames.ExamMarksEntry, PermissionNames.FeeView)]
-        public async Task<List<StudentViewModel>> GetStudentByClassId([FromQuery] string classId, CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> GetStudentByClassId([FromQuery] string classId, [FromQuery] bool isActive = true, CancellationToken cancellationToken = default)
         {
             var classRoomId = Guid.Parse(classId);
-            var result = await _studentService.GetStudentByClassIdAsync(classRoomId, cancellationToken);
+            var result = await _studentService.GetStudentByClassIdAsync(classRoomId, isActive, cancellationToken);
             return result;
         }
 
         [HttpGet()]
         [Route("GetStudentByClassSectionId")]
         [HasPermission(PermissionNames.StudentView, PermissionNames.ExamMarksEntry, PermissionNames.FeeView)]
-        public async Task<List<StudentViewModel>> GetStudentByClassSectionId([FromQuery] string classSectionId, [FromQuery] int? examType, CancellationToken cancellationToken)
+        public async Task<List<StudentViewModel>> GetStudentByClassSectionId([FromQuery] string classSectionId, [FromQuery] int? examType, [FromQuery] bool isActive = true, CancellationToken cancellationToken = default)
         {
-            var result = await _studentService.GetStudentByClassSectionId(classSectionId, examType, cancellationToken);
+            var result = await _studentService.GetStudentByClassSectionId(classSectionId, examType, isActive, cancellationToken);
             return result;
         }
 
@@ -77,6 +77,14 @@ namespace WebApi.Controllers
         public async Task UpdateStudent([FromBody] StudentDto addStudent, CancellationToken cancellationToken)
         {
             await _studentService.UpdateStudentAsync(addStudent, cancellationToken);
+        }
+
+        [HttpPut]
+        [Route("UpdateStudentEnrollmentStatus")]
+        [HasPermission(PermissionNames.StudentUpdate)]
+        public async Task UpdateStudentEnrollmentStatus([FromQuery] string studentEnrollmentId, [FromBody] StudentStatusDto studentStatusDto, CancellationToken cancellationToken)
+        {
+            await _studentService.UpdateStudentEnrollmentStatusAsync(studentEnrollmentId, studentStatusDto, cancellationToken);
         }
 
         [HttpPost]
