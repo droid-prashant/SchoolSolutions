@@ -5,94 +5,67 @@
   subtitle="Review class-wise fee collection status for the current academic year.">
 </app-page-header>
 
-<div class="app-page-toolbar">
-  <div class="app-page-toolbar-left">
-    <span *ngIf="currentAcademicYearName" class="app-page-context-pill">
-      Academic Year: {{ currentAcademicYearName }}
-    </span>
-    <app-student-filter
-      [showClassFilter]="true"
-      [showSectionFilter]="true"
-      (loadStudents)="onLoadReport($event)">
-    </app-student-filter>
-  </div>
-</div>
-
-<div class="card app-page-table-card">
-  <div *ngIf="!hasLoadedReport" class="app-empty-state">
-    Select a class and section, then click Load to view the fee report.
-  </div>
-
-  <div *ngIf="hasLoadedReport && feeReport">
-    <div class="grid mb-4 text-sm">
-      <div class="col-12 md:col-3">
-        <strong>Class:</strong> {{ feeReport.className }}
-      </div>
-      <div class="col-12 md:col-3">
-        <strong>Section:</strong> {{ feeReport.sectionName }}
-      </div>
-      <div class="col-12 md:col-3">
-        <strong>Total Students:</strong> {{ feeReport.totalStudents }}
-      </div>
-      <div class="col-12 md:col-3">
-        <strong>Academic Year:</strong> {{ feeReport.academicYearName }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Total Fees:</strong> {{ feeReport.totalFees | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Total Discount:</strong> {{ feeReport.totalDiscount | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Total Fine:</strong> {{ feeReport.totalFine | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Net Fees:</strong> {{ feeReport.netFees | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Total Paid:</strong> {{ feeReport.totalPaid | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Current Year Due:</strong> {{ feeReport.totalPending | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Previous Year Due:</strong> {{ feeReport.totalPreviousYearPending | currency:'NPR':'symbol' }}
-      </div>
-      <div class="col-12 md:col-4">
-        <strong>Grand Total Due:</strong> {{ feeReport.grandTotalPending | currency:'NPR':'symbol' }}
-      </div>
+<div class="fee-report-page">
+  <p-toolbar styleClass="fee-report-filter-toolbar">
+    <div class="p-toolbar-group-start">
+      <app-student-filter
+        [showClassFilter]="true"
+        [showSectionFilter]="true"
+        (loadStudents)="onLoadReport($event)">
+      </app-student-filter>
     </div>
+  </p-toolbar>
+
+  <section class="fee-report-table-card">
+    <ng-container *ngIf="feeReport">
+      <div class="fee-report-summary">
+        <span><b>{{ feeReport.className }} - {{ feeReport.sectionName }}</b></span>
+        <span><b>{{ feeReport.totalStudents }}</b> Students</span>
+        <span><b>{{ feeReport.netFees | currency:'NPR':'symbol' }}</b> Net Fees</span>
+        <span><b>{{ feeReport.totalPaid | currency:'NPR':'symbol' }}</b> Paid</span>
+        <span class="due"><b>{{ feeReport.totalPending | currency:'NPR':'symbol' }}</b> Current Due</span>
+        <span class="due"><b>{{ feeReport.grandTotalPending | currency:'NPR':'symbol' }}</b> Grand Due</span>
+      </div>
+    </ng-container>
 
     <p-table
       #feeReportTable
-      [value]="feeReport.students"
+      [value]="feeReport?.students || []"
       styleClass="app-grid-table"
       [paginator]="true"
-      [rows]="15"
-      [rowsPerPageOptions]="[15, 30, 50]"
+      [rows]="20"
+      [rowsPerPageOptions]="[20, 50, 100]"
       [scrollable]="true"
-      scrollHeight="34rem"
+      scrollHeight="flex"
+      paginatorDropdownAppendTo="body"
+      [tableStyle]="{ 'min-width': '86rem' }"
       [globalFilterFields]="['rollNumber', 'studentName', 'totalFees', 'totalPaid', 'totalPending']">
       <ng-template pTemplate="caption">
-        <span class="p-input-icon-left app-page-search" *ngIf="feeReport.students.length > 0">
+        <span class="p-input-icon-left app-page-search" *ngIf="(feeReport?.students?.length || 0) > 0">
           <i class="pi pi-search"></i>
-          <input #feeReportSearch type="text" pInputText placeholder="Search grid..."
+          <input
+            #feeReportSearch
+            type="text"
+            pInputText
+            placeholder="Search grid..."
             (input)="feeReportTable.filterGlobal(feeReportSearch.value, 'contains')" />
         </span>
       </ng-template>
+
       <ng-template pTemplate="header">
         <tr>
-          <th>Roll No</th>
-          <th>Student</th>
+          <th pSortableColumn="rollNumber">Roll <p-sortIcon field="rollNumber"></p-sortIcon></th>
+          <th pSortableColumn="studentName">Student <p-sortIcon field="studentName"></p-sortIcon></th>
           <th>Total Fees</th>
           <th>Discount</th>
           <th>Fine</th>
           <th>Net Fees</th>
           <th>Total Paid</th>
-          <th>Total Pending</th>
-          <th>Prev. Year Due</th>
-          <th>Grand Total Due</th>
+          <th>Current Due</th>
+          <th>Prev. Due</th>
+          <th>Grand Due</th>
           <th>Status</th>
+          <th style="width: 90px">Action</th>
         </tr>
       </ng-template>
 
@@ -114,14 +87,113 @@
               [severity]="student.grandTotalPending > 0 ? 'warning' : 'success'">
             </p-tag>
           </td>
+          <td>
+            <button
+              pButton
+              pRipple
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text"
+              pTooltip="View detail"
+              (click)="showDetail(student)">
+            </button>
+          </td>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="11" class="text-center">No fee data found for this class and section.</td>
+          <td colspan="12" class="text-center">No records found</td>
         </tr>
       </ng-template>
     </p-table>
-  </div>
+  </section>
 </div>
+
+<p-dialog
+  header="Fee Detail"
+  [(visible)]="isDetailVisible"
+  [modal]="true"
+  [style]="{ width: '72rem', maxWidth: '96vw' }"
+  (onHide)="closeDetail()">
+  <ng-container *ngIf="isDetailLoading">
+    <p-skeleton height="2rem" styleClass="mb-2"></p-skeleton>
+    <p-skeleton height="12rem"></p-skeleton>
+  </ng-container>
+
+  <ng-container *ngIf="!isDetailLoading && selectedStudentFeeSummary">
+    <div class="detail-summary">
+      <span><b>{{ selectedStudentFeeSummary.studentName }}</b></span>
+      <span>{{ selectedStudentFeeSummary.className }} - {{ selectedStudentFeeSummary.sectionName }}</span>
+      <span><b>{{ selectedStudentFeeSummary.netFees | currency:'NPR':'symbol' }}</b> Net</span>
+      <span><b>{{ selectedStudentFeeSummary.totalPaid | currency:'NPR':'symbol' }}</b> Paid</span>
+      <span class="due"><b>{{ selectedStudentFeeSummary.grandTotalPending | currency:'NPR':'symbol' }}</b> Grand Due</span>
+    </div>
+
+    <h4>Current Year Fees</h4>
+    <p-table
+      [value]="selectedStudentFeeSummary.feeDetails"
+      styleClass="app-grid-table"
+      [paginator]="true"
+      [rows]="8"
+      [rowsPerPageOptions]="[8, 15, 30]"
+      paginatorDropdownAppendTo="body"
+      [tableStyle]="{ 'min-width': '60rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fee Type</th>
+          <th>Month</th>
+          <th>Total</th>
+          <th>Discount</th>
+          <th>Fine</th>
+          <th>Net</th>
+          <th>Paid</th>
+          <th>Pending</th>
+          <th>Status</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-fee>
+        <tr>
+          <td>{{ fee.feeType }}</td>
+          <td>{{ fee.feeMonth ? (fee.feeMonth | date:'MMM yyyy') : '-' }}</td>
+          <td>{{ fee.totalAmount | currency:'NPR':'symbol' }}</td>
+          <td>{{ fee.discountAmount | currency:'NPR':'symbol' }}</td>
+          <td>{{ fee.fineAmount | currency:'NPR':'symbol' }}</td>
+          <td>{{ fee.netAmount | currency:'NPR':'symbol' }}</td>
+          <td>{{ fee.paidAmount | currency:'NPR':'symbol' }}</td>
+          <td>{{ fee.pendingAmount | currency:'NPR':'symbol' }}</td>
+          <td><p-tag [value]="fee.isPaid ? 'Paid' : 'Pending'" [severity]="fee.isPaid ? 'success' : 'warning'"></p-tag></td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="text-center">No current year fee details found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <h4>Previous Year Dues</h4>
+    <p-table
+      [value]="selectedStudentFeeSummary.previousYearDues"
+      styleClass="app-grid-table"
+      [tableStyle]="{ 'min-width': '28rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Academic Year</th>
+          <th>Pending Amount</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-due>
+        <tr>
+          <td>{{ due.academicYearName }}</td>
+          <td>{{ due.pendingAmount | currency:'NPR':'symbol' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="2" class="text-center">No previous year dues.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ng-container>
+</p-dialog>

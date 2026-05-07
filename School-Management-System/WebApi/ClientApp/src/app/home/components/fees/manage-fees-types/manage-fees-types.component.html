@@ -49,13 +49,9 @@
     </p-toolbar>
 
     <div class="card app-page-table-card manage-fee-table-card">
-        <div *ngIf="!hasLoadedClassFeeStructures" class="app-empty-state manage-fee-empty-state">
-            Select a class and click Load to view or create fee structures.
-        </div>
         <form [formGroup]="feeStructureForm">
             <p-table
                 #feeStructureTable
-                *ngIf="hasLoadedClassFeeStructures"
                 [value]="feeStrucures"
                 styleClass="app-grid-table"
                 [paginator]="true"
@@ -127,8 +123,5 @@
                 </ng-template>
             </p-table>
         </form>
-        <div *ngIf="hasLoadedClassFeeStructures && !feeStrucures.length && !isNewRow && !isUpdateRow" class="app-empty-state">
-            No fee structure found for this class in the current academic year. Click New to create one.
-        </div>
     </div>
 </div>

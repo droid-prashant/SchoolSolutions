@@ -1,3 +1,108 @@
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fee-report-page {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .fee-report-filter-toolbar.p-toolbar {
+  align-items: end;
+  justify-content: flex-start;
+  margin-top: .75rem;
+  padding: .75rem;
+}
+
+.fee-report-table-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin-top: .75rem;
+  min-height: 0;
+}
+
+.fee-report-empty-state {
+  align-items: center;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-height: 18rem;
+}
+
+.fee-report-summary,
+.detail-summary {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+
+.fee-report-summary span,
+.detail-summary span {
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 6px;
+  color: #475569;
+  font-size: .85rem;
+  padding: .35rem .55rem;
+}
+
+.fee-report-summary b,
+.detail-summary b {
+  color: #0f172a;
+}
+
+.fee-report-summary .due b,
+.detail-summary .due b {
+  color: #b45309;
+}
+
+::ng-deep .fee-report-table-card p-table,
+::ng-deep .fee-report-table-card .p-datatable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .fee-report-table-card .app-grid-table .p-datatable-wrapper {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+}
+
+::ng-deep .fee-report-table-card .p-paginator {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+h4 {
+  color: #0f172a;
+  font-size: 1rem;
+  margin: 1rem 0 .5rem;
+}
+
+::ng-deep .p-dialog .app-grid-table .p-datatable-wrapper {
+  max-height: 18rem;
+}
+
+@media (max-width: 960px) {
+  :host {
+    overflow-y: auto;
+  }
+
+  .fee-report-table-card {
+    min-height: 34rem;
+  }
 }
