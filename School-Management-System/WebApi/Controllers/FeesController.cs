@@ -39,6 +39,22 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
+        [Route("GetManualFeeTemplates")]
+        [HasPermission(PermissionNames.FeeView, PermissionNames.FeeCreate)]
+        public async Task<List<FeeStructureViewModel>> GetManualFeeTemplates([FromQuery] string studentEnrollmentId, CancellationToken cancellationToken)
+        {
+            return await _feesService.GetManualFeeTemplatesAsync(studentEnrollmentId, cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("GetManualFeeTemplatesByClassSection")]
+        [HasPermission(PermissionNames.FeeView, PermissionNames.FeeCreate)]
+        public async Task<List<FeeStructureViewModel>> GetManualFeeTemplatesByClassSection([FromQuery] string classSectionId, CancellationToken cancellationToken)
+        {
+            return await _feesService.GetManualFeeTemplatesByClassSectionAsync(classSectionId, cancellationToken);
+        }
+
+        [HttpGet]
         [Route("GetFeeReport")]
         [HasPermission(PermissionNames.FeeView)]
         public async Task<FeeReportViewModel?> GetFeeReport([FromQuery] string classSectionId, CancellationToken cancellationToken)
@@ -66,6 +82,22 @@ namespace WebApi.Controllers
         public Task AddFeeStructure([FromBody] FeeStructureDto feeStructureDto, CancellationToken cancellationToken)
         {
             return _feesService.AddFeeStructure(feeStructureDto, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("AssignManualCharge")]
+        [HasPermission(PermissionNames.FeeCreate)]
+        public Task AssignManualCharge([FromBody] ManualStudentChargeDto manualChargeDto, CancellationToken cancellationToken)
+        {
+            return _feesService.AssignManualChargeAsync(manualChargeDto, cancellationToken);
+        }
+
+        [HttpPost]
+        [Route("AssignBulkManualCharge")]
+        [HasPermission(PermissionNames.FeeCreate)]
+        public Task<BulkManualChargeResultViewModel> AssignBulkManualCharge([FromBody] BulkManualStudentChargeDto bulkManualChargeDto, CancellationToken cancellationToken)
+        {
+            return _feesService.AssignBulkManualChargeAsync(bulkManualChargeDto, cancellationToken);
         }
 
         [HttpPost]

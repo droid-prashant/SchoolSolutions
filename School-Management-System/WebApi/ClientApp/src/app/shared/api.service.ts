@@ -18,6 +18,9 @@ import { FeeTypeDto } from '../home/components/master-entry/model/dtos/feeType.d
 import { FeeTypeViewModel } from '../home/components/master-entry/model/viewModels/feeType.viewModel';
 import { FeeStructureDto } from '../home/components/fees/model/feeStructure.dto';
 import { FeeAdjustmentDto } from '../home/components/fees/model/feeAdjustment.dto';
+import { BulkManualStudentChargeDto } from '../home/components/fees/model/bulkManualStudentCharge.dto';
+import { BulkManualChargeResultViewModel } from '../home/components/fees/model/bulkManualChargeResult.viewModel';
+import { ManualStudentChargeDto } from '../home/components/fees/model/manualStudentCharge.dto';
 import { FeeStructureViewModel } from '../home/components/fees/model/feeStructure.viewModel';
 import { FeeReportViewModel } from '../home/components/fees/model/feeReport.viewModel';
 import { StudentFeeSummaryViewModel } from '../home/components/fees/model/studentFeeSummary.viewModel';
@@ -348,6 +351,22 @@ export class ApiService {
 
   getFeeStructure(classId: string): Observable<FeeStructureViewModel[]> {
     return this._httpClient.get<FeeStructureViewModel[]>(this.baseUrl + `api/Fees/GetFeeStructure?classId=${classId}`);
+  }
+
+  getManualFeeTemplates(studentEnrollmentId: string): Observable<FeeStructureViewModel[]> {
+    return this._httpClient.get<FeeStructureViewModel[]>(this.baseUrl + `api/Fees/GetManualFeeTemplates?studentEnrollmentId=${studentEnrollmentId}`);
+  }
+
+  getManualFeeTemplatesByClassSection(classSectionId: string): Observable<FeeStructureViewModel[]> {
+    return this._httpClient.get<FeeStructureViewModel[]>(this.baseUrl + `api/Fees/GetManualFeeTemplatesByClassSection?classSectionId=${classSectionId}`);
+  }
+
+  assignManualCharge(request: ManualStudentChargeDto): Observable<void> {
+    return this._httpClient.post<void>(this.baseUrl + "api/Fees/AssignManualCharge", request);
+  }
+
+  assignBulkManualCharge(request: BulkManualStudentChargeDto): Observable<BulkManualChargeResultViewModel> {
+    return this._httpClient.post<BulkManualChargeResultViewModel>(this.baseUrl + "api/Fees/AssignBulkManualCharge", request);
   }
 
   getFeeReport(classSectionId: string): Observable<FeeReportViewModel> {

@@ -9,6 +9,7 @@ using Application.Fees.Dtos;
 using Application.Fees.Interfaces;
 using Application.Fees.ViewModel;
 using Domain;
+using Domain.Enums;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,10 +19,12 @@ namespace Infrastructure.Services.Fees
     {
         private readonly IApplicationDbContext _dbContext;
         private readonly UserResolver _userResolver;
-        public FeeService(IApplicationDbContext dbContext, UserResolver userResolver)
+        private readonly IFeeGenerationService _feeGenerationService;
+        public FeeService(IApplicationDbContext dbContext, UserResolver userResolver, IFeeGenerationService feeGenerationService)
         {
             _dbContext = dbContext;
             _userResolver = userResolver;
+            _feeGenerationService = feeGenerationService;
         }
 
         private Guid GetCurrentAcademicYearId()
@@ -45,9 +48,14 @@ namespace Infrastructure.Services.Fees
             return studentFee.FeeAdjustments.Sum(x => x.FineAmount);
         }
 
+        private static decimal GetEducationTaxTotal(StudentFee studentFee)
+        {
+            return studentFee.FeeAdjustments.Sum(x => x.EducationTaxAmount);
+        }
+
         private static decimal GetNetAmount(StudentFee studentFee)
         {
-            return studentFee.Amount - GetDiscountTotal(studentFee) + GetFineTotal(studentFee);
+            return studentFee.Amount - GetDiscountTotal(studentFee) + GetFineTotal(studentFee) + GetEducationTaxTotal(studentFee);
         }
 
         private static decimal GetPaidAmount(StudentFee studentFee)
@@ -60,104 +68,12 @@ namespace Infrastructure.Services.Fees
             return Math.Max(GetNetAmount(studentFee) - GetPaidAmount(studentFee), 0);
         }
 
-        private async Task SyncFeesForClassAsync(Guid classId, CancellationToken cancellationToken)
+        private static bool IsEducationTaxEligible(StudentFee studentFee)
         {
-            var currentAcademicYearId = GetCurrentAcademicYearId();
-            var feeStructures = await _dbContext.FeeStructures
-                .Include(x => x.FeeType)
-                .Where(x => x.ClassId == classId && x.AcademicYearId == currentAcademicYearId)
-                .ToListAsync(cancellationToken);
-
-            if (!feeStructures.Any())
-            {
-                return;
-            }
-
-            var enrollments = await _dbContext.StudentEnrollments
-                .Include(x => x.Student)
-                .Include(x => x.ClassSection)
-                .Where(x => x.AcademicYearId == currentAcademicYearId &&
-                            x.ClassSection.ClassId == classId &&
-                            x.IsActive &&
-                            !x.IsDeleted &&
-                            !x.Student.IsDeleted)
-                .ToListAsync(cancellationToken);
-
-            if (!enrollments.Any())
-            {
-                return;
-            }
-
-            var enrollmentIds = enrollments.Select(x => x.Id).ToList();
-            var feeStructureIds = feeStructures.Select(x => x.Id).ToList();
-            var existingStudentFees = await _dbContext.StudentFees
-                .Where(x => enrollmentIds.Contains(x.StudentEnrollmentId) && feeStructureIds.Contains(x.FeeStructureId))
-                .ToListAsync(cancellationToken);
-
-            var currentMonth = GetMonthStart(DateTime.UtcNow);
-            var newStudentFees = new List<StudentFee>();
-
-            foreach (var enrollment in enrollments)
-            {
-                var startMonth = GetMonthStart(enrollment.CreatedDate);
-
-                foreach (var feeStructure in feeStructures)
-                {
-                    if (feeStructure.FeeType.IsRecurring)
-                    {
-                        var existingMonths = existingStudentFees
-                            .Where(x => x.StudentEnrollmentId == enrollment.Id && x.FeeStructureId == feeStructure.Id && x.FeeMonth.HasValue)
-                            .Select(x => GetMonthStart(x.FeeMonth!.Value))
-                            .ToHashSet();
-
-                        for (var month = startMonth; month <= currentMonth; month = month.AddMonths(1))
-                        {
-                            if (existingMonths.Contains(month))
-                            {
-                                continue;
-                            }
-
-                            newStudentFees.Add(new StudentFee
-                            {
-                                StudentEnrollmentId = enrollment.Id,
-                                FeeStructureId = feeStructure.Id,
-                                Amount = feeStructure.Amount,
-                                FeeMonth = month,
-                                IsPaid = false,
-                                CreatedDate = DateTime.UtcNow
-                            });
-                        }
-                    }
-                    else
-                    {
-                        var alreadyExists = existingStudentFees.Any(x =>
-                            x.StudentEnrollmentId == enrollment.Id &&
-                            x.FeeStructureId == feeStructure.Id &&
-                            !x.FeeMonth.HasValue);
-
-                        if (alreadyExists)
-                        {
-                            continue;
-                        }
-
-                        newStudentFees.Add(new StudentFee
-                        {
-                            StudentEnrollmentId = enrollment.Id,
-                            FeeStructureId = feeStructure.Id,
-                            Amount = feeStructure.Amount,
-                            FeeMonth = null,
-                            IsPaid = false,
-                            CreatedDate = DateTime.UtcNow
-                        });
-                    }
-                }
-            }
-
-            if (newStudentFees.Any())
-            {
-                await _dbContext.StudentFees.AddRangeAsync(newStudentFees, cancellationToken);
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
+            var feeTypeName = studentFee.FeeStructure?.FeeType?.Name ?? string.Empty;
+            return feeTypeName.Contains("month", StringComparison.OrdinalIgnoreCase) ||
+                   feeTypeName.Contains("tuition", StringComparison.OrdinalIgnoreCase) ||
+                   feeTypeName.Contains("tution", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<List<FeeTypeViewModel>> GetFeeType(CancellationToken cancellationToken)
@@ -168,6 +84,7 @@ namespace Infrastructure.Services.Fees
                 Name = x.Name,
                 IsRecurring = x.IsRecurring,
                 Frequency = x.Frequency,
+                Applicability = x.Applicability,
             }).ToListAsync(cancellationToken);
             return result;
         }
@@ -187,9 +104,85 @@ namespace Infrastructure.Services.Fees
                                                        ClassId = x.ClassId.ToString(),
                                                        Class = x.ClassRoom.Name,
                                                        Amount = x.Amount,
-                                                       Description = x.Description
+                                                       Description = x.Description,
+                                                       Applicability = x.FeeType.Applicability
                                                    }).ToListAsync(cancellationToken);
             return result;
+        }
+
+        public async Task<List<FeeStructureViewModel>> GetManualFeeTemplatesAsync(string studentEnrollmentId, CancellationToken cancellationToken)
+        {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var studentEnrollmentGuid = Guid.Parse(studentEnrollmentId);
+
+            var enrollment = await _dbContext.StudentEnrollments
+                .Include(x => x.ClassSection)
+                .FirstOrDefaultAsync(
+                    x => x.Id == studentEnrollmentGuid &&
+                         x.AcademicYearId == currentAcademicYearId &&
+                         x.IsActive &&
+                         !x.IsDeleted,
+                    cancellationToken);
+
+            if (enrollment == null)
+            {
+                return new List<FeeStructureViewModel>();
+            }
+
+            return await _dbContext.FeeStructures
+                .Where(x => x.ClassId == enrollment.ClassSection.ClassId &&
+                            x.AcademicYearId == currentAcademicYearId &&
+                            !x.FeeType.IsRecurring)
+                .OrderBy(x => x.FeeType.Name)
+                .Select(x => new FeeStructureViewModel
+                {
+                    Id = x.Id,
+                    AcademicYearId = x.AcademicYearId.ToString(),
+                    AcademicYearName = x.AcademicYear.YearName,
+                    FeeTypeId = x.FeeTypeId.ToString(),
+                    FeeType = x.FeeType.Name,
+                    ClassId = x.ClassId.ToString(),
+                    Class = x.ClassRoom.Name,
+                    Amount = x.Amount,
+                    Description = x.Description,
+                    Applicability = x.FeeType.Applicability
+                })
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<FeeStructureViewModel>> GetManualFeeTemplatesByClassSectionAsync(string classSectionId, CancellationToken cancellationToken)
+        {
+            var classSectionGuid = Guid.Parse(classSectionId);
+            var classId = await _dbContext.ClassSections
+                .Where(x => x.Id == classSectionGuid)
+                .Select(x => x.ClassId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (classId == Guid.Empty)
+            {
+                return new List<FeeStructureViewModel>();
+            }
+
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            return await _dbContext.FeeStructures
+                .Where(x => x.ClassId == classId &&
+                            x.AcademicYearId == currentAcademicYearId &&
+                            !x.FeeType.IsRecurring)
+                .OrderBy(x => x.FeeType.Name)
+                .Select(x => new FeeStructureViewModel
+                {
+                    Id = x.Id,
+                    AcademicYearId = x.AcademicYearId.ToString(),
+                    AcademicYearName = x.AcademicYear.YearName,
+                    FeeTypeId = x.FeeTypeId.ToString(),
+                    FeeType = x.FeeType.Name,
+                    ClassId = x.ClassId.ToString(),
+                    Class = x.ClassRoom.Name,
+                    Amount = x.Amount,
+                    Description = x.Description,
+                    Applicability = x.FeeType.Applicability
+                })
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<FeeReportViewModel?> GetFeeReport(string classSectionId, CancellationToken cancellationToken)
@@ -206,7 +199,7 @@ namespace Infrastructure.Services.Fees
                 return null;
             }
 
-            await SyncFeesForClassAsync(classSection.ClassId, cancellationToken);
+            await _feeGenerationService.SyncFeesForClassAsync(classSection.ClassId, currentAcademicYearId, cancellationToken);
 
             var enrollments = await _dbContext.StudentEnrollments
                 .Include(se => se.Student)
@@ -262,7 +255,7 @@ namespace Infrastructure.Services.Fees
                 .Select(g => new
                 {
                     StudentId = g.Key,
-                    PendingAmount = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount)) -
+                    PendingAmount = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount) + x.FeeAdjustments.Sum(a => a.EducationTaxAmount)) -
                                     g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid)
                 })
                 .ToListAsync(cancellationToken);
@@ -323,6 +316,7 @@ namespace Infrastructure.Services.Fees
                 Name = feeTypeDto.Name,
                 IsRecurring = feeTypeDto.IsRecurring,
                 Frequency = feeTypeDto.Frequency,
+                Applicability = feeTypeDto.Applicability,
                 CreatedDate = DateTime.UtcNow
             };
             await _dbContext.FeeTypes.AddAsync(feeType);
@@ -337,6 +331,7 @@ namespace Infrastructure.Services.Fees
                 existingFeeType.Name = feeTypeDto.Name;
                 existingFeeType.Frequency = feeTypeDto.Frequency;
                 existingFeeType.IsRecurring = feeTypeDto.IsRecurring;
+                existingFeeType.Applicability = feeTypeDto.Applicability;
                 existingFeeType.ModifiedDate = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
@@ -360,6 +355,12 @@ namespace Infrastructure.Services.Fees
                 throw new Exception("Fee structure already exists for this fee type, class, and academic year.");
             }
 
+            var feeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == feeStructureDto.FeeTypeId, cancellationToken);
+            if (feeType == null)
+            {
+                throw new Exception("Fee type not found.");
+            }
+
             var feeStructure = new FeeStructure
             {
                 AcademicYearId = currentAcademicYearId,
@@ -371,7 +372,7 @@ namespace Infrastructure.Services.Fees
             };
             await _dbContext.FeeStructures.AddAsync(feeStructure);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await SyncFeesForClassAsync(feeStructure.ClassId, cancellationToken);
+            await _feeGenerationService.SyncFeesForClassAsync(feeStructure.ClassId, currentAcademicYearId, cancellationToken);
         }
 
         public async Task UpdateFeeSctucture(FeeStructureDto feeStructureDto, string feeStructureId, CancellationToken cancellationToken)
@@ -394,6 +395,12 @@ namespace Infrastructure.Services.Fees
                     throw new Exception("Another fee structure already exists for this fee type, class, and academic year.");
                 }
 
+                var feeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == feeStructureDto.FeeTypeId, cancellationToken);
+                if (feeType == null)
+                {
+                    throw new Exception("Fee type not found.");
+                }
+
                 existingFeeStructure.AcademicYearId = currentAcademicYearId;
                 existingFeeStructure.FeeTypeId = feeStructureDto.FeeTypeId;
                 existingFeeStructure.ClassId = feeStructureDto.ClassId;
@@ -401,7 +408,7 @@ namespace Infrastructure.Services.Fees
                 existingFeeStructure.Description = feeStructureDto.Description;
                 existingFeeStructure.ModifiedDate = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                await SyncFeesForClassAsync(existingFeeStructure.ClassId, cancellationToken);
+                await _feeGenerationService.SyncFeesForClassAsync(existingFeeStructure.ClassId, currentAcademicYearId, cancellationToken);
             }
         }
 
@@ -420,7 +427,7 @@ namespace Infrastructure.Services.Fees
             if (studentEnrollment == null)
                 return null;
 
-            await SyncFeesForClassAsync(studentEnrollment.ClassSection.ClassId, cancellationToken);
+            await _feeGenerationService.SyncFeesForClassAsync(studentEnrollment.ClassSection.ClassId, currentAcademicYearId, cancellationToken);
 
             var studentFees = await _dbContext.StudentFees.Include(sf => sf.FeeStructure)
                                                           .ThenInclude(fs => fs.FeeType)
@@ -445,12 +452,13 @@ namespace Infrastructure.Services.Fees
                                                 FeeMonth = g.Key.FeeMonth,
                                                 DiscountAmount = g.Sum(x => x.FeeAdjustments.Sum(a => a.DiscountAmount)),
                                                 FineAmount = g.Sum(x => x.FeeAdjustments.Sum(a => a.FineAmount)),
+                                                EducationTaxAmount = g.Sum(x => x.FeeAdjustments.Sum(a => a.EducationTaxAmount)),
                                                 TotalAmount = g.Sum(x => x.Amount),
-                                                NetAmount = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount)),
+                                                NetAmount = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount) + x.FeeAdjustments.Sum(a => a.EducationTaxAmount)),
                                                 PaidAmount = g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid),
-                                                PendingAmount = Math.Max(g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount)) - g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid), 0),
-                                                IsPaid = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount)) <= g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid)
-                                            }).OrderBy(x => x.FeeType == "Monthy Fee").ThenBy(x => x.FeeMonth)
+                                                PendingAmount = Math.Max(g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount) + x.FeeAdjustments.Sum(a => a.EducationTaxAmount)) - g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid), 0),
+                                                IsPaid = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount) + x.FeeAdjustments.Sum(a => a.EducationTaxAmount)) <= g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid)
+                                            }).OrderBy(x => x.FeeType == "Monthly Fee").ThenBy(x => x.FeeMonth)
                                             .ToList();
 
             var previousYearFeeDetails = await _dbContext.StudentFees
@@ -474,15 +482,16 @@ namespace Infrastructure.Services.Fees
                     FeeMonth = sf.FeeMonth,
                     DiscountAmount = sf.FeeAdjustments.Sum(a => a.DiscountAmount),
                     FineAmount = sf.FeeAdjustments.Sum(a => a.FineAmount),
+                    EducationTaxAmount = sf.FeeAdjustments.Sum(a => a.EducationTaxAmount),
                     TotalAmount = sf.Amount,
-                    NetAmount = sf.Amount - sf.FeeAdjustments.Sum(a => a.DiscountAmount) + sf.FeeAdjustments.Sum(a => a.FineAmount),
+                    NetAmount = sf.Amount - sf.FeeAdjustments.Sum(a => a.DiscountAmount) + sf.FeeAdjustments.Sum(a => a.FineAmount) + sf.FeeAdjustments.Sum(a => a.EducationTaxAmount),
                     PaidAmount = sf.Payments.Sum(p => p.AmountPaid),
-                    PendingAmount = Math.Max((sf.Amount - sf.FeeAdjustments.Sum(a => a.DiscountAmount) + sf.FeeAdjustments.Sum(a => a.FineAmount)) - sf.Payments.Sum(p => p.AmountPaid), 0),
-                    IsPaid = (sf.Amount - sf.FeeAdjustments.Sum(a => a.DiscountAmount) + sf.FeeAdjustments.Sum(a => a.FineAmount)) <= sf.Payments.Sum(p => p.AmountPaid)
+                    PendingAmount = Math.Max((sf.Amount - sf.FeeAdjustments.Sum(a => a.DiscountAmount) + sf.FeeAdjustments.Sum(a => a.FineAmount) + sf.FeeAdjustments.Sum(a => a.EducationTaxAmount)) - sf.Payments.Sum(p => p.AmountPaid), 0),
+                    IsPaid = (sf.Amount - sf.FeeAdjustments.Sum(a => a.DiscountAmount) + sf.FeeAdjustments.Sum(a => a.FineAmount) + sf.FeeAdjustments.Sum(a => a.EducationTaxAmount)) <= sf.Payments.Sum(p => p.AmountPaid)
                 })
                 .Where(x => x.PendingAmount > 0)
                 .OrderBy(x => x.AcademicYearName)
-                .ThenBy(x => x.FeeType == "Monthy Fee")
+                .ThenBy(x => x.FeeType == "Monthly Fee")
                 .ThenBy(x => x.FeeMonth)
                 .ToListAsync(cancellationToken);
 
@@ -501,7 +510,7 @@ namespace Infrastructure.Services.Fees
                 .Select(g => new PreviousYearDueViewModel
                 {
                     AcademicYearName = g.Key.YearName,
-                    PendingAmount = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount)) -
+                    PendingAmount = g.Sum(x => x.Amount - x.FeeAdjustments.Sum(a => a.DiscountAmount) + x.FeeAdjustments.Sum(a => a.FineAmount) + x.FeeAdjustments.Sum(a => a.EducationTaxAmount)) -
                                     g.SelectMany(x => x.Payments).Sum(p => p.AmountPaid)
                 })
                 .Where(x => x.PendingAmount > 0)
@@ -512,6 +521,7 @@ namespace Infrastructure.Services.Fees
             var totalFees = feeDetails.Sum(f => f.TotalAmount);
             var totalDiscount = feeDetails.Sum(f => f.DiscountAmount);
             var totalFine = feeDetails.Sum(f => f.FineAmount);
+            var totalEducationTax = feeDetails.Sum(f => f.EducationTaxAmount);
             var netFees = feeDetails.Sum(f => f.NetAmount);
             var totalPaid = feeDetails.Sum(f => f.PaidAmount);
             var totalPending = feeDetails.Sum(f => f.PendingAmount);
@@ -526,6 +536,7 @@ namespace Infrastructure.Services.Fees
                 TotalFees = totalFees,
                 TotalDiscount = totalDiscount,
                 TotalFine = totalFine,
+                TotalEducationTax = totalEducationTax,
                 NetFees = netFees,
                 TotalPaid = totalPaid,
                 TotalPending = totalPending,
@@ -537,16 +548,198 @@ namespace Infrastructure.Services.Fees
             };
         }
 
+        public async Task AssignManualChargeAsync(ManualStudentChargeDto manualChargeDto, CancellationToken cancellationToken)
+        {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+
+            var studentEnrollment = await _dbContext.StudentEnrollments
+                .Include(x => x.Student)
+                .Include(x => x.ClassSection)
+                .FirstOrDefaultAsync(
+                    x => x.Id == manualChargeDto.StudentEnrollmentId &&
+                         x.AcademicYearId == currentAcademicYearId &&
+                         x.IsActive &&
+                         !x.IsDeleted &&
+                         !x.Student.IsDeleted,
+                    cancellationToken);
+
+            if (studentEnrollment == null)
+            {
+                throw new Exception("Student enrollment not found for the current academic year.");
+            }
+
+            var feeStructure = await _dbContext.FeeStructures
+                .Include(x => x.FeeType)
+                .FirstOrDefaultAsync(
+                    x => x.Id == manualChargeDto.FeeStructureId &&
+                         x.AcademicYearId == currentAcademicYearId,
+                    cancellationToken);
+
+            if (feeStructure == null)
+            {
+                throw new Exception("Fee template not found.");
+            }
+
+            if (feeStructure.ClassId != studentEnrollment.ClassSection.ClassId)
+            {
+                throw new Exception("Selected manual fee does not belong to the student's class.");
+            }
+
+            if (feeStructure.FeeType.IsRecurring)
+            {
+                throw new Exception("Only non-recurring fee templates can be assigned on demand.");
+            }
+
+            var amount = manualChargeDto.Amount ?? feeStructure.Amount;
+            if (amount <= 0)
+            {
+                throw new Exception("Charge amount must be greater than zero.");
+            }
+
+            var duplicateExists = await _dbContext.StudentFees.AnyAsync(
+                x => x.StudentEnrollmentId == studentEnrollment.Id &&
+                     x.FeeStructureId == feeStructure.Id &&
+                     !x.FeeMonth.HasValue,
+                cancellationToken);
+
+            if (duplicateExists)
+            {
+                throw new Exception("This manual charge has already been assigned to the selected student.");
+            }
+
+            var studentFee = new StudentFee
+            {
+                StudentEnrollmentId = studentEnrollment.Id,
+                FeeStructureId = feeStructure.Id,
+                Amount = amount,
+                FeeMonth = null,
+                IsPaid = false,
+                Origin = StudentFeeOrigin.ManualSingle,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            await _dbContext.StudentFees.AddAsync(studentFee, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<BulkManualChargeResultViewModel> AssignBulkManualChargeAsync(BulkManualStudentChargeDto bulkManualChargeDto, CancellationToken cancellationToken)
+        {
+            if (bulkManualChargeDto.StudentEnrollmentIds == null || bulkManualChargeDto.StudentEnrollmentIds.Count == 0)
+            {
+                throw new Exception("Select at least one student for bulk charge assignment.");
+            }
+
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var requestedEnrollmentIds = bulkManualChargeDto.StudentEnrollmentIds
+                .Where(x => x != Guid.Empty)
+                .Distinct()
+                .ToList();
+
+            if (requestedEnrollmentIds.Count == 0)
+            {
+                throw new Exception("Select at least one valid student for bulk charge assignment.");
+            }
+
+            var classSection = await _dbContext.ClassSections
+                .FirstOrDefaultAsync(x => x.Id == bulkManualChargeDto.ClassSectionId, cancellationToken);
+
+            if (classSection == null)
+            {
+                throw new Exception("Class section not found.");
+            }
+
+            var feeStructure = await _dbContext.FeeStructures
+                .Include(x => x.FeeType)
+                .FirstOrDefaultAsync(
+                    x => x.Id == bulkManualChargeDto.FeeStructureId &&
+                         x.AcademicYearId == currentAcademicYearId,
+                    cancellationToken);
+
+            if (feeStructure == null)
+            {
+                throw new Exception("Fee template not found.");
+            }
+
+            if (feeStructure.ClassId != classSection.ClassId)
+            {
+                throw new Exception("Selected manual fee does not belong to the selected class.");
+            }
+
+            if (feeStructure.FeeType.IsRecurring)
+            {
+                throw new Exception("Only non-recurring fee templates can be assigned in bulk.");
+            }
+
+            var amount = bulkManualChargeDto.Amount ?? feeStructure.Amount;
+            if (amount <= 0)
+            {
+                throw new Exception("Charge amount must be greater than zero.");
+            }
+
+            var eligibleEnrollments = await _dbContext.StudentEnrollments
+                .Include(x => x.Student)
+                .Where(x => requestedEnrollmentIds.Contains(x.Id) &&
+                            x.ClassSectionId == bulkManualChargeDto.ClassSectionId &&
+                            x.AcademicYearId == currentAcademicYearId &&
+                            x.IsActive &&
+                            !x.IsDeleted &&
+                            !x.Student.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            if (!eligibleEnrollments.Any())
+            {
+                throw new Exception("No valid active student enrollments found for the selected class.");
+            }
+
+            var eligibleIds = eligibleEnrollments.Select(x => x.Id).ToList();
+            var alreadyAssignedIds = await _dbContext.StudentFees
+                .Where(x => eligibleIds.Contains(x.StudentEnrollmentId) &&
+                            x.FeeStructureId == feeStructure.Id &&
+                            !x.FeeMonth.HasValue)
+                .Select(x => x.StudentEnrollmentId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            var newStudentFees = eligibleIds
+                .Where(x => !alreadyAssignedIds.Contains(x))
+                .Select(x => new StudentFee
+                {
+                    StudentEnrollmentId = x,
+                    FeeStructureId = feeStructure.Id,
+                    Amount = amount,
+                    FeeMonth = null,
+                    IsPaid = false,
+                    Origin = StudentFeeOrigin.ManualBulk,
+                    CreatedDate = DateTime.UtcNow
+                })
+                .ToList();
+
+            if (newStudentFees.Any())
+            {
+                await _dbContext.StudentFees.AddRangeAsync(newStudentFees, cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            return new BulkManualChargeResultViewModel
+            {
+                RequestedCount = requestedEnrollmentIds.Count,
+                EligibleCount = eligibleIds.Count,
+                AssignedCount = newStudentFees.Count,
+                AlreadyAssignedCount = alreadyAssignedIds.Count,
+                InvalidEnrollmentCount = requestedEnrollmentIds.Count - eligibleIds.Count
+            };
+        }
+
         public async Task ApplyFeeAdjustmentAsync(FeeAdjustmentDto feeAdjustmentDto, CancellationToken cancellationToken)
         {
-            if (feeAdjustmentDto.DiscountAmount < 0 || feeAdjustmentDto.FineAmount < 0)
+            if (feeAdjustmentDto.DiscountAmount < 0 || feeAdjustmentDto.FineAmount < 0 || feeAdjustmentDto.EducationTaxPercentage < 0)
             {
                 throw new Exception("Adjustment amounts cannot be negative.");
             }
 
-            if (feeAdjustmentDto.DiscountAmount == 0 && feeAdjustmentDto.FineAmount == 0)
+            if (feeAdjustmentDto.DiscountAmount == 0 && feeAdjustmentDto.FineAmount == 0 && feeAdjustmentDto.EducationTaxPercentage == 0)
             {
-                throw new Exception("Enter a discount or fine amount.");
+                throw new Exception("Enter a discount, fine, or education tax percentage.");
             }
 
             if (string.IsNullOrWhiteSpace(feeAdjustmentDto.Reason))
@@ -557,6 +750,8 @@ namespace Infrastructure.Services.Fees
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var studentFee = await _dbContext.StudentFees
                 .Include(sf => sf.StudentEnrollment)
+                .Include(sf => sf.FeeStructure)
+                    .ThenInclude(fs => fs.FeeType)
                 .Include(sf => sf.Payments)
                 .Include(sf => sf.FeeAdjustments)
                 .FirstOrDefaultAsync(sf => sf.Id == feeAdjustmentDto.StudentFeeId && sf.StudentEnrollment.AcademicYearId == currentAcademicYearId, cancellationToken);
@@ -566,20 +761,37 @@ namespace Infrastructure.Services.Fees
                 throw new Exception("Fee record not found.");
             }
 
+            if (feeAdjustmentDto.EducationTaxPercentage > 0 && !IsEducationTaxEligible(studentFee))
+            {
+                throw new Exception("Education tax can only be applied to the monthly tuition fee.");
+            }
+
+            if (feeAdjustmentDto.EducationTaxPercentage > 100)
+            {
+                throw new Exception("Education tax percentage cannot exceed 100.");
+            }
+
             var existingDiscount = GetDiscountTotal(studentFee);
             var existingFine = GetFineTotal(studentFee);
-            var maxDiscount = studentFee.Amount + existingFine - existingDiscount;
+            var existingEducationTax = GetEducationTaxTotal(studentFee);
+            var maxDiscount = studentFee.Amount + existingFine + existingEducationTax - existingDiscount;
 
             if (feeAdjustmentDto.DiscountAmount > maxDiscount)
             {
                 throw new Exception("Discount amount cannot exceed the net fee amount.");
             }
 
+            var educationTaxAmount = feeAdjustmentDto.EducationTaxPercentage > 0
+                ? Math.Round(studentFee.Amount * feeAdjustmentDto.EducationTaxPercentage / 100, 2, MidpointRounding.AwayFromZero)
+                : 0;
+
             var adjustment = new FeeAdjustment
             {
                 StudentFeeId = studentFee.Id,
                 DiscountAmount = feeAdjustmentDto.DiscountAmount,
                 FineAmount = feeAdjustmentDto.FineAmount,
+                EducationTaxPercentage = feeAdjustmentDto.EducationTaxPercentage,
+                EducationTaxAmount = educationTaxAmount,
                 Reason = feeAdjustmentDto.Reason
             };
 
@@ -604,7 +816,7 @@ namespace Infrastructure.Services.Fees
                 return;
             }
 
-            await SyncFeesForClassAsync(studentEnrollment.ClassSection.ClassId, cancellationToken);
+            await _feeGenerationService.SyncFeesForClassAsync(studentEnrollment.ClassSection.ClassId, currentAcademicYearId, cancellationToken);
         }
 
 

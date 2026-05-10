@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Application.Students.Dtos;
+using Application.Fees.Interfaces;
 using Application.Students.Interfaces;
 using Application.Students.ViewModels;
 using Azure.Core;
@@ -23,10 +24,12 @@ namespace Infrastructure.Services.Students
     {
         private readonly IApplicationDbContext _context;
         private readonly UserResolver _userResolver;
-        public StudentService(IApplicationDbContext context, UserResolver userResolver)
+        private readonly IFeeGenerationService _feeGenerationService;
+        public StudentService(IApplicationDbContext context, UserResolver userResolver, IFeeGenerationService feeGenerationService)
         {
             _context = context;
             _userResolver = userResolver;
+            _feeGenerationService = feeGenerationService;
         }
 
         private Guid GetCurrentAcademicYearId()
@@ -63,73 +66,7 @@ namespace Infrastructure.Services.Students
                 await AssignRollNumbersInternalAsync(currentEnrollment.ClassSectionId, currentAcademicYearId, cancellationToken);
             }
         }
-        private async Task MapStudentFeesAsync(StudentEnrollment studentEnrollment, CancellationToken cancellationToken)
-        {
-            await MapStudentFeesAsync(studentEnrollment, GetCurrentAcademicYearId(), cancellationToken);
-        }
-
-        private async Task MapStudentFeesAsync(StudentEnrollment studentEnrollment, Guid academicYearId, CancellationToken cancellationToken)
-        {
-            var selectedClassSection = await _context.ClassSections.FirstOrDefaultAsync(x => x.Id == studentEnrollment.ClassSectionId);
-            if (selectedClassSection == null)
-            {
-                return;
-            }
-
-            studentEnrollment.ClassSection = selectedClassSection;
-            var classFees = await _context.FeeStructures
-                .Include(x => x.FeeType)
-                .Where(f => f.ClassId == studentEnrollment.ClassSection.ClassId && f.AcademicYearId == academicYearId)
-                .ToListAsync(cancellationToken);
-
-            if (!classFees.Any())
-            {
-                return;
-            }
-
-            var startMonth = new DateTime(studentEnrollment.CreatedDate.Year, studentEnrollment.CreatedDate.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-            var currentMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-            var studentFees = new List<StudentFee>();
-
-            foreach (var fee in classFees)
-            {
-                if (fee.FeeType.IsRecurring)
-                {
-                    for (var month = startMonth; month <= currentMonth; month = month.AddMonths(1))
-                    {
-                        studentFees.Add(new StudentFee
-                        {
-                            StudentEnrollmentId = studentEnrollment.Id,
-                            FeeStructureId = fee.Id,
-                            Amount = fee.Amount,
-                            FeeMonth = month,
-                            IsPaid = false,
-                            CreatedDate = DateTime.UtcNow
-                        });
-                    }
-                }
-                else
-                {
-                    studentFees.Add(new StudentFee
-                    {
-                        StudentEnrollmentId = studentEnrollment.Id,
-                        FeeStructureId = fee.Id,
-                        Amount = fee.Amount,
-                        FeeMonth = null,
-                        IsPaid = false,
-                        CreatedDate = DateTime.UtcNow
-                    });
-                }
-            }
-
-            if (studentFees.Any())
-            {
-                await _context.StudentFees.AddRangeAsync(studentFees, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-        }
-
-        private async Task<StudentEnrollment> CreateStudentEnrollmentAsync(Guid studentId, Guid classSectionId, Guid academicYearId, bool isPromoted, CancellationToken cancellationToken)
+        private async Task<StudentEnrollment> CreateStudentEnrollmentAsync(Guid studentId, Guid classSectionId, Guid academicYearId, bool isPromoted, bool isBusRequired, CancellationToken cancellationToken)
         {
             var studentEnrollment = new StudentEnrollment
             {
@@ -142,6 +79,7 @@ namespace Infrastructure.Services.Students
                 CreatedDate = DateTime.UtcNow,
                 EnrollmentDate = DateTime.UtcNow,
                 IsPromoted = isPromoted,
+                IsBusRequired = isBusRequired,
                 IsActive = true,
                 EnrollmentStatus = StudentEnrollmentStatus.Active
             };
@@ -150,11 +88,11 @@ namespace Infrastructure.Services.Students
             return studentEnrollment;
         }
 
-        private async Task StudentEnrollent(Student student, Guid classSectionId, CancellationToken cancellationToken)
+        private async Task StudentEnrollent(Student student, Guid classSectionId, bool isBusRequired, CancellationToken cancellationToken)
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
-            var studentEnrollment = await CreateStudentEnrollmentAsync(student.Id, classSectionId, currentAcademicYearId, false, cancellationToken);
-            await MapStudentFeesAsync(studentEnrollment, currentAcademicYearId, cancellationToken);
+            var studentEnrollment = await CreateStudentEnrollmentAsync(student.Id, classSectionId, currentAcademicYearId, false, isBusRequired, cancellationToken);
+            await _feeGenerationService.EnsureFeesForEnrollmentAsync(studentEnrollment.Id, currentAcademicYearId, cancellationToken);
             await AssignRollNumbersInternalAsync(classSectionId, currentAcademicYearId, cancellationToken);
         }
         public async Task AddStudentAsync(StudentDto addStudent, CancellationToken cancellationToken)
@@ -187,7 +125,7 @@ namespace Infrastructure.Services.Students
                 };
                 _context.Students.Add(student);
                 await _context.SaveChangesAsync(cancellationToken);
-                await StudentEnrollent(student, classSectionId, cancellationToken);
+                await StudentEnrollent(student, classSectionId, addStudent.IsBusRequired, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception ex)
@@ -237,10 +175,18 @@ namespace Infrastructure.Services.Students
                 else
                 {
                     var previousClassSectionId = existingStudentEnrollment.ClassSectionId;
+                    var previousIsBusRequired = existingStudentEnrollment.IsBusRequired;
                     existingStudentEnrollment.ClassSectionId = Guid.Parse(studentDto.ClassSectionId);
+                    existingStudentEnrollment.IsBusRequired = studentDto.IsBusRequired;
                     existingStudentEnrollment.RollNumber = null;
 
                     await _context.SaveChangesAsync(cancellationToken);
+                    if (previousClassSectionId == existingStudentEnrollment.ClassSectionId &&
+                        !previousIsBusRequired &&
+                        existingStudentEnrollment.IsBusRequired)
+                    {
+                        await _feeGenerationService.EnsureFeesForEnrollmentAsync(existingStudentEnrollment.Id, currentAcademicYearId, cancellationToken);
+                    }
                     await AssignRollNumbersAsync(existingStudentEnrollment.ClassSectionId.ToString(), cancellationToken);
 
                     if (previousClassSectionId != existingStudentEnrollment.ClassSectionId)
@@ -393,6 +339,7 @@ namespace Infrastructure.Services.Students
                                                                 ClassRoomName = x.ClassSection.ClassRoom.Name,
                                                                 SectionName = x.ClassSection.Section.Name,
                                                                 RollNumber = x.RollNumber ?? 0,
+                                                                IsBusRequired = x.IsBusRequired,
                                                                 IsActive = x.IsActive,
                                                                 EnrollmentStatus = (int)x.EnrollmentStatus,
                                                                 StatusDate = x.StatusDate,
@@ -794,9 +741,10 @@ namespace Infrastructure.Services.Students
                         targetClassSection.Id,
                         targetAcademicYear.Id,
                         false,
+                        enrollment.IsBusRequired,
                         cancellationToken);
 
-                    await MapStudentFeesAsync(newEnrollment, targetAcademicYear.Id, cancellationToken);
+                    await _feeGenerationService.EnsureFeesForEnrollmentAsync(newEnrollment.Id, targetAcademicYear.Id, cancellationToken);
 
                     if (markSourceAsPromoted)
                     {
@@ -925,6 +873,7 @@ namespace Infrastructure.Services.Students
                                                       ClassRoomName = x.ClassSection.ClassRoom.Name,
                                                       SectionName = x.ClassSection.Section.Name,
                                                       RollNumber = x.RollNumber ?? 0,
+                                                      IsBusRequired = x.IsBusRequired,
                                                       IsActive = x.IsActive,
                                                       EnrollmentStatus = (int)x.EnrollmentStatus,
                                                       StatusDate = x.StatusDate,
@@ -983,6 +932,7 @@ namespace Infrastructure.Services.Students
                                                                 ClassRoomName = x.ClassSection.ClassRoom.Name,
                                                                 SectionName = x.ClassSection.Section.Name,
                                                                 RollNumber = x.RollNumber ?? 0,
+                                                                IsBusRequired = x.IsBusRequired,
                                                                 IsActive = x.IsActive,
                                                                 EnrollmentStatus = (int)x.EnrollmentStatus,
                                                                 StatusDate = x.StatusDate,

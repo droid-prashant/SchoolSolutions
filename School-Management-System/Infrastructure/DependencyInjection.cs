@@ -55,6 +55,7 @@ namespace Infrastructure
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IExamService, ExamService>();
             services.AddScoped<IFeeService, FeeService>();
+            services.AddScoped<IFeeGenerationService, FeeGenerationService>();
             services.AddScoped<ITeacherService, TeacherService>();
             services.AddScoped<IStudentAttendanceService, StudentAttendanceService>();
             services.AddScoped<ITeacherAttendanceService, TeacherAttendanceService>();

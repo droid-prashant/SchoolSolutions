@@ -775,3 +775,142 @@ BEGIN
 
     END IF;
 END $$;
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public."FeeTypes"
+    ) THEN
+
+        INSERT INTO public."FeeTypes"
+        (
+            "Id",
+            "Name",
+            "IsRecurring",
+            "Frequency",
+            "CreatedDate",
+            "ModifiedDate",
+            "CreatedBy",
+            "ModifiedBy",
+            "IsActive",
+            "DeletedBy",
+            "DeletedOn",
+            "IsDeleted"
+        )
+        VALUES
+        (gen_random_uuid(), 'Annual Fee', FALSE, 'Yearly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Tution Fee', TRUE, 'Monthly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Tie Fee', FALSE, 'One Time', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Belt Fee', FALSE, 'One Time', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Exam Fee', FALSE, 'Per Exam', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Coaching Fee', FALSE, 'Monthly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Computer Fee', TRUE, 'Monthly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Electric Fee', TRUE, 'Monthly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Games & Sports Fee', FALSE, 'Yearly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Bus Fee', TRUE, 'Monthly', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE),
+
+        (gen_random_uuid(), 'Others', FALSE, 'Custom', NOW(), NOW(),
+        '00000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
+        TRUE, NULL, NULL, FALSE);
+
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260509110000_AddFeeApplicabilityAndEnrollmentBus'
+    ) THEN
+
+        ALTER TABLE "FeeTypes"
+        ADD COLUMN IF NOT EXISTS "Applicability" integer NOT NULL DEFAULT 1;
+
+        ALTER TABLE "StudentEnrollments"
+        ADD COLUMN IF NOT EXISTS "IsBusRequired" boolean NOT NULL DEFAULT FALSE;
+
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+        VALUES ('20260509110000_AddFeeApplicabilityAndEnrollmentBus', '8.0.15');
+
+    END IF;
+END $$;
+
+
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260509123000_AddStudentFeeOriginForOnDemandCleanup'
+    ) THEN
+
+ALTER TABLE "StudentFees" ADD "Origin" integer NOT NULL DEFAULT 0;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260509123000_AddStudentFeeOriginForOnDemandCleanup', '8.0.15');
+
+    END IF;
+END $$;
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260509130000_AddEducationTaxToFeeAdjustment'
+    ) THEN
+
+ALTER TABLE "FeeAdjustments" ADD "EducationTaxAmount" numeric NOT NULL DEFAULT 0.0;
+
+ALTER TABLE "FeeAdjustments" ADD "EducationTaxPercentage" numeric NOT NULL DEFAULT 0.0;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260509130000_AddEducationTaxToFeeAdjustment', '8.0.15');
+    END IF;
+END $$;

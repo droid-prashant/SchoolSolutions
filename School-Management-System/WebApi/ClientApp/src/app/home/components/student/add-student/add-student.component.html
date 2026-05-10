@@ -110,6 +110,14 @@
         <small class="text-gray-500">Assigned automatically by alphabetical order for the selected class and section.</small>
       </div>
 
+      <div class="field col-3">
+        <label class="d-block mb-2">Bus Required</label>
+        <div class="flex align-items-center gap-2 pt-2">
+          <p-checkbox formControlName="isBusRequired" [binary]="true" inputId="isBusRequired"></p-checkbox>
+          <label for="isBusRequired" class="mb-0">Enable transport fee for this enrollment</label>
+        </div>
+      </div>
+
       <div class="col-12 text-right mt-2">
         <button type="submit" pButton [label]="isEditMode ? 'Update' : 'Add'"
           [disabled]="studentForm.invalid"></button>

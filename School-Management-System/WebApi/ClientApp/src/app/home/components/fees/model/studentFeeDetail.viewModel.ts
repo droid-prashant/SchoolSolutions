@@ -6,6 +6,7 @@ export interface StudentFeeDetailViewModel {
   feeMonth?: string; // Use string for date from API (ISO format)
   discountAmount: number;
   fineAmount: number;
+  educationTaxAmount: number;
   totalAmount: number;
   netAmount: number;
   paidAmount: number;

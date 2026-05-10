@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain;
+using Domain.Enums;
 
 namespace Application.Fees.ViewModel
 {
@@ -18,5 +18,6 @@ namespace Application.Fees.ViewModel
         public string Class { get; set; }
         public decimal Amount { get; set; }
         public string Description { get; set; }
+        public FeeApplicability Applicability { get; set; }
     }
 }

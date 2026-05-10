@@ -20,6 +20,7 @@ namespace Domain
         public DateTime EnrollmentDate { get; set; }
         public string? RegistrationNumber { get; set; }
         public string? SymbolNumber { get; set; }
+        public bool IsBusRequired { get; set; }
         public bool IsPromoted { get; set; }
         public StudentEnrollmentStatus EnrollmentStatus { get; set; }
         public DateTime? StatusDate { get; set; }

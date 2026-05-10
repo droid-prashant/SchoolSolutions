@@ -8,4 +8,5 @@ export interface FeeStructureViewModel {
     class: string;
     amount: number;
     description: string;
+    applicability: number;
 }

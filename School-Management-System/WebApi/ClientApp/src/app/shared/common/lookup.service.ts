@@ -297,6 +297,10 @@ export class LookupService {
         this.coursesCache = null;
         localStorage.removeItem('lookup_courses');
         break;
+      case 'fees':
+        this.feesCache = null;
+        localStorage.removeItem('lookup_fees');
+        break;
     }
   }
 

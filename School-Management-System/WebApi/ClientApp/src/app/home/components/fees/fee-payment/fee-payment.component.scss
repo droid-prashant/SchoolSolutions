@@ -16,60 +16,232 @@
   padding-bottom: 0 !important;
 }
 
-.text-sm {
-  font-size: 0.9rem;
+.workspace-section {
+  border-top: 1px solid #e5e7eb;
+  padding: 1.25rem 0;
 }
 
-.mt-3 {
+.workspace-section--intro {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.workspace-section--soft {
+  background: #f8fbff;
+  border: 1px solid #dbe7ff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.workspace-section--accent {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.section-header h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.section-header p {
+  margin: 0;
+  color: #64748b;
+  max-width: 52rem;
+  line-height: 1.5;
+}
+
+.section-header__meta {
+  white-space: nowrap;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.summary-tile {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.85rem 1rem;
+}
+
+.summary-tile strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #0f172a;
+}
+
+.summary-tile span {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #64748b;
+}
+
+.student-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.summary-tile--accent {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+}
+
+.summary-tile--danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.subsection {
   margin-top: 1rem;
 }
 
-.text-gray-500 {
-  color: #6b7280;
+.subsection-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.subsection-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.subsection-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.education-tax-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.education-tax-inline__controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.education-tax-inline__controls .p-inputtext {
+  width: 7rem;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.action-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
 }
 
 .selected-fees {
-  border: 1px solid #dee2e6;
+  border: 1px solid #dbe2ea;
   border-radius: 8px;
   padding: 1rem;
-  background-color: #fafafa;
+  background: #fff;
 }
 
-.selected-fees h4 {
-  margin: 0;
-  font-weight: 600;
-  color: #2c3e50;
+.payment-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
 }
 
-.total-summary {
+.payment-toolbar__mode {
+  width: min(18rem, 100%);
+}
+
+.payment-toolbar__total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  color: #334155;
+}
+
+.payment-toolbar__total strong {
   font-size: 1.1rem;
-  color: #1a1a1a;
+  color: #0f172a;
 }
 
-.payment-section {
+.payment-actions {
+  display: flex;
+  justify-content: flex-end;
   margin-top: 1rem;
 }
 
-.payment-section label {
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-.payment-section p-dropdown {
-  width: 200px;
+.bulk-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 100%;
+  padding-top: 2rem;
 }
 
 @media (max-width: 768px) {
-  .payment-section {
+  .summary-grid,
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header,
+  .subsection-header,
+  .payment-toolbar {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .payment-section p-dropdown {
+  .subsection-actions,
+  .education-tax-inline__controls {
     width: 100%;
+    align-items: stretch;
   }
 
-  .total-summary {
-    justify-content: flex-start;
+  .bulk-mode-toggle {
+    padding-top: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .payment-toolbar__mode,
+  .payment-toolbar__mode :is(.p-dropdown, .p-inputtext),
+  .action-panel :is(.p-dropdown, .p-inputtext),
+  .workspace-section :is(.p-dropdown, .p-inputtext) {
+    width: 100%;
   }
 }

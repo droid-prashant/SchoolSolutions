@@ -29,6 +29,7 @@ namespace Application.Students.Dtos
         public string ClassSectionId { get; set; }
         public string SectionId { get; set; }
         public int? RollNumber { get; set; }
+        public bool IsBusRequired { get; set; }
     }
 
     public class StudentStatusDto

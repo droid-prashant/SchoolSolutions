@@ -19,6 +19,9 @@ namespace Infrastructure.Persistance.Configuration
             builder.Property(x => x.StatusRemarks)
                    .HasMaxLength(500);
 
+            builder.Property(x => x.IsBusRequired)
+                   .HasDefaultValue(false);
+
             builder.HasIndex(x => new { x.AcademicYearId, x.ClassSectionId, x.IsActive, x.IsDeleted });
 
             builder.HasIndex(x => new { x.StudentId, x.AcademicYearId });

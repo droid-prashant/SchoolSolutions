@@ -10,6 +10,7 @@ export interface StudentFeeSummaryViewModel {
   totalFees: number;
   totalDiscount: number;
   totalFine: number;
+  totalEducationTax: number;
   netFees: number;
   totalPaid: number;
   totalPending: number;

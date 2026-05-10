@@ -15,6 +15,7 @@ namespace Application.Fees.Dtos
         public DateTime? FeeMonth { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FineAmount { get; set; }
+        public decimal EducationTaxAmount { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal NetAmount { get; set; }
         public decimal PaidAmount { get; set; }

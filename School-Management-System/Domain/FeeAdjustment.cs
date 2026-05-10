@@ -15,6 +15,8 @@ namespace Domain
 
         public decimal DiscountAmount { get; set; } = 0;
         public decimal FineAmount { get; set; } = 0;
+        public decimal EducationTaxPercentage { get; set; } = 0;
+        public decimal EducationTaxAmount { get; set; } = 0;
         public string? Reason { get; set; }
     }
 }

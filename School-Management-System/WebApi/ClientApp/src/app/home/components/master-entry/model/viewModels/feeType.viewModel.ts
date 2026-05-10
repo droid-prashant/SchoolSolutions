@@ -3,4 +3,5 @@ export interface FeeTypeViewModel {
     name: string;
     isRecurring: boolean;
     frequency: string;
+    applicability: number;
 }

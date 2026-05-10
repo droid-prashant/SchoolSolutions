@@ -7,6 +7,7 @@ namespace Application.Fees.Dtos
         public Guid StudentFeeId { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FineAmount { get; set; }
+        public decimal EducationTaxPercentage { get; set; }
         public string Reason { get; set; } = string.Empty;
     }
 }

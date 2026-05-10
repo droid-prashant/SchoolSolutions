@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,6 +15,9 @@ namespace Infrastructure.Persistance.Configuration
         public void Configure(EntityTypeBuilder<StudentFee> builder)
         {
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Origin)
+                   .HasConversion<int>()
+                   .HasDefaultValue(StudentFeeOrigin.Unknown);
             builder.HasMany(x => x.Payments)
                    .WithOne(x => x.StudentFee)
                    .HasForeignKey(x => x.StudentFeeId);

@@ -15,6 +15,11 @@ import { LookupService } from '../../../../shared/common/lookup.service';
 export class FeeTypeComponent implements OnInit {
   feeTypeForm!: FormGroup
   feeTypes: FeeTypeViewModel[] = [];
+  applicabilityOptions = [
+    { label: 'Standard', value: 1 },
+    { label: 'Bus Conditional', value: 2 },
+    { label: 'Manual / On Demand', value: 3 }
+  ];
   isSubmitted: boolean = false;
   isUpdate: boolean = false;
   submitButtonLabel: string = "Save";
@@ -25,6 +30,7 @@ export class FeeTypeComponent implements OnInit {
       name: ['', Validators.required],
       isRecurring: [false],
       frequency: ['', Validators.required],
+      applicability: [1, Validators.required]
     });
   }
 
@@ -50,7 +56,8 @@ export class FeeTypeComponent implements OnInit {
     this._apiService.postFeeType(feeTypeValue).subscribe({
       next: (res) => {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Fee Type Added' });
-        this.listFeeType();
+        this._lookupService.clearCacheByKey('fees');
+        this.listFeeType(true);
         this.resetForm();
       },
       error: (err) => {
@@ -58,7 +65,8 @@ export class FeeTypeComponent implements OnInit {
       },
       complete: () => {
         this.isSubmitted = false;
-        this.listFeeType();
+        this._lookupService.clearCacheByKey('fees');
+        this.listFeeType(true);
         this.resetForm();
       }
     });
@@ -80,6 +88,7 @@ export class FeeTypeComponent implements OnInit {
       complete: () => {
         this.isSubmitted = false;
         this.isUpdate = false;
+        this._lookupService.clearCacheByKey('fees');
         this.listFeeType(true);
         this.resetForm();
         this.submitButtonLabel = "Save";
@@ -109,12 +118,17 @@ export class FeeTypeComponent implements OnInit {
     return value === true ? 'Yes' : 'No';
   }
 
+  getApplicabilityLabel(value: number): string {
+    return this.applicabilityOptions.find(x => x.value === value)?.label ?? 'Standard';
+  }
+
   resetForm() {
     this.feeTypeForm.reset({
       id: '',
       name: '',
       isRecurring: false,
-      frequency: ''
+      frequency: '',
+      applicability: 1
     });
   }
 }

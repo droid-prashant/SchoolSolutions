@@ -49,7 +49,7 @@ export class ManageFeesTypesComponent implements OnInit {
   ngOnInit(): void {
     this.currentAcademicYearId = this._authService.getCurrentAcademicYearId();
     this.feeStructureForm.get('academicYearId')?.setValue(this.currentAcademicYearId);
-    this.listFeeType();
+    this.listFeeType(true);
     this.loadClasses();
   }
 

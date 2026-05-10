@@ -5,18 +5,22 @@ export interface StudentDto {
   grandFatherName: string;
   fatherName: string;
   motherName: string;
-  gender: number;         
+  gender: number;
   age: number;
-  address: string;
+  dobNp: string;
+  dobEn: string;
+  wardNo: number;
   contactNumber: string;
   parentContactNumber: string;
   parentEmail: string;
-  classRoomId: string;    
-  sectionId: string;    
-  provinceId: string;    
-  districtId: string;    
-  municipalityId: string; 
+  classRoomId: string;
+  classSectionId: string;
+  sectionId: string;
+  provinceId: string;
+  districtId: string;
+  municipalityId: string;
   rollNumber: string;
+  isBusRequired: boolean;
 }
 
 export interface StudentStatusDto {

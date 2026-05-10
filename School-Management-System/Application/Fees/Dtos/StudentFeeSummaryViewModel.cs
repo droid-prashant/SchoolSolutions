@@ -16,6 +16,7 @@ namespace Application.Fees.Dtos
         public decimal TotalFees { get; set; }
         public decimal TotalDiscount { get; set; }
         public decimal TotalFine { get; set; }
+        public decimal TotalEducationTax { get; set; }
         public decimal NetFees { get; set; }
         public decimal TotalPaid { get; set; }
         public decimal TotalPending { get; set; }

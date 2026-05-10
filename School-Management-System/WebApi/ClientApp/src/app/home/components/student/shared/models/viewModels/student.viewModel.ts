@@ -23,6 +23,7 @@ export interface StudentViewModel {
     wardNo: number;
     classSectionId?: string;
     rollNumber?: number;
+    isBusRequired?: boolean;
     isActive: boolean;
     enrollmentStatus?: number;
     enrollmentStatusName?: string;
