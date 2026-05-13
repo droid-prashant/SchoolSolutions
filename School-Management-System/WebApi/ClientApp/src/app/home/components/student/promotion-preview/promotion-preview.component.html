@@ -57,7 +57,8 @@
           [(ngModel)]="targetAcademicYearId"
           [showClear]="true"
           appendTo="body"
-          placeholder="Target Year">
+          placeholder="Target Year"
+          (onChange)="onTargetAcademicYearChange()">
         </p-dropdown>
       </div>
 

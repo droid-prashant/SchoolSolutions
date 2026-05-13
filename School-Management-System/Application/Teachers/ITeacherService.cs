@@ -9,6 +9,7 @@ namespace Application.Teachers
         Task UpdateTeacherStatusAsync(string teacherId, TeacherStatusDto teacherStatusDto, CancellationToken cancellationToken);
         Task SoftDeleteTeacherAsync(string teacherId, CancellationToken cancellationToken);
         Task<List<TeacherClassSectionViewModel>> GetTeacherAssignmentsAsync(string teacherId, string? academicYearId, CancellationToken cancellationToken);
+        Task<List<TeacherClassSectionViewModel>> GetCurrentTeacherAssignmentsAsync(string? academicYearId, CancellationToken cancellationToken);
         Task AddTeacherAssignmentAsync(string teacherId, TeacherClassSectionDto assignment, CancellationToken cancellationToken);
         Task UpdateTeacherAssignmentAsync(string teacherId, TeacherClassSectionDto assignment, CancellationToken cancellationToken);
         Task DeleteTeacherAssignmentAsync(string assignmentId, CancellationToken cancellationToken);

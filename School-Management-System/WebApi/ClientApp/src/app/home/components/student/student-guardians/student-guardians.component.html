@@ -1,0 +1,123 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="guardian-shell">
+  <div class="guardian-summary">
+    <div>
+      <h3>{{ studentName }}</h3>
+      <p>{{ student?.classRoomName || 'Class' }} {{ student?.sectionName || '' }}</p>
+    </div>
+    <p-tag [value]="guardians.length + ' guardian(s) linked'" severity="info"></p-tag>
+  </div>
+
+  <div class="guardian-section">
+    <h4>Linked Guardians</h4>
+    <p-table [value]="guardians" [loading]="isLoading" styleClass="app-grid-table" [tableStyle]="{ 'min-width': '52rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Relation</th>
+          <th>Access</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-guardian>
+        <tr>
+          <td>
+            <div class="guardian-name">{{ guardian.fullName }}</div>
+            <small>{{ guardian.userName }}</small>
+          </td>
+          <td>
+            <div>{{ guardian.contactNumber }}</div>
+            <small>{{ guardian.email || '-' }}</small>
+          </td>
+          <td>{{ guardian.relationType }}</td>
+          <td>
+            <div class="access-grid">
+              <label><p-checkbox [(ngModel)]="guardian.isPrimaryGuardian" [binary]="true"></p-checkbox> Primary</label>
+              <label><p-checkbox [(ngModel)]="guardian.canViewFees" [binary]="true"></p-checkbox> Fees</label>
+              <label><p-checkbox [(ngModel)]="guardian.canViewResults" [binary]="true"></p-checkbox> Results</label>
+              <label><p-checkbox [(ngModel)]="guardian.canViewAttendance" [binary]="true"></p-checkbox> Attendance</label>
+              <label><p-checkbox [(ngModel)]="guardian.canPayFees" [binary]="true"></p-checkbox> Pay fees</label>
+            </div>
+          </td>
+          <td>
+            <p-tag [value]="guardian.isGuardianActive ? 'Active' : 'Inactive'" [severity]="guardian.isGuardianActive ? 'success' : 'danger'"></p-tag>
+          </td>
+          <td>
+            <div class="app-grid-actions">
+              <button pButton pRipple type="button" icon="pi pi-save" pTooltip="Save access"
+                class="p-button-text app-grid-action-btn" (click)="updateAccess(guardian)"></button>
+              <button pButton pRipple type="button" icon="pi pi-unlink" pTooltip="Unlink"
+                class="p-button-text p-button-danger app-grid-action-btn" (click)="unlinkGuardian(guardian)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">No guardians linked yet.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="guardian-forms">
+    <div class="guardian-panel">
+      <h4>Create New Guardian</h4>
+      <form [formGroup]="createGuardianForm" class="form-grid" (ngSubmit)="createGuardian()">
+        <input pInputText formControlName="fullName" placeholder="Full name" />
+        <input pInputText formControlName="contactNumber" placeholder="Contact number" />
+        <input pInputText formControlName="email" placeholder="Email" />
+        <input pInputText formControlName="relationType" placeholder="Relation" />
+        <input pInputText formControlName="userName" placeholder="Username" />
+        <p-password formControlName="password" placeholder="Password" [feedback]="false" [toggleMask]="true"></p-password>
+
+        <div class="access-grid wide">
+          <label><p-checkbox formControlName="isPrimaryGuardian" [binary]="true"></p-checkbox> Primary</label>
+          <label><p-checkbox formControlName="canViewFees" [binary]="true"></p-checkbox> Fees</label>
+          <label><p-checkbox formControlName="canViewResults" [binary]="true"></p-checkbox> Results</label>
+          <label><p-checkbox formControlName="canViewAttendance" [binary]="true"></p-checkbox> Attendance</label>
+          <label><p-checkbox formControlName="canPayFees" [binary]="true"></p-checkbox> Pay fees</label>
+        </div>
+
+        <button pButton type="submit" label="Create & Link" icon="pi pi-user-plus" [loading]="isSaving"></button>
+      </form>
+    </div>
+
+    <div class="guardian-panel">
+      <h4>Link Existing Guardian</h4>
+      <form [formGroup]="linkGuardianForm" class="form-grid" (ngSubmit)="linkGuardian()">
+        <div class="search-row">
+          <input pInputText formControlName="keyword" placeholder="Search by name, phone, or email" />
+          <button pButton type="button" icon="pi pi-search" [loading]="isSearching" (click)="searchGuardians()"></button>
+        </div>
+
+        <p-dropdown
+          formControlName="guardianId"
+          [options]="guardianSearchResults"
+          optionLabel="fullName"
+          optionValue="id"
+          placeholder="Select guardian"
+          [filter]="true"
+          filterBy="fullName,contactNumber,email">
+          <ng-template pTemplate="item" let-guardian>
+            <div>{{ guardian.fullName }} - {{ guardian.contactNumber }}</div>
+          </ng-template>
+        </p-dropdown>
+
+        <div class="access-grid wide">
+          <label><p-checkbox formControlName="isPrimaryGuardian" [binary]="true"></p-checkbox> Primary</label>
+          <label><p-checkbox formControlName="canViewFees" [binary]="true"></p-checkbox> Fees</label>
+          <label><p-checkbox formControlName="canViewResults" [binary]="true"></p-checkbox> Results</label>
+          <label><p-checkbox formControlName="canViewAttendance" [binary]="true"></p-checkbox> Attendance</label>
+          <label><p-checkbox formControlName="canPayFees" [binary]="true"></p-checkbox> Pay fees</label>
+        </div>
+
+        <button pButton type="submit" label="Link Guardian" icon="pi pi-link" [loading]="isSaving"></button>
+      </form>
+    </div>
+  </div>
+</div>

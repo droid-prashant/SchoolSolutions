@@ -107,9 +107,9 @@ namespace WebApi.Controllers
         [HttpGet]
         [Route("GetPromotionCandidates")]
         [HasPermission(PermissionNames.StudentView)]
-        public async Task<List<PromotionCandidateViewModel>> GetPromotionCandidates([FromQuery] string classSectionId, [FromQuery] int examType, CancellationToken cancellationToken)
+        public async Task<List<PromotionCandidateViewModel>> GetPromotionCandidates([FromQuery] string classSectionId, [FromQuery] int examType, [FromQuery] string? targetAcademicYearId, CancellationToken cancellationToken)
         {
-            return await _studentService.GetPromotionCandidates(classSectionId, examType, cancellationToken);
+            return await _studentService.GetPromotionCandidates(classSectionId, examType, targetAcademicYearId, cancellationToken);
         }
 
         [HttpPost]

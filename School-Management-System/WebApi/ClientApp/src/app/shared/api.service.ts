@@ -44,6 +44,7 @@ import { PromotionExecutionResultViewModel } from '../home/components/student/sh
 import { TeacherMarksAssignmentViewModel, TeacherSubjectStudentMarksViewModel } from '../home/components/teacher/shared/models/viewModels/teacher-marks.viewModel';
 import { DashboardSummaryViewModel } from '../home/components/dashboard/model/dashboardSummary.viewModel';
 import { PermissionViewModel, RoleDto, RolePermissionsDto, RoleViewModel, UserRolesDto, UserRolesViewModel, UserViewModel } from './common/models/security/role-permission.models';
+import { GuardianCreateDto, GuardianLinkedStudentViewModel, GuardianStudentAccessDto, GuardianStudentLinkDto, GuardianViewModel, StudentGuardianViewModel } from '../home/components/student/shared/models/guardian.models';
 
 @Injectable({
   providedIn: 'root'
@@ -106,6 +107,34 @@ export class ApiService {
 
   setUserRoles(userId: string, roles: UserRolesDto): Observable<void> {
     return this._httpClient.post<void>(this.baseUrl + `api/users/${userId}/roles`, roles);
+  }
+
+  getStudentGuardians(studentId: string): Observable<StudentGuardianViewModel[]> {
+    return this._httpClient.get<StudentGuardianViewModel[]>(this.baseUrl + `api/Guardian/GetStudentGuardians?studentId=${studentId}`);
+  }
+
+  searchGuardians(keyword = ''): Observable<GuardianViewModel[]> {
+    return this._httpClient.get<GuardianViewModel[]>(this.baseUrl + `api/Guardian/SearchGuardians?keyword=${encodeURIComponent(keyword)}`);
+  }
+
+  createGuardianForStudent(studentId: string, guardian: GuardianCreateDto): Observable<StudentGuardianViewModel> {
+    return this._httpClient.post<StudentGuardianViewModel>(this.baseUrl + `api/Guardian/CreateGuardianForStudent?studentId=${studentId}`, guardian);
+  }
+
+  linkGuardianToStudent(link: GuardianStudentLinkDto): Observable<StudentGuardianViewModel> {
+    return this._httpClient.post<StudentGuardianViewModel>(this.baseUrl + 'api/Guardian/LinkGuardianToStudent', link);
+  }
+
+  updateStudentGuardianAccess(guardianStudentId: string, access: GuardianStudentAccessDto): Observable<void> {
+    return this._httpClient.put<void>(this.baseUrl + `api/Guardian/UpdateStudentGuardianAccess?guardianStudentId=${guardianStudentId}`, access);
+  }
+
+  unlinkGuardianFromStudent(guardianStudentId: string): Observable<void> {
+    return this._httpClient.delete<void>(this.baseUrl + `api/Guardian/UnlinkGuardianFromStudent?guardianStudentId=${guardianStudentId}`);
+  }
+
+  getCurrentGuardianStudents(): Observable<GuardianLinkedStudentViewModel[]> {
+    return this._httpClient.get<GuardianLinkedStudentViewModel[]>(this.baseUrl + 'api/Guardian/GetCurrentGuardianStudents');
   }
 
   getStudentsByClassCount(): Observable<StudentsByClassViewModel[]> {
@@ -391,8 +420,9 @@ export class ApiService {
     return this._httpClient.get<StudentEnrollmentViewModel[]>(this.baseUrl + `api/Student/GetRegAndSymCompliantEnrolledStudents?classSectionId=${classSectionId}`);
   }
 
-  getPromotionCandidates(classSectionId: string, examType: number): Observable<PromotionCandidateViewModel[]> {
-    return this._httpClient.get<PromotionCandidateViewModel[]>(this.baseUrl + `api/Student/GetPromotionCandidates?classSectionId=${classSectionId}&examType=${examType}`);
+  getPromotionCandidates(classSectionId: string, examType: number, targetAcademicYearId?: string | null): Observable<PromotionCandidateViewModel[]> {
+    const targetAcademicYearQuery = targetAcademicYearId ? `&targetAcademicYearId=${targetAcademicYearId}` : '';
+    return this._httpClient.get<PromotionCandidateViewModel[]>(this.baseUrl + `api/Student/GetPromotionCandidates?classSectionId=${classSectionId}&examType=${examType}${targetAcademicYearQuery}`);
   }
 
   promoteStudents(request: PromoteStudentsDto): Observable<PromotionExecutionResultViewModel> {

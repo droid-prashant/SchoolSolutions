@@ -440,10 +440,14 @@ namespace Infrastructure.Services.Students
 
 
         }
-        public async Task<List<PromotionCandidateViewModel>> GetPromotionCandidates(string classSectionId, int examType, CancellationToken cancellationToken)
+        public async Task<List<PromotionCandidateViewModel>> GetPromotionCandidates(string classSectionId, int examType, string? targetAcademicYearId, CancellationToken cancellationToken)
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var classSectionGuid = Guid.Parse(classSectionId);
+            Guid? targetAcademicYearGuid = Guid.TryParse(targetAcademicYearId, out var parsedTargetAcademicYearId)
+                && parsedTargetAcademicYearId != currentAcademicYearId
+                    ? parsedTargetAcademicYearId
+                    : null;
 
             var currentClassSection = await _context.ClassSections
                 .Include(x => x.ClassRoom)
@@ -499,12 +503,11 @@ namespace Infrastructure.Services.Students
                 var targetClassName = nextClassSection?.ClassRoom?.Name ?? nextClass?.Name ?? string.Empty;
                 var targetSectionName = nextClassSection?.Section?.Name ?? string.Empty;
                 var hasTarget = nextClassSection != null;
-                var hasHigherClassEnrollment = enrollment.Student.StudentEnrollments.Any(x =>
-                    x.Id != enrollment.Id &&
-                    x.ClassSection?.ClassRoom != null &&
-                    x.ClassSection.ClassRoom.OrderNumber > enrollment.ClassSection.ClassRoom.OrderNumber &&
-                    x.EnrollmentDate >= enrollment.EnrollmentDate);
-                var isAlreadyPromoted = enrollment.IsPromoted || hasHigherClassEnrollment;
+                var isAlreadyPromoted = targetAcademicYearGuid.HasValue &&
+                    enrollment.Student.StudentEnrollments.Any(x =>
+                        x.Id != enrollment.Id &&
+                        x.AcademicYearId == targetAcademicYearGuid.Value &&
+                        !x.IsDeleted);
                 var isPromotable = evaluation.IsPassed && hasTarget && !isAlreadyPromoted;
                 var resultStatus = isAlreadyPromoted ? "Promoted" : evaluation.Status;
 
@@ -806,7 +809,7 @@ namespace Infrastructure.Services.Students
         {
             if (alreadyPromoted)
             {
-                return "Student has already been promoted from this session.";
+                return "Student already has an enrollment in the selected target academic year.";
             }
 
             if (status == "No Result")

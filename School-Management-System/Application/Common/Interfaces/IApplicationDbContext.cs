@@ -21,6 +21,8 @@ namespace Application.Common.Interfaces
         DbSet<TeacherExperience> TeacherExperiences { get; }
         DbSet<TeacherDocument> TeacherDocuments { get; }
         DbSet<Student> Students { get; }
+        DbSet<Guardian> Guardians { get; }
+        DbSet<GuardianStudent> GuardianStudents { get; }
         DbSet<Course> Courses { get; }
         DbSet<ClassRoom> ClassRooms { get; }
         DbSet<Section> Sections { get; }

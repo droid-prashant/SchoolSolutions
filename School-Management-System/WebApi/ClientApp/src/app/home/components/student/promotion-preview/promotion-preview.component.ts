@@ -78,7 +78,7 @@ export class PromotionPreviewComponent implements OnInit {
       return;
     }
 
-    this._apiService.getPromotionCandidates(filter.classSectionId, filter.examType).subscribe({
+    this._apiService.getPromotionCandidates(filter.classSectionId, filter.examType, this.targetAcademicYearId).subscribe({
       next: (response) => {
         this.candidates = response;
         this.hasLoadedCandidates = true;
@@ -106,6 +106,15 @@ export class PromotionPreviewComponent implements OnInit {
 
     if (this.manualTargetClassSectionId) {
       this.executeManualPromotion();
+      return;
+    }
+
+    if (this.selectedCandidates.some(x => x.isAlreadyPromoted)) {
+      this._messageService.add({
+        severity: 'warn',
+        summary: 'Invalid Selection',
+        detail: 'Selected student already exists in the target academic year.'
+      });
       return;
     }
 
@@ -178,6 +187,13 @@ export class PromotionPreviewComponent implements OnInit {
 
     const selectedClass = this.classOptions.find(x => x.id === classId);
     this.targetSectionOptions = selectedClass?.sections ?? [];
+  }
+
+  onTargetAcademicYearChange(): void {
+    this.selectedCandidates = [];
+    if (this.hasLoadedCandidates && this.lastFilter?.classSectionId && this.lastFilter.examType) {
+      this.onLoadCandidates(this.lastFilter);
+    }
   }
 
   onSourceClassChange(classId: string | null): void {

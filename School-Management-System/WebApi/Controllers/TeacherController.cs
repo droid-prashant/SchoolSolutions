@@ -68,6 +68,20 @@ namespace WebApi.Controllers
             return await _teacherService.GetTeacherAssignmentsAsync(teacherId, academicYearId, cancellationToken);
         }
 
+        [HttpGet("GetCurrentTeacherAssignments")]
+        [HasPermission(
+            PermissionNames.TeacherView,
+            PermissionNames.TeacherManage,
+            PermissionNames.StudentView,
+            PermissionNames.SubjectMarksEntry,
+            PermissionNames.StudentAttendanceView,
+            PermissionNames.StudentAttendanceTake,
+            PermissionNames.StudentAttendanceEdit)]
+        public async Task<List<TeacherClassSectionViewModel>> GetCurrentTeacherAssignments([FromQuery] string? academicYearId, CancellationToken cancellationToken)
+        {
+            return await _teacherService.GetCurrentTeacherAssignmentsAsync(academicYearId, cancellationToken);
+        }
+
         [HttpPost("AddTeacherAssignment")]
         [HasPermission(PermissionNames.TeacherManage)]
         public async Task AddTeacherAssignment([FromQuery] string teacherId, [FromBody] TeacherClassSectionDto assignment, CancellationToken cancellationToken)

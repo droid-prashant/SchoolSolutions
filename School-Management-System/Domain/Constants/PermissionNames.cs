@@ -16,6 +16,12 @@ namespace Domain.Constants
         public const string AcademicYearManage = "AcademicYear.Manage";
         public const string UserManage = "User.Manage";
         public const string RoleManage = "Role.Manage";
+        public const string GuardianManage = "Guardian.Manage";
+        public const string GuardianStudentProfileView = "Guardian.StudentProfile.View";
+        public const string GuardianAttendanceView = "Guardian.Attendance.View";
+        public const string GuardianResultView = "Guardian.Result.View";
+        public const string GuardianFeeView = "Guardian.Fee.View";
+        public const string GuardianFeePay = "Guardian.Fee.Pay";
         public const string TeacherView = "Teacher.View";
         public const string TeacherManage = "Teacher.Manage";
         public const string CourseManage = "Course.Manage";
@@ -48,6 +54,12 @@ namespace Domain.Constants
             new(AcademicYearManage, "Manage Academic Years", "Academic", "Can create and update academic years."),
             new(UserManage, "Manage Users", "Security", "Can create users and assign roles."),
             new(RoleManage, "Manage Roles", "Security", "Can create roles and assign permissions."),
+            new(GuardianManage, "Manage Guardians", "Guardian", "Can create guardian accounts and link guardians to students."),
+            new(GuardianStudentProfileView, "View Own Students", "Guardian", "Guardian can view linked student profiles."),
+            new(GuardianAttendanceView, "View Own Attendance", "Guardian", "Guardian can view attendance for linked students."),
+            new(GuardianResultView, "View Own Results", "Guardian", "Guardian can view exam results for linked students."),
+            new(GuardianFeeView, "View Own Fees", "Guardian", "Guardian can view fee summaries for linked students."),
+            new(GuardianFeePay, "Pay Own Fees", "Guardian", "Guardian can pay fees for linked students when enabled."),
             new(TeacherView, "View Teachers", "Teacher", "Can view teacher records."),
             new(TeacherManage, "Manage Teachers", "Teacher", "Can create, update, delete, and assign teachers."),
             new(CourseManage, "Manage Courses", "Academic", "Can manage courses and class course mappings."),

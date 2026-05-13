@@ -8,6 +8,8 @@ export interface StudentViewModel {
     grandGatherName: string;
     fatherName: string;
     motherName: string;
+    parentContactNumber: string;
+    parentEmail?: string;
     classRoomId: string;
     classRoomName: string;
     sectionId: string

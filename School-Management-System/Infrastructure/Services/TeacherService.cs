@@ -335,6 +335,26 @@ namespace Infrastructure.Services
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<TeacherClassSectionViewModel>> GetCurrentTeacherAssignmentsAsync(string? academicYearId, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(_userResolver.UserId, out var userId))
+            {
+                throw new Exception("Current user is not available.");
+            }
+
+            var teacherId = await _context.Teachers
+                .Where(x => x.UserId == userId && x.IsActive && !x.IsDeleted)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (teacherId == Guid.Empty)
+            {
+                return [];
+            }
+
+            return await GetTeacherAssignmentsAsync(teacherId.ToString(), academicYearId, cancellationToken);
+        }
+
         public async Task AddTeacherAssignmentAsync(string teacherId, TeacherClassSectionDto assignment, CancellationToken cancellationToken)
         {
             if (!Guid.TryParse(teacherId, out var teacherGuid))

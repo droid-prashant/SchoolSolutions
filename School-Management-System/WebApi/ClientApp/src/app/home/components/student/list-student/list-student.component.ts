@@ -18,6 +18,7 @@ export class ListStudentComponent implements OnInit {
   sections: SectionViewModel[] = [];
   isAddDialogVisible: boolean = false;
   isEditDialogVisible: boolean = false;
+  isGuardianDialogVisible: boolean = false;
   selectedStudent: StudentViewModel | null = null;
   currentFilter: FilterSelection = {};
   searchText: string = '';
@@ -37,6 +38,11 @@ export class ListStudentComponent implements OnInit {
   editStudent(student: StudentViewModel) {
     this.selectedStudent = { ...student };
     this.isEditDialogVisible = true;
+  }
+
+  manageGuardians(student: StudentViewModel) {
+    this.selectedStudent = { ...student };
+    this.isGuardianDialogVisible = true;
   }
 
   openAddStudentDialog() {
@@ -234,6 +240,7 @@ export class ListStudentComponent implements OnInit {
     this.onLoadStudents(this.currentFilter);
     this.isEditDialogVisible = false;
     this.isAddDialogVisible = false;
+    this.isGuardianDialogVisible = false;
     this.selectedStudent = null;
   }
 }

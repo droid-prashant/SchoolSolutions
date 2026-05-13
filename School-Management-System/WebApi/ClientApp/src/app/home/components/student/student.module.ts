@@ -10,12 +10,14 @@ import { StudentRoutingModule } from "./student.routes";
 import { HttpClientModule } from "@angular/common/http";
 import { NpDatepickerComponent } from "../../../shared/calender/np-datepicker/np-datepicker.component";
 import { StudentFilterComponent } from "../student-filter/student-filter.component";
+import { StudentGuardiansComponent } from "./student-guardians/student-guardians.component";
 
 
 @NgModule({
     declarations: [
         ListStudentComponent,
         AddStudentComponent,
+        StudentGuardiansComponent,
         PromotionPreviewComponent
     ],
     imports: [

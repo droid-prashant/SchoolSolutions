@@ -21,7 +21,8 @@ namespace WebApi.Seeds
                 ("Admin", "School administrator."),
                 ("Principal", "Principal with academic oversight permissions."),
                 ("Teacher", "Teacher with assigned teaching permissions."),
-                ("Accountant", "Accountant with fee management permissions.")
+                ("Accountant", "Accountant with fee management permissions."),
+                ("Guardian", "Guardian with student-scoped access.")
             };
 
             foreach (var (roleName, description) in roles)
@@ -38,6 +39,7 @@ namespace WebApi.Seeds
 
             await SeedPermissionsAsync(dbContext);
             await AssignAllPermissionsToSuperAdmin(roleManager, dbContext);
+            await AssignGuardianPermissions(roleManager, dbContext);
         }
 
         private static async Task SeedPermissionsAsync(ApplicationDbContext dbContext)
@@ -109,6 +111,69 @@ namespace WebApi.Seeds
                 }
 
                 await roleManager.AddClaimAsync(superAdminRole, new Claim(CustomClaimType.Permission, permission.Code));
+            }
+        }
+
+        private static async Task AssignGuardianPermissions(RoleManager<ApplicationRole> roleManager, ApplicationDbContext dbContext)
+        {
+            var guardianPermissions = new[]
+            {
+                PermissionNames.GuardianStudentProfileView,
+                PermissionNames.GuardianAttendanceView,
+                PermissionNames.GuardianResultView,
+                PermissionNames.GuardianFeeView,
+                PermissionNames.GuardianFeePay
+            };
+
+            await AssignPermissionsToRole("Guardian", guardianPermissions, roleManager, dbContext);
+        }
+
+        private static async Task AssignPermissionsToRole(
+            string roleName,
+            string[] permissionCodes,
+            RoleManager<ApplicationRole> roleManager,
+            ApplicationDbContext dbContext)
+        {
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role == null)
+            {
+                return;
+            }
+
+            var permissions = await dbContext.Permissions
+                .Where(x => permissionCodes.Contains(x.Code))
+                .ToListAsync();
+
+            foreach (var permission in permissions)
+            {
+                var rolePermissionExists = await dbContext.RolePermissions
+                    .AnyAsync(x => x.RoleId == role.Id && x.PermissionId == permission.Id);
+                if (!rolePermissionExists)
+                {
+                    await dbContext.RolePermissions.AddAsync(new RolePermission
+                    {
+                        Id = Guid.NewGuid(),
+                        RoleId = role.Id,
+                        PermissionId = permission.Id,
+                        IsActive = true
+                    });
+                }
+            }
+
+            await dbContext.SaveChangesAsync(CancellationToken.None);
+
+            var existingPermissionClaims = (await roleManager.GetClaimsAsync(role))
+                .Where(x => x.Type == CustomClaimType.Permission)
+                .ToList();
+
+            foreach (var permission in permissions)
+            {
+                if (existingPermissionClaims.Any(x => x.Value == permission.Code))
+                {
+                    continue;
+                }
+
+                await roleManager.AddClaimAsync(role, new Claim(CustomClaimType.Permission, permission.Code));
             }
         }
     }

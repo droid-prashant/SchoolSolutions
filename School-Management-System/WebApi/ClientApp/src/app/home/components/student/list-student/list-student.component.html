@@ -62,7 +62,7 @@
                 <th>Gender</th>
                 <th>Status</th>
                 <th>Address</th>
-                <th *appHasPermission="'Student.Update'">Action</th>
+                <th *appHasAnyPermission="['Student.Update', 'Guardian.Manage', 'User.Manage']">Action</th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-student let-rowIndex="rowIndex">
@@ -78,40 +78,53 @@
                         [severity]="student.isActive ? 'success' : 'danger'"></p-tag>
                 </td>
                 <td>{{ student.address }}</td>
-                <td *appHasPermission="'Student.Update'">
+                <td *appHasAnyPermission="['Student.Update', 'Guardian.Manage', 'User.Manage']">
                     <div class="app-grid-actions">
+                        <ng-container *appHasPermission="'Student.Update'">
+                            <button
+                                *ngIf="studentView === 'active'"
+                                pButton
+                                pRipple
+                                type="button"
+                                icon="pi pi-pencil"
+                                pTooltip="Edit student"
+                                tooltipPosition="top"
+                                class="p-button-text app-grid-action-btn"
+                                (click)="editStudent(student)">
+                            </button>
+                            <button
+                                *ngIf="studentView === 'active'"
+                                pButton
+                                pRipple
+                                type="button"
+                                icon="pi pi-ban"
+                                pTooltip="Drop student"
+                                tooltipPosition="top"
+                                class="p-button-text p-button-danger app-grid-action-btn"
+                                (click)="updateStudentStatus(student, false)">
+                            </button>
+                            <button
+                                *ngIf="studentView === 'dropped'"
+                                pButton
+                                pRipple
+                                type="button"
+                                icon="pi pi-refresh"
+                                pTooltip="Revive student"
+                                tooltipPosition="top"
+                                class="p-button-text p-button-success app-grid-action-btn"
+                                (click)="updateStudentStatus(student, true)">
+                            </button>
+                        </ng-container>
                         <button
                             *ngIf="studentView === 'active'"
                             pButton
                             pRipple
                             type="button"
-                            icon="pi pi-pencil"
-                            pTooltip="Edit student"
+                            icon="pi pi-users"
+                            pTooltip="Manage guardians"
                             tooltipPosition="top"
                             class="p-button-text app-grid-action-btn"
-                            (click)="editStudent(student)">
-                        </button>
-                        <button
-                            *ngIf="studentView === 'active'"
-                            pButton
-                            pRipple
-                            type="button"
-                            icon="pi pi-ban"
-                            pTooltip="Drop student"
-                            tooltipPosition="top"
-                            class="p-button-text p-button-danger app-grid-action-btn"
-                            (click)="updateStudentStatus(student, false)">
-                        </button>
-                        <button
-                            *ngIf="studentView === 'dropped'"
-                            pButton
-                            pRipple
-                            type="button"
-                            icon="pi pi-refresh"
-                            pTooltip="Revive student"
-                            tooltipPosition="top"
-                            class="p-button-text p-button-success app-grid-action-btn"
-                            (click)="updateStudentStatus(student, true)">
+                            (click)="manageGuardians(student)">
                         </button>
                     </div>
                 </td>
@@ -130,6 +143,13 @@
     <p-dialog header="Add Student" [modal]="true" [(visible)]="isAddDialogVisible" [style]="{ width: '70vw' }">
         <app-add-student *ngIf="isAddDialogVisible" [isEditMode]="false" (studentSaved)="onStudentSaved()">
         </app-add-student>
+    </p-dialog>
+</ng-container>
+
+<!-- Guardian Dialog -->
+<ng-container *appHasAnyPermission="['Student.Update', 'Guardian.Manage', 'User.Manage']">
+    <p-dialog header="Manage Guardians" [modal]="true" [(visible)]="isGuardianDialogVisible" [style]="{ width: '82vw' }">
+        <app-student-guardians *ngIf="isGuardianDialogVisible" [student]="selectedStudent"></app-student-guardians>
     </p-dialog>
 </ng-container>
 

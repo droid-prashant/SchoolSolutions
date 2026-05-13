@@ -914,3 +914,72 @@ INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20260509130000_AddEducationTaxToFeeAdjustment', '8.0.15');
     END IF;
 END $$;
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260510100000_AddGuardianAccess'
+    ) THEN
+
+CREATE TABLE "Guardians" (
+    "Id" uuid NOT NULL,
+    "UserId" uuid NOT NULL,
+    "FullName" character varying(150) NOT NULL,
+    "ContactNumber" character varying(30) NOT NULL,
+    "Email" character varying(150),
+    "RelationType" character varying(50) NOT NULL,
+    "IsActive" boolean NOT NULL,
+    "IsDeleted" boolean NOT NULL,
+    "CreatedDate" timestamp with time zone NOT NULL,
+    "ModifiedDate" timestamp with time zone NOT NULL,
+    "DeletedOn" timestamp with time zone,
+    "CreatedBy" uuid NOT NULL,
+    "ModifiedBy" uuid NOT NULL,
+    "DeletedBy" uuid,
+    CONSTRAINT "PK_Guardians" PRIMARY KEY ("Id")
+);
+
+CREATE TABLE "GuardianStudents" (
+    "Id" uuid NOT NULL,
+    "GuardianId" uuid NOT NULL,
+    "StudentId" uuid NOT NULL,
+    "IsPrimaryGuardian" boolean NOT NULL,
+    "CanViewFees" boolean NOT NULL,
+    "CanViewResults" boolean NOT NULL,
+    "CanViewAttendance" boolean NOT NULL,
+    "CanPayFees" boolean NOT NULL,
+    "IsActive" boolean NOT NULL,
+    "IsDeleted" boolean NOT NULL,
+    "CreatedDate" timestamp with time zone NOT NULL,
+    "ModifiedDate" timestamp with time zone NOT NULL,
+    "DeletedOn" timestamp with time zone,
+    "CreatedBy" uuid NOT NULL,
+    "ModifiedBy" uuid NOT NULL,
+    "DeletedBy" uuid,
+    CONSTRAINT "PK_GuardianStudents" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_GuardianStudents_Guardians_GuardianId" FOREIGN KEY ("GuardianId") REFERENCES "Guardians" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_GuardianStudents_Students_StudentId" FOREIGN KEY ("StudentId") REFERENCES "Students" ("Id") ON DELETE RESTRICT
+);
+
+CREATE INDEX "IX_Guardians_ContactNumber" ON "Guardians" ("ContactNumber");
+
+CREATE INDEX "IX_Guardians_Email" ON "Guardians" ("Email");
+
+CREATE INDEX "IX_Guardians_UserId" ON "Guardians" ("UserId");
+
+CREATE INDEX "IX_GuardianStudents_GuardianId" ON "GuardianStudents" ("GuardianId");
+
+CREATE INDEX "IX_GuardianStudents_GuardianId_StudentId" ON "GuardianStudents" ("GuardianId", "StudentId");
+
+CREATE INDEX "IX_GuardianStudents_StudentId" ON "GuardianStudents" ("StudentId");
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260510100000_AddGuardianAccess', '8.0.15');
+
+    END IF;
+END $$;
+
+
