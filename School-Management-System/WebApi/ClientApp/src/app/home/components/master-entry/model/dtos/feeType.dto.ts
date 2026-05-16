@@ -1,5 +1,5 @@
 export interface FeeTypeDto {
-    id: string;
+    id?: string;
     name: string;
     isRecurring: boolean;
     frequency: string;

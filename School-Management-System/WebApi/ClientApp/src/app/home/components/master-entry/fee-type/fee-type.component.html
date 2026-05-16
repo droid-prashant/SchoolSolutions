@@ -1,9 +1,9 @@
 <app-page-header
     section="Master Entry"
-    page="Fee Type Entry"
-    subtitle="Maintain reusable fee categories in the standard entry layout.">
+    page="Fee Types"
+    subtitle="Create reusable fee master data before mapping amounts class-wise.">
 </app-page-header>
-<form [formGroup]="feeTypeForm" (ngSubmit)="submit()" class="p-fluid">
+<form [formGroup]="feeTypeForm" (ngSubmit)="submit()" class="p-fluid fee-type-form">
     <div class="formgrid grid">
 
         <div class="field col-6">
@@ -15,13 +15,20 @@
         <div class="field col-6">
             <label class="form-label d-block mb-2">Recurring</label>
             <div class="switch-container">
-                <p-inputSwitch formControlName="isRecurring"></p-inputSwitch>
+                <p-inputSwitch formControlName="isRecurring" [disabled]="isManualFee()"></p-inputSwitch>
             </div>
         </div>
 
         <div class="field col-6">
             <label class="form-label">Frequency</label>
-            <input type="text" pInputText formControlName="frequency" />
+            <p-dropdown
+                [options]="frequencyOptions"
+                optionLabel="label"
+                optionValue="value"
+                formControlName="frequency"
+                appendTo="body"
+                placeholder="Select frequency">
+            </p-dropdown>
         </div>
 
         <div class="field col-6">
@@ -43,9 +50,9 @@
 
     </div>
 </form>
-<div class="card">
+<div class="card app-page-table-card fee-type-table-card">
     <p-table #feeTypeTable [value]="feeTypes" styleClass="app-grid-table" dataKey="id" editMode="row" [paginator]="true" [rows]="15"
-        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="34rem" [tableStyle]="{'min-width': '50rem'}"
+        [rowsPerPageOptions]="[15, 30, 50]" [scrollable]="true" scrollHeight="flex" paginatorDropdownAppendTo="body" [tableStyle]="{'min-width': '50rem'}"
         [globalFilterFields]="['name', 'frequency']">
         <ng-template pTemplate="caption">
             <span class="p-input-icon-left app-page-search" *ngIf="feeTypes.length > 0">

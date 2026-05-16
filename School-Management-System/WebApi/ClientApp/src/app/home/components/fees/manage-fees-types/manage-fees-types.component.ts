@@ -10,6 +10,7 @@ import { AuthService } from '../../../../shared/auth.service';
 import { LookupService } from '../../../../shared/common/lookup.service';
 import { FilterSelection } from '../../student-filter/student-filter.component';
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
+import { extractApiErrorMessage } from '../../../../shared/http-error.util';
 
 @Component({
   selector: 'app-manage-fees-types',
@@ -27,9 +28,15 @@ export class ManageFeesTypesComponent implements OnInit {
   isClassSelected: boolean = false;
   feeStructureId: string = "";
   currentAcademicYearId: string = "";
+  currentAcademicYearName: string = "";
   hasLoadedClassFeeStructures: boolean = false;
   classOptions: ClassRoomViewModel[] = [];
   selectedClassId: string | null = null;
+  applicabilityOptions = [
+    { label: 'Standard', value: 1 },
+    { label: 'Bus Conditional', value: 2 },
+    { label: 'Manual / On Demand', value: 3 }
+  ];
 
   constructor(
     private _apiService: ApiService,
@@ -51,6 +58,7 @@ export class ManageFeesTypesComponent implements OnInit {
     this.feeStructureForm.get('academicYearId')?.setValue(this.currentAcademicYearId);
     this.listFeeType(true);
     this.loadClasses();
+    this.loadCurrentAcademicYearName();
   }
 
   loadClasses(): void {
@@ -66,7 +74,7 @@ export class ManageFeesTypesComponent implements OnInit {
         this.feeTypes = res;
       },
       error: (err) => {
-        this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'failed to load Fee Types' });
+        this._messageService.add({ severity: 'error', summary: 'Fee Types Failed', detail: extractApiErrorMessage(err) });
       }
     });
   }
@@ -77,7 +85,7 @@ export class ManageFeesTypesComponent implements OnInit {
         this.feeStrucures = res;
       },
       error: (err) => {
-        this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'failed to load Fee Structure' });
+        this._messageService.add({ severity: 'error', summary: 'Class Fee Setup Failed', detail: extractApiErrorMessage(err) });
       }
     });
   }
@@ -154,7 +162,7 @@ export class ManageFeesTypesComponent implements OnInit {
           this.resetForm();
         },
         error: (err) => {
-          this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'failed to configure Fee Structure' });
+          this._messageService.add({ severity: 'error', summary: 'Class Fee Setup Failed', detail: extractApiErrorMessage(err) });
         }
       });
   }
@@ -174,7 +182,7 @@ export class ManageFeesTypesComponent implements OnInit {
           this.resetForm();
         },
         error: (err) => {
-          this._messageService.add({ severity: 'fail', summary: 'Fail', detail: 'failed to update Fee Structure' });
+          this._messageService.add({ severity: 'error', summary: 'Class Fee Setup Failed', detail: extractApiErrorMessage(err) });
         }
       });
   }
@@ -186,9 +194,34 @@ export class ManageFeesTypesComponent implements OnInit {
     this.feeStructureForm.patchValue(feeStructure);
   }
 
+  loadCurrentAcademicYearName(): void {
+    if (!this.currentAcademicYearId) {
+      return;
+    }
+
+    this._lookupService.getAcademicYearById(this.currentAcademicYearId).subscribe({
+      next: academicYear => this.currentAcademicYearName = academicYear?.yearName ?? ''
+    });
+  }
+
+  get selectableFeeTypes(): FeeTypeViewModel[] {
+    const mappedFeeTypeIds = new Set(
+      this.feeStrucures
+        .filter(x => !this.isUpdateRow || x.id !== this.feeStructureId)
+        .map(x => x.feeTypeId)
+    );
+
+    return this.feeTypes.filter(x => !mappedFeeTypeIds.has(x.id));
+  }
+
+  getApplicabilityLabel(value: number): string {
+    return this.applicabilityOptions.find(x => x.value === value)?.label ?? 'Standard';
+  }
+
   resetForm() {
     this.feeStructureForm.reset({
-      academicYearId: this.currentAcademicYearId
+      academicYearId: this.currentAcademicYearId,
+      classId: this.classId
     });
     this.feeStructureForm.markAsPristine();
     this.feeStructureForm.markAsUntouched();

@@ -5,6 +5,7 @@ import { FeeTypeDto } from '../model/dtos/feeType.dto';
 import { FeeTypeViewModel } from '../model/viewModels/feeType.viewModel';
 import { MessageService } from 'primeng/api';
 import { LookupService } from '../../../../shared/common/lookup.service';
+import { extractApiErrorMessage } from '../../../../shared/http-error.util';
 
 @Component({
   selector: 'app-fee-type',
@@ -20,6 +21,12 @@ export class FeeTypeComponent implements OnInit {
     { label: 'Bus Conditional', value: 2 },
     { label: 'Manual / On Demand', value: 3 }
   ];
+  frequencyOptions = [
+    { label: 'Monthly', value: 'Monthly' },
+    { label: 'Yearly', value: 'Yearly' },
+    { label: 'One Time', value: 'One Time' },
+    { label: 'Manual', value: 'Manual' }
+  ];
   isSubmitted: boolean = false;
   isUpdate: boolean = false;
   submitButtonLabel: string = "Save";
@@ -29,12 +36,13 @@ export class FeeTypeComponent implements OnInit {
     this.feeTypeForm = _fb.group({
       name: ['', Validators.required],
       isRecurring: [false],
-      frequency: ['', Validators.required],
+      frequency: ['One Time'],
       applicability: [1, Validators.required]
     });
   }
 
   ngOnInit(): void {
+    this.configureFeeBehavior();
     this.listFeeType(true);
   }
 
@@ -61,13 +69,11 @@ export class FeeTypeComponent implements OnInit {
         this.resetForm();
       },
       error: (err) => {
-        this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Failed to add fee type ' });
+        this.isSubmitted = false;
+        this._messageService.add({ severity: 'error', summary: 'Fee Type Failed', detail: extractApiErrorMessage(err) });
       },
       complete: () => {
         this.isSubmitted = false;
-        this._lookupService.clearCacheByKey('fees');
-        this.listFeeType(true);
-        this.resetForm();
       }
     });
   }
@@ -81,17 +87,18 @@ export class FeeTypeComponent implements OnInit {
     this._apiService.updateFeeType(feeTypeValue, this.feeTypeId).subscribe({
       next: (res) => {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Fee Type Updated' });
-      },
-      error: (err) => {
-        this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Failed to update fee type' });
-      },
-      complete: () => {
-        this.isSubmitted = false;
         this.isUpdate = false;
         this._lookupService.clearCacheByKey('fees');
         this.listFeeType(true);
         this.resetForm();
         this.submitButtonLabel = "Save";
+      },
+      error: (err) => {
+        this.isSubmitted = false;
+        this._messageService.add({ severity: 'error', summary: 'Fee Type Failed', detail: extractApiErrorMessage(err) });
+      },
+      complete: () => {
+        this.isSubmitted = false;
       }
     });
   }
@@ -114,6 +121,36 @@ export class FeeTypeComponent implements OnInit {
     this.submitButtonLabel = "Update";
   }
 
+  configureFeeBehavior(): void {
+    this.feeTypeForm.get('isRecurring')?.valueChanges.subscribe((isRecurring: boolean) => {
+      const frequencyControl = this.feeTypeForm.get('frequency');
+      if (isRecurring) {
+        frequencyControl?.setValidators([Validators.required]);
+        if (!frequencyControl?.value || frequencyControl.value === 'One Time' || frequencyControl.value === 'Manual') {
+          frequencyControl?.setValue('Monthly', { emitEvent: false });
+        }
+      } else {
+        frequencyControl?.clearValidators();
+        frequencyControl?.setValue(this.feeTypeForm.get('applicability')?.value === 3 ? 'Manual' : 'One Time', { emitEvent: false });
+      }
+      frequencyControl?.updateValueAndValidity({ emitEvent: false });
+    });
+
+    this.feeTypeForm.get('applicability')?.valueChanges.subscribe((applicability: number) => {
+      if (applicability === 3) {
+        this.feeTypeForm.patchValue({ isRecurring: false, frequency: 'Manual' }, { emitEvent: false });
+        this.feeTypeForm.get('frequency')?.clearValidators();
+        this.feeTypeForm.get('frequency')?.updateValueAndValidity({ emitEvent: false });
+      } else if (!this.feeTypeForm.get('isRecurring')?.value && this.feeTypeForm.get('frequency')?.value === 'Manual') {
+        this.feeTypeForm.get('frequency')?.setValue('One Time', { emitEvent: false });
+      }
+    });
+  }
+
+  isManualFee(): boolean {
+    return this.feeTypeForm.get('applicability')?.value === 3;
+  }
+
   isRecurringFee(value: boolean): string {
     return value === true ? 'Yes' : 'No';
   }
@@ -127,7 +164,7 @@ export class FeeTypeComponent implements OnInit {
       id: '',
       name: '',
       isRecurring: false,
-      frequency: '',
+      frequency: 'One Time',
       applicability: 1
     });
   }

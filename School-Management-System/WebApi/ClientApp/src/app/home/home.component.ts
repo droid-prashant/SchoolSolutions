@@ -198,7 +198,8 @@ export class HomeComponent implements OnInit {
         label: 'Fees & Payments',
         icon: 'pi pi-wallet',
         items: [
-          { label: 'Manage Fee Type', icon: 'pi pi-credit-card', routerLink: ['/home/fees/manage-fees'], data: { permissions: [PermissionNames.FeeCreate] } },
+          { label: 'Fee Types', icon: 'pi pi-tags', routerLink: ['/home/master-entry/fee-type'], data: { permissions: [PermissionNames.FeeCreate] } },
+          { label: 'Class Fee Setup', icon: 'pi pi-credit-card', routerLink: ['/home/fees/manage-fees'], data: { permissions: [PermissionNames.FeeCreate] } },
           { label: 'Fee Payment', icon: 'pi pi-money-bill', routerLink: ['/home/fees/fee-payment'], data: { permissions: [PermissionNames.FeeCreate] } },
           { label: 'Fee Reports', icon: 'pi pi-file', routerLink: ['/home/fees/reports'], data: { permissions: [PermissionNames.FeeView] } }
         ]

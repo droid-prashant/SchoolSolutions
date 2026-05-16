@@ -49,6 +49,12 @@
   width: 12rem;
 }
 
+.manage-fee-filter .p-inputtext[readonly] {
+  background: #f8fafc;
+  color: #475569;
+  width: 12rem;
+}
+
 .manage-fee-table-card {
   display: flex;
   flex: 1 1 auto;

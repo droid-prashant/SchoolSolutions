@@ -1,3 +1,15 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.fee-type-form {
+  flex: 0 0 auto;
+}
+
 .switch-container {
   display: flex;
   align-items: center;
@@ -6,4 +18,46 @@
 
 .p-inputswitch {
   margin-top: 4px; /* subtle vertical adjustment for visual balance */
+}
+
+::ng-deep .p-dropdown {
+  width: 100%;
+}
+
+.fee-type-table-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin-top: .75rem;
+  min-height: 0;
+}
+
+::ng-deep .fee-type-table-card p-table,
+::ng-deep .fee-type-table-card .p-datatable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+::ng-deep .fee-type-table-card .app-grid-table .p-datatable-wrapper {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+}
+
+::ng-deep .fee-type-table-card .p-paginator {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 960px) {
+  :host {
+    overflow-y: auto;
+  }
+
+  .fee-type-table-card {
+    min-height: 28rem;
+  }
 }

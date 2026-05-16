@@ -32,6 +32,81 @@ namespace Infrastructure.Services.Fees
             return _userResolver.GetAcademicYearGuidOrThrow();
         }
 
+        private static (string Name, string Frequency) ValidateFeeTypeDto(FeeTypeDto feeTypeDto)
+        {
+            if (feeTypeDto == null)
+            {
+                throw new ArgumentException("Fee type details are required.");
+            }
+
+            var name = feeTypeDto.Name?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Fee type name is required.");
+            }
+
+            if (name.Length > 120)
+            {
+                throw new ArgumentException("Fee type name cannot exceed 120 characters.");
+            }
+
+            if (!Enum.IsDefined(typeof(FeeApplicability), feeTypeDto.Applicability))
+            {
+                throw new ArgumentException("Select a valid fee applicability.");
+            }
+
+            if (feeTypeDto.Applicability == FeeApplicability.Manual && feeTypeDto.IsRecurring)
+            {
+                throw new ArgumentException("Manual/on-demand fees cannot be recurring.");
+            }
+
+            var frequency = feeTypeDto.Frequency?.Trim() ?? string.Empty;
+            if (feeTypeDto.IsRecurring && string.IsNullOrWhiteSpace(frequency))
+            {
+                throw new ArgumentException("Frequency is required for recurring fee types.");
+            }
+
+            if (!feeTypeDto.IsRecurring && string.IsNullOrWhiteSpace(frequency))
+            {
+                frequency = "One Time";
+            }
+
+            if (frequency.Length > 40)
+            {
+                throw new ArgumentException("Frequency cannot exceed 40 characters.");
+            }
+
+            return (name, frequency);
+        }
+
+        private static void ValidateFeeStructureDto(FeeStructureDto feeStructureDto)
+        {
+            if (feeStructureDto == null)
+            {
+                throw new ArgumentException("Fee structure details are required.");
+            }
+
+            if (feeStructureDto.FeeTypeId == Guid.Empty)
+            {
+                throw new ArgumentException("Fee type is required.");
+            }
+
+            if (feeStructureDto.ClassId == Guid.Empty)
+            {
+                throw new ArgumentException("Class is required.");
+            }
+
+            if (feeStructureDto.Amount <= 0)
+            {
+                throw new ArgumentException("Fee amount must be greater than zero.");
+            }
+
+            if ((feeStructureDto.Description?.Length ?? 0) > 300)
+            {
+                throw new ArgumentException("Description cannot exceed 300 characters.");
+            }
+        }
+
         private static DateTime GetMonthStart(DateTime value)
         {
             var normalized = value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
@@ -91,9 +166,14 @@ namespace Infrastructure.Services.Fees
 
         public async Task<List<FeeStructureViewModel>> GetFeeStructure(string classId, CancellationToken cancellationToken)
         {
+            if (!Guid.TryParse(classId, out var parsedClassId))
+            {
+                throw new ArgumentException("Select a valid class.");
+            }
+
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var result = await _dbContext.FeeStructures
-                                                   .Where(x => x.ClassId == Guid.Parse(classId) && x.AcademicYearId == currentAcademicYearId)
+                                                   .Where(x => x.ClassId == parsedClassId && x.AcademicYearId == currentAcademicYearId)
                                                    .Select(x => new FeeStructureViewModel
                                                    {
                                                        Id = x.Id,
@@ -311,11 +391,22 @@ namespace Infrastructure.Services.Fees
 
         public async Task AddFeeType(FeeTypeDto feeTypeDto, CancellationToken cancellationToken)
         {
+            var validatedFeeType = ValidateFeeTypeDto(feeTypeDto);
+            var normalizedName = validatedFeeType.Name.ToUpper();
+            var isDuplicate = await _dbContext.FeeTypes.AnyAsync(
+                x => x.Name.ToUpper() == normalizedName,
+                cancellationToken);
+
+            if (isDuplicate)
+            {
+                throw new InvalidOperationException("A fee type with this name already exists.");
+            }
+
             var feeType = new FeeType
             {
-                Name = feeTypeDto.Name,
+                Name = validatedFeeType.Name,
                 IsRecurring = feeTypeDto.IsRecurring,
-                Frequency = feeTypeDto.Frequency,
+                Frequency = validatedFeeType.Frequency,
                 Applicability = feeTypeDto.Applicability,
                 CreatedDate = DateTime.UtcNow
             };
@@ -325,11 +416,42 @@ namespace Infrastructure.Services.Fees
 
         public async Task UpdateFeeType(FeeTypeDto feeTypeDto, string feeTypeId, CancellationToken cancellationToken)
         {
-            var existingFeeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == Guid.Parse(feeTypeId));
+            if (!Guid.TryParse(feeTypeId, out var parsedFeeTypeId))
+            {
+                throw new ArgumentException("Select a valid fee type.");
+            }
+
+            var validatedFeeType = ValidateFeeTypeDto(feeTypeDto);
+            var normalizedName = validatedFeeType.Name.ToUpper();
+            var duplicateExists = await _dbContext.FeeTypes.AnyAsync(
+                x => x.Id != parsedFeeTypeId && x.Name.ToUpper() == normalizedName,
+                cancellationToken);
+
+            if (duplicateExists)
+            {
+                throw new InvalidOperationException("Another fee type with this name already exists.");
+            }
+
+            var existingFeeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == parsedFeeTypeId, cancellationToken);
             if (existingFeeType != null)
             {
-                existingFeeType.Name = feeTypeDto.Name;
-                existingFeeType.Frequency = feeTypeDto.Frequency;
+                var behaviorChanged = existingFeeType.IsRecurring != feeTypeDto.IsRecurring ||
+                                      existingFeeType.Applicability != feeTypeDto.Applicability;
+
+                if (behaviorChanged)
+                {
+                    var isAlreadyMapped = await _dbContext.FeeStructures.AnyAsync(
+                        x => x.FeeTypeId == existingFeeType.Id,
+                        cancellationToken);
+
+                    if (isAlreadyMapped)
+                    {
+                        throw new InvalidOperationException("This fee type is already mapped to class fee structures. Create a new fee type if the recurrence or applicability behavior must change.");
+                    }
+                }
+
+                existingFeeType.Name = validatedFeeType.Name;
+                existingFeeType.Frequency = validatedFeeType.Frequency;
                 existingFeeType.IsRecurring = feeTypeDto.IsRecurring;
                 existingFeeType.Applicability = feeTypeDto.Applicability;
                 existingFeeType.ModifiedDate = DateTime.UtcNow;
@@ -339,10 +461,11 @@ namespace Infrastructure.Services.Fees
 
         public async Task AddFeeStructure(FeeStructureDto feeStructureDto, CancellationToken cancellationToken)
         {
+            ValidateFeeStructureDto(feeStructureDto);
             var currentAcademicYearId = GetCurrentAcademicYearId();
             if (feeStructureDto.AcademicYearId != Guid.Empty && feeStructureDto.AcademicYearId != currentAcademicYearId)
             {
-                throw new Exception("Fee structure must be created for the current academic year.");
+                throw new InvalidOperationException("Fee structure must be created for the current academic year.");
             }
 
             var isDuplicate = await _dbContext.FeeStructures.AnyAsync(x =>
@@ -352,13 +475,13 @@ namespace Infrastructure.Services.Fees
 
             if (isDuplicate)
             {
-                throw new Exception("Fee structure already exists for this fee type, class, and academic year.");
+                throw new InvalidOperationException("Fee structure already exists for this fee type, class, and academic year.");
             }
 
             var feeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == feeStructureDto.FeeTypeId, cancellationToken);
             if (feeType == null)
             {
-                throw new Exception("Fee type not found.");
+                throw new KeyNotFoundException("Fee type not found.");
             }
 
             var feeStructure = new FeeStructure
@@ -367,7 +490,7 @@ namespace Infrastructure.Services.Fees
                 FeeTypeId = feeStructureDto.FeeTypeId,
                 ClassId = feeStructureDto.ClassId,
                 Amount = feeStructureDto.Amount,
-                Description = feeStructureDto.Description,
+                Description = feeStructureDto.Description?.Trim() ?? string.Empty,
                 CreatedDate = DateTime.UtcNow
             };
             await _dbContext.FeeStructures.AddAsync(feeStructure);
@@ -377,9 +500,15 @@ namespace Infrastructure.Services.Fees
 
         public async Task UpdateFeeSctucture(FeeStructureDto feeStructureDto, string feeStructureId, CancellationToken cancellationToken)
         {
+            ValidateFeeStructureDto(feeStructureDto);
+            if (!Guid.TryParse(feeStructureId, out var parsedFeeStructureId))
+            {
+                throw new ArgumentException("Select a valid fee structure.");
+            }
+
             var currentAcademicYearId = GetCurrentAcademicYearId();
             var existingFeeStructure = _dbContext.FeeStructures
-                .Where(x => x.Id == Guid.Parse(feeStructureId) && x.AcademicYearId == currentAcademicYearId)
+                .Where(x => x.Id == parsedFeeStructureId && x.AcademicYearId == currentAcademicYearId)
                 .FirstOrDefault();
 
             if (existingFeeStructure != null)
@@ -392,20 +521,20 @@ namespace Infrastructure.Services.Fees
 
                 if (duplicateExists)
                 {
-                    throw new Exception("Another fee structure already exists for this fee type, class, and academic year.");
+                    throw new InvalidOperationException("Another fee structure already exists for this fee type, class, and academic year.");
                 }
 
                 var feeType = await _dbContext.FeeTypes.FirstOrDefaultAsync(x => x.Id == feeStructureDto.FeeTypeId, cancellationToken);
                 if (feeType == null)
                 {
-                    throw new Exception("Fee type not found.");
+                    throw new KeyNotFoundException("Fee type not found.");
                 }
 
                 existingFeeStructure.AcademicYearId = currentAcademicYearId;
                 existingFeeStructure.FeeTypeId = feeStructureDto.FeeTypeId;
                 existingFeeStructure.ClassId = feeStructureDto.ClassId;
                 existingFeeStructure.Amount = feeStructureDto.Amount;
-                existingFeeStructure.Description = feeStructureDto.Description;
+                existingFeeStructure.Description = feeStructureDto.Description?.Trim() ?? string.Empty;
                 existingFeeStructure.ModifiedDate = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await _feeGenerationService.SyncFeesForClassAsync(existingFeeStructure.ClassId, currentAcademicYearId, cancellationToken);
