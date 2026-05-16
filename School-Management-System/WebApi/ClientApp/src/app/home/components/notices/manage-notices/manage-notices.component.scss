@@ -1,0 +1,101 @@
+.notice-page {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.notice-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(20rem, 28rem) minmax(0, 1fr);
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.notice-editor,
+.notice-list-panel {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid #dbe3ef;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.notice-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.notice-section-head h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.notice-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field label {
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.notice-description-field textarea {
+  width: 100%;
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.notice-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.35rem;
+}
+
+td strong,
+td small {
+  display: block;
+}
+
+td small {
+  max-width: 24rem;
+  margin-top: 0.2rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:host ::ng-deep .notice-form .p-dropdown,
+:host ::ng-deep .notice-form .p-calendar,
+:host ::ng-deep .notice-form .p-inputtext {
+  width: 100%;
+}
+
+@media screen and (max-width: 980px) {
+  .notice-layout {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+}

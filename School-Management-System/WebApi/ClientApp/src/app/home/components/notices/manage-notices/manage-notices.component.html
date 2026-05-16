@@ -1,0 +1,194 @@
+<div class="notice-page">
+  <app-page-header
+    section="Communication"
+    page="School Notices"
+    subtitle="Create notices and publish them to guardian notifications">
+  </app-page-header>
+
+  <div class="notice-layout">
+    <section class="notice-editor">
+      <div class="notice-section-head">
+        <h3>{{ isEditing ? 'Edit Notice' : 'Create Notice' }}</h3>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-refresh"
+          class="p-button-text p-button-sm"
+          label="Reset"
+          (click)="resetForm()">
+        </button>
+      </div>
+
+      <form [formGroup]="noticeForm" class="notice-form" (ngSubmit)="saveNotice()">
+        <div class="field">
+          <label for="noticeTitle">Title</label>
+          <input id="noticeTitle" pInputText formControlName="title" maxlength="200" />
+        </div>
+
+        <div class="field">
+          <label for="noticeDate">Notice Date</label>
+          <app-np-datepicker
+            placeholder="Select notice date"
+            [unicodeDate]="false"
+            [selectedDate]="noticeForm.get('noticeDateNp')?.value"
+            selectedDateType="bs"
+            (dateChange)="onNoticeDateChange($event)">
+          </app-np-datepicker>
+        </div>
+
+        <div class="field">
+          <label for="targetAudience">Target Audience</label>
+          <p-dropdown
+            inputId="targetAudience"
+            formControlName="targetAudience"
+            [options]="targetAudiences"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onTargetAudienceChange()">
+          </p-dropdown>
+        </div>
+
+        <div class="field" *ngIf="showClassSelector()">
+          <label for="classId">Class</label>
+          <p-dropdown
+            inputId="classId"
+            formControlName="classId"
+            [options]="classRooms"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select class"
+            [showClear]="selectedTargetAudience === 'StudentWise'"
+            (onChange)="onClassChange()">
+          </p-dropdown>
+        </div>
+
+        <div class="field" *ngIf="showSectionSelector()">
+          <label for="sectionId">Section</label>
+          <p-dropdown
+            inputId="sectionId"
+            formControlName="sectionId"
+            [options]="filteredSections"
+            optionLabel="name"
+            optionValue="sectionId"
+            placeholder="Select section"
+            [showClear]="selectedTargetAudience === 'StudentWise'"
+            (onChange)="onSectionChange()">
+          </p-dropdown>
+        </div>
+
+        <div class="field" *ngIf="showStudentSelector()">
+          <label for="studentIds">Students</label>
+          <p-multiSelect
+            inputId="studentIds"
+            formControlName="studentIds"
+            [options]="students"
+            optionLabel="displayName"
+            optionValue="id"
+            placeholder="Select students"
+            display="chip"
+            [filter]="true">
+          </p-multiSelect>
+        </div>
+
+        <div class="field notice-description-field">
+          <label for="description">Description</label>
+          <textarea id="description" pInputText rows="6" formControlName="description"></textarea>
+        </div>
+
+        <div class="notice-actions">
+          <button
+            pButton
+            type="submit"
+            icon="pi pi-save"
+            [label]="isEditing ? 'Update Notice' : 'Save Notice'"
+            [loading]="isSaving">
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="notice-list-panel">
+      <div class="notice-section-head">
+        <h3>Notices</h3>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-sync"
+          class="p-button-text p-button-sm"
+          label="Refresh"
+          (click)="loadNotices()">
+        </button>
+      </div>
+
+      <p-table
+        [value]="notices"
+        [loading]="isLoading"
+        [paginator]="true"
+        [rows]="8"
+        responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Title</th>
+            <th>Audience</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-notice>
+          <tr>
+            <td>
+              <strong>{{ notice.title }}</strong>
+              <small>{{ notice.description }}</small>
+            </td>
+            <td>
+              {{ notice.targetAudience }}
+              <small *ngIf="notice.studentNames?.length">
+                {{ notice.studentNames?.join(', ') }}
+              </small>
+              <small *ngIf="notice.className || notice.sectionName">
+                {{ notice.className || '' }} {{ notice.sectionName || '' }}
+              </small>
+            </td>
+            <td>{{ notice.noticeDateNp }}</td>
+            <td>
+              <p-tag
+                [value]="notice.isPublished ? 'Published' : 'Draft'"
+                [severity]="notice.isPublished ? 'success' : 'warning'">
+              </p-tag>
+            </td>
+            <td>
+              <div class="row-actions">
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-pencil"
+                  class="p-button-text"
+                  [disabled]="notice.isPublished"
+                  (click)="editNotice(notice)"
+                  aria-label="Edit notice">
+                </button>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-send"
+                  class="p-button-text"
+                  [disabled]="notice.isPublished"
+                  (click)="publishNotice(notice)"
+                  aria-label="Publish notice">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">No notices found.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </div>
+</div>
+
+<p-confirmDialog></p-confirmDialog>

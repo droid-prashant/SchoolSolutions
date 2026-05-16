@@ -14,6 +14,7 @@ export const PermissionNames = {
   UserManage: 'User.Manage',
   RoleManage: 'Role.Manage',
   GuardianManage: 'Guardian.Manage',
+  NoticeManage: 'Notice.Manage',
   GuardianStudentProfileView: 'Guardian.StudentProfile.View',
   GuardianAttendanceView: 'Guardian.Attendance.View',
   GuardianResultView: 'Guardian.Result.View',

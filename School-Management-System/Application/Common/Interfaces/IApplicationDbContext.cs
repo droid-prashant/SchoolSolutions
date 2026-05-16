@@ -11,6 +11,7 @@ namespace Application.Common.Interfaces
 {
     public interface IApplicationDbContext
     {
+        DbSet<School> Schools { get; }
         DbSet<AcademicYear> AcademicYears { get; }
         DbSet<StudentEnrollment> StudentEnrollments { get; }
         DbSet<StudentAttendance> StudentAttendances { get; }
@@ -42,6 +43,11 @@ namespace Application.Common.Interfaces
         DbSet<StudentTransferCertificateLog> studentTransferCertificateLogs { get; }
         DbSet<Permission> Permissions { get; }
         DbSet<RolePermission> RolePermissions { get; }
+        DbSet<UserNotificationToken> UserNotificationTokens { get; }
+        DbSet<Notification> Notifications { get; }
+        DbSet<UserNotification> UserNotifications { get; }
+        DbSet<Notice> Notices { get; }
+        DbSet<NoticeStudent> NoticeStudents { get; }
         DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

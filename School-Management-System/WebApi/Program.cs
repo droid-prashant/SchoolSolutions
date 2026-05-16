@@ -2,8 +2,11 @@ using Application;
 using Infrastructure;
 using Infrastructure.Extension;
 using Infrastructure.Services;
+using Application.Notifications.Interfaces;
+using WebApi.Hubs;
 using WebApi.Middleware;
 using WebApi.Seeds;
+using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +20,9 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserResolver>();
+builder.Services.AddSingleton<NotificationConnectionTracker>();
+builder.Services.AddScoped<ISignalRNotificationService, SignalRNotificationService>();
+builder.Services.AddSignalR();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -33,9 +39,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors(builder => builder
-              .AllowAnyOrigin()
+              .SetIsOriginAllowed(_ => true)
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials());
 app.UseStaticFiles();
 //app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -44,5 +51,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

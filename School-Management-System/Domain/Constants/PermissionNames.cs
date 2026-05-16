@@ -17,6 +17,7 @@ namespace Domain.Constants
         public const string UserManage = "User.Manage";
         public const string RoleManage = "Role.Manage";
         public const string GuardianManage = "Guardian.Manage";
+        public const string NoticeManage = "Notice.Manage";
         public const string GuardianStudentProfileView = "Guardian.StudentProfile.View";
         public const string GuardianAttendanceView = "Guardian.Attendance.View";
         public const string GuardianResultView = "Guardian.Result.View";
@@ -55,6 +56,7 @@ namespace Domain.Constants
             new(UserManage, "Manage Users", "Security", "Can create users and assign roles."),
             new(RoleManage, "Manage Roles", "Security", "Can create roles and assign permissions."),
             new(GuardianManage, "Manage Guardians", "Guardian", "Can create guardian accounts and link guardians to students."),
+            new(NoticeManage, "Manage Notices", "Communication", "Can create, update, publish, and view school notices."),
             new(GuardianStudentProfileView, "View Own Students", "Guardian", "Guardian can view linked student profiles."),
             new(GuardianAttendanceView, "View Own Attendance", "Guardian", "Guardian can view attendance for linked students."),
             new(GuardianResultView, "View Own Results", "Guardian", "Guardian can view exam results for linked students."),

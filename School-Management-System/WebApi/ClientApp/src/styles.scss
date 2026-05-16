@@ -921,3 +921,284 @@ body .p-confirm-dialog .p-dialog-header {
     margin-bottom: 1mm;
   }
 }
+/* Notification center lives in the app shell and uses global styling because
+   the overlay panel is rendered outside the component host. */
+.notification-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -0.38rem;
+  right: -0.35rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.notification-panel {
+  width: min(24rem, 88vw);
+  max-height: 32rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.notification-panel-head h4 {
+  margin: 0;
+  color: var(--app-text, #0f172a);
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.notification-panel-head span {
+  display: block;
+  margin-top: 0.18rem;
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.notification-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 0.4rem;
+}
+
+.notification-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.15rem minmax(0, 1fr);
+  gap: 0.7rem;
+  padding: 0.75rem 0.35rem;
+  border: 0;
+  border-bottom: 1px solid #edf2f7;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background: #f8fbff;
+}
+
+.notification-unread {
+  background: #eef5ff;
+}
+
+.notification-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.7rem;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.notification-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.notification-copy strong,
+.notification-copy small,
+.notification-copy em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-copy strong {
+  color: var(--app-text, #0f172a);
+  font-size: 0.88rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.notification-copy small {
+  color: var(--app-text, #334155);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.notification-copy em {
+  color: var(--app-text-muted, #64748b);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.notification-empty {
+  min-height: 9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  color: var(--app-text-muted, #64748b);
+  font-weight: 800;
+}
+
+.notification-empty i {
+  font-size: 1.6rem;
+}
+
+.notice-letter-dialog .p-dialog-content {
+  background: #f8fafc;
+  overflow-x: hidden;
+}
+
+.notice-letter-dialog.p-dialog {
+  margin: 1rem;
+}
+
+.notice-letter-loading {
+  min-height: 18rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-primary-strong, #1e40af);
+  font-size: 1.6rem;
+}
+
+.notice-letter {
+  width: 100%;
+  min-height: 30rem;
+  padding: 2rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+.notice-letter-head {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #1e40af;
+  text-align: center;
+}
+
+.notice-letter-head img {
+  width: 4.7rem;
+  height: 4.7rem;
+  object-fit: contain;
+}
+
+.notice-letter-head h2 {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 1.55rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.notice-letter-head p {
+  margin: 0.18rem 0 0;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.notice-letter-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.notice-letter h3 {
+  margin: 1.5rem 0 1rem;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.notice-letter-body {
+  min-height: 12rem;
+  white-space: pre-line;
+  color: #1e293b;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  font-weight: 600;
+}
+
+.notice-letter-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.18rem;
+  margin-top: 2.5rem;
+  color: #334155;
+}
+
+.notice-letter-footer span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.notice-letter-footer strong {
+  min-width: 10rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid #334155;
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+@media screen and (max-width: 640px) {
+  .notice-letter {
+    padding: 1.1rem;
+  }
+
+  .notice-letter-head {
+    grid-template-columns: 1fr;
+  }
+
+  .notice-letter-head img {
+    margin: 0 auto;
+  }
+
+  .notice-letter-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+}

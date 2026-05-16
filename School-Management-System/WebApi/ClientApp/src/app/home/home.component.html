@@ -26,6 +26,110 @@
         </div>
 
         <button
+            *ngIf="hasGuardianRole"
+            type="button"
+            class="notification-trigger topbar-icon-btn"
+            (click)="notificationPanel.toggle($event)"
+            aria-label="Open notifications">
+            <i class="pi pi-bell"></i>
+            <span class="notification-badge" *ngIf="unreadNotificationCount > 0">
+                {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+            </span>
+        </button>
+
+        <p-overlayPanel #notificationPanel [dismissable]="true" styleClass="notification-overlay">
+            <div class="notification-panel">
+                <div class="notification-panel-head">
+                    <div>
+                        <h4>Notifications</h4>
+                        <span>{{ unreadNotificationCount }} unread</span>
+                    </div>
+                    <button
+                        pButton
+                        type="button"
+                        class="p-button-text p-button-sm"
+                        label="Mark all read"
+                        [disabled]="unreadNotificationCount === 0"
+                        (click)="markAllNotificationsAsRead()">
+                    </button>
+                </div>
+
+                <div class="notification-list" *ngIf="notifications.length; else noNotifications">
+                    <button
+                        type="button"
+                        class="notification-item"
+                        *ngFor="let notification of getVisibleNotifications()"
+                        [class.notification-unread]="!notification.isRead"
+                        (click)="markNotificationAsRead(notification)">
+                        <span class="notification-icon">
+                            <i [class]="notification.notificationType === 'Attendance' ? 'pi pi-calendar-clock' : 'pi pi-megaphone'"></i>
+                        </span>
+                        <span class="notification-copy">
+                            <strong>{{ notification.title }}</strong>
+                            <small>{{ notification.message }}</small>
+                            <em>
+                                {{ notification.notificationType }}
+                                <ng-container *ngIf="notification.studentName"> &middot; {{ notification.studentName }}</ng-container>
+                                &middot; {{ notification.notificationDateTimeNp || (notification.createdAt | date:'medium') }}
+                            </em>
+                        </span>
+                    </button>
+                </div>
+
+                <ng-template #noNotifications>
+                    <div class="notification-empty">
+                        <i class="pi pi-inbox"></i>
+                        <span>No notifications yet</span>
+                    </div>
+                </ng-template>
+            </div>
+        </p-overlayPanel>
+
+        <p-dialog
+            header="School Notice"
+            [(visible)]="isNoticeLetterVisible"
+            [modal]="true"
+            [draggable]="false"
+            [resizable]="false"
+            appendTo="body"
+            [baseZIndex]="10000"
+            [style]="{ width: 'min(52rem, 94vw)', maxHeight: 'calc(100vh - 2rem)' }"
+            [contentStyle]="{ maxHeight: 'calc(100vh - 8rem)', overflow: 'auto' }"
+            styleClass="notice-letter-dialog">
+            <div class="notice-letter-loading" *ngIf="isNoticeLetterLoading">
+                <i class="pi pi-spin pi-spinner"></i>
+            </div>
+
+            <article class="notice-letter" *ngIf="!isNoticeLetterLoading && selectedNoticeLetter">
+                <header class="notice-letter-head">
+                    <img src="assets/Om Pushpanjali logo.png" alt="School Logo" />
+                    <div>
+                        <h2>{{ selectedNoticeLetter.schoolName }}</h2>
+                        <p *ngIf="selectedNoticeLetter.schoolAddress">{{ selectedNoticeLetter.schoolAddress }}</p>
+                        <p>
+                            <ng-container *ngIf="selectedNoticeLetter.schoolPhoneNumber">{{ selectedNoticeLetter.schoolPhoneNumber }}</ng-container>
+                            <ng-container *ngIf="selectedNoticeLetter.schoolPhoneNumber && selectedNoticeLetter.schoolEmail"> | </ng-container>
+                            <ng-container *ngIf="selectedNoticeLetter.schoolEmail">{{ selectedNoticeLetter.schoolEmail }}</ng-container>
+                        </p>
+                    </div>
+                </header>
+
+                <section class="notice-letter-meta">
+                    <span>Notice No: {{ selectedNoticeLetter.noticeNumber || '-' }}</span>
+                    <span>Date: {{ selectedNoticeLetter.noticeDateNp || selectedNoticeLetter.publishedDateTimeNp }}</span>
+                </section>
+
+                <h3>Subject: {{ selectedNoticeLetter.subject }}</h3>
+                <div class="notice-letter-body">{{ selectedNoticeLetter.body }}</div>
+
+                <footer class="notice-letter-footer">
+                    <span>Issued By</span>
+                    <strong>{{ selectedNoticeLetter.issuedBy }}</strong>
+                </footer>
+            </article>
+        </p-dialog>
+
+        <button
             type="button"
             class="avatar-trigger"
             (click)="avatarPanel.toggle($event)"

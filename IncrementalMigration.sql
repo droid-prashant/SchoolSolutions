@@ -983,3 +983,195 @@ VALUES ('20260510100000_AddGuardianAccess', '8.0.15');
 END $$;
 
 
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260516090000_AddNotificationsAndNotices'
+    ) THEN
+
+CREATE TABLE "Notices" (
+    "Id" uuid NOT NULL,
+    "Title" character varying(200) NOT NULL,
+    "Description" text NOT NULL,
+    "NoticeDate" timestamp with time zone NOT NULL,
+    "TargetAudience" character varying(100) NOT NULL,
+    "ClassId" uuid,
+    "SectionId" uuid,
+    "IsPublished" boolean NOT NULL DEFAULT FALSE,
+    "PublishedAt" timestamp with time zone,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "UpdatedAt" timestamp with time zone,
+    "CreatedBy" uuid,
+    "UpdatedBy" uuid,
+    "IsDeleted" boolean NOT NULL DEFAULT FALSE,
+    CONSTRAINT "PK_Notices" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_Notices_ClassRooms_ClassId" FOREIGN KEY ("ClassId") REFERENCES "ClassRooms" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_Notices_Sections_SectionId" FOREIGN KEY ("SectionId") REFERENCES "Sections" ("Id") ON DELETE RESTRICT
+);
+
+CREATE TABLE "Notifications" (
+    "Id" uuid NOT NULL,
+    "Title" character varying(200) NOT NULL,
+    "Message" text NOT NULL,
+    "NotificationType" character varying(100) NOT NULL,
+    "ReferenceId" uuid,
+    "StudentId" uuid,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "CreatedBy" uuid,
+    "IsDeleted" boolean NOT NULL DEFAULT FALSE,
+    CONSTRAINT "PK_Notifications" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_Notifications_Students_StudentId" FOREIGN KEY ("StudentId") REFERENCES "Students" ("Id") ON DELETE RESTRICT
+);
+
+CREATE TABLE "UserNotificationTokens" (
+    "Id" uuid NOT NULL,
+    "UserId" uuid NOT NULL,
+    "FcmToken" text NOT NULL,
+    "DeviceType" character varying(50),
+    "Browser" character varying(100),
+    "Platform" character varying(100),
+    "IsActive" boolean NOT NULL DEFAULT TRUE,
+    "LastUsedAt" timestamp with time zone,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "UpdatedAt" timestamp with time zone,
+    "CreatedBy" uuid,
+    "UpdatedBy" uuid,
+    CONSTRAINT "PK_UserNotificationTokens" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_UserNotificationTokens_AspNetUsers_UserId" FOREIGN KEY ("UserId") REFERENCES "AspNetUsers" ("Id") ON DELETE CASCADE
+);
+
+CREATE TABLE "UserNotifications" (
+    "Id" uuid NOT NULL,
+    "NotificationId" uuid NOT NULL,
+    "UserId" uuid NOT NULL,
+    "IsRead" boolean NOT NULL DEFAULT FALSE,
+    "ReadAt" timestamp with time zone,
+    "IsPushSent" boolean NOT NULL DEFAULT FALSE,
+    "PushSentAt" timestamp with time zone,
+    "IsSignalRSent" boolean NOT NULL DEFAULT FALSE,
+    "SignalRSentAt" timestamp with time zone,
+    "DeliveryStatus" character varying(50) NOT NULL,
+    "ErrorMessage" text,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    CONSTRAINT "PK_UserNotifications" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_UserNotifications_AspNetUsers_UserId" FOREIGN KEY ("UserId") REFERENCES "AspNetUsers" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_UserNotifications_Notifications_NotificationId" FOREIGN KEY ("NotificationId") REFERENCES "Notifications" ("Id") ON DELETE CASCADE
+);
+
+CREATE INDEX "IX_Notices_ClassId" ON "Notices" ("ClassId");
+
+CREATE INDEX "IX_Notices_CreatedAt" ON "Notices" ("CreatedAt");
+
+CREATE INDEX "IX_Notices_IsPublished" ON "Notices" ("IsPublished");
+
+CREATE INDEX "IX_Notices_NoticeDate" ON "Notices" ("NoticeDate");
+
+CREATE INDEX "IX_Notices_SectionId" ON "Notices" ("SectionId");
+
+CREATE INDEX "IX_Notices_TargetAudience" ON "Notices" ("TargetAudience");
+
+CREATE INDEX "IX_Notifications_CreatedAt" ON "Notifications" ("CreatedAt");
+
+CREATE INDEX "IX_Notifications_NotificationType" ON "Notifications" ("NotificationType");
+
+CREATE INDEX "IX_Notifications_NotificationType_ReferenceId_StudentId" ON "Notifications" ("NotificationType", "ReferenceId", "StudentId");
+
+CREATE INDEX "IX_Notifications_ReferenceId" ON "Notifications" ("ReferenceId");
+
+CREATE INDEX "IX_Notifications_StudentId" ON "Notifications" ("StudentId");
+
+CREATE INDEX "IX_UserNotifications_CreatedAt" ON "UserNotifications" ("CreatedAt");
+
+CREATE INDEX "IX_UserNotifications_IsRead" ON "UserNotifications" ("IsRead");
+
+CREATE INDEX "IX_UserNotifications_NotificationId" ON "UserNotifications" ("NotificationId");
+
+CREATE UNIQUE INDEX "IX_UserNotifications_NotificationId_UserId" ON "UserNotifications" ("NotificationId", "UserId");
+
+CREATE INDEX "IX_UserNotifications_UserId" ON "UserNotifications" ("UserId");
+
+CREATE INDEX "IX_UserNotifications_UserId_IsRead_CreatedAt" ON "UserNotifications" ("UserId", "IsRead", "CreatedAt");
+
+CREATE INDEX "IX_UserNotificationTokens_FcmToken" ON "UserNotificationTokens" ("FcmToken");
+
+CREATE INDEX "IX_UserNotificationTokens_UserId" ON "UserNotificationTokens" ("UserId");
+
+CREATE UNIQUE INDEX "IX_UserNotificationTokens_UserId_FcmToken_IsActive" ON "UserNotificationTokens" ("UserId", "FcmToken", "IsActive") WHERE "IsActive" = true;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260516090000_AddNotificationsAndNotices', '8.0.15');
+
+    END IF;
+END $$;
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260516093000_AddNotificationNepaliDateTime'
+    ) THEN
+    ALTER TABLE "Notifications"
+ADD COLUMN IF NOT EXISTS "NotificationDateTimeNp" character varying(40) NOT NULL DEFAULT '';
+ALTER TABLE "Notifications"
+ALTER COLUMN "NotificationDateTimeNp" DROP DEFAULT;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260516093000_AddNotificationNepaliDateTime', '8.0.15');
+
+       END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260516094500_AddNoticeNepaliDate'
+    ) THEN
+    ALTER TABLE "Notices"
+ADD COLUMN IF NOT EXISTS "NoticeDateNp" character varying(20) NOT NULL DEFAULT '';
+ALTER TABLE "Notices"
+ALTER COLUMN "NoticeDateNp" DROP DEFAULT;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260516094500_AddNoticeNepaliDate', '8.0.15');
+
+       END IF;
+END $$;
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "__EFMigrationsHistory"
+        WHERE "MigrationId" = '20260516103000_AddNoticeStudents'
+    ) THEN
+
+CREATE TABLE "NoticeStudents" (
+    "Id" uuid NOT NULL,
+    "NoticeId" uuid NOT NULL,
+    "StudentId" uuid NOT NULL,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    CONSTRAINT "PK_NoticeStudents" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_NoticeStudents_Notices_NoticeId" FOREIGN KEY ("NoticeId") REFERENCES "Notices" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_NoticeStudents_Students_StudentId" FOREIGN KEY ("StudentId") REFERENCES "Students" ("Id") ON DELETE RESTRICT
+);
+
+CREATE INDEX "IX_NoticeStudents_NoticeId" ON "NoticeStudents" ("NoticeId");
+
+CREATE UNIQUE INDEX "IX_NoticeStudents_NoticeId_StudentId" ON "NoticeStudents" ("NoticeId", "StudentId");
+
+CREATE INDEX "IX_NoticeStudents_StudentId" ON "NoticeStudents" ("StudentId");
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260516103000_AddNoticeStudents', '8.0.15');
+
+       END IF;
+END $$;
+
+

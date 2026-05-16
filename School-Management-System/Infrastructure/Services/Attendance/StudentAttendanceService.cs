@@ -2,9 +2,11 @@ using Application.Attendance.Dtos;
 using Application.Attendance.Interfaces;
 using Application.Attendance.ViewModels;
 using Application.Common.Interfaces;
+using Application.Notifications.Interfaces;
 using Domain;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.Attendance
 {
@@ -12,11 +14,19 @@ namespace Infrastructure.Services.Attendance
     {
         private readonly IApplicationDbContext _context;
         private readonly UserResolver _userResolver;
+        private readonly INotificationService _notificationService;
+        private readonly ILogger<StudentAttendanceService> _logger;
 
-        public StudentAttendanceService(IApplicationDbContext context, UserResolver userResolver)
+        public StudentAttendanceService(
+            IApplicationDbContext context,
+            UserResolver userResolver,
+            INotificationService notificationService,
+            ILogger<StudentAttendanceService> logger)
         {
             _context = context;
             _userResolver = userResolver;
+            _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task<StudentDailyAttendanceViewModel> UpsertDailyAttendanceAsync(StudentAttendanceBatchDto request, CancellationToken cancellationToken)
@@ -61,6 +71,7 @@ namespace Infrastructure.Services.Attendance
 
             ValidateStatuses(request.Entries);
 
+            var savedAttendanceIds = new List<Guid>();
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {
@@ -95,6 +106,7 @@ namespace Infrastructure.Services.Attendance
                     attendance.ModifiedBy = recordedBy;
                     attendance.IsActive = true;
                     attendance.IsDeleted = false;
+                    savedAttendanceIds.Add(attendance.Id);
                 }
 
                 await _context.SaveChangesAsync(cancellationToken);
@@ -104,6 +116,15 @@ namespace Infrastructure.Services.Attendance
             {
                 await transaction.RollbackAsync(cancellationToken);
                 throw;
+            }
+
+            try
+            {
+                await _notificationService.CreateAttendanceNotificationsAsync(savedAttendanceIds.Distinct().ToList(), cancellationToken);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogError(exception, "Attendance was saved but guardian notification dispatch failed.");
             }
 
             return await GetAttendanceByDateAsync(request.AcademicYearId, request.ClassSectionId, request.AttendanceDateEn, cancellationToken);

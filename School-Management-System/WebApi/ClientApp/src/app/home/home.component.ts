@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MenuItem } from 'primeng/api';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../shared/auth.service';
 import { LookupService } from '../shared/common/lookup.service';
 import { PermissionNames } from '../shared/common/constants/permission-names';
+import { AppNotification, NoticeLetter } from '../shared/notifications/notification.models';
+import { NotificationService } from '../shared/notifications/notification.service';
 
 @Component({
   selector: 'app-home',
@@ -11,9 +14,15 @@ import { PermissionNames } from '../shared/common/constants/permission-names';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   sidebarItems: MenuItem[] = [];
   avatarMenuItems: MenuItem[] = [];
+  notifications: AppNotification[] = [];
+  selectedNoticeLetter?: NoticeLetter;
+  isNoticeLetterVisible = false;
+  isNoticeLetterLoading = false;
+  unreadNotificationCount = 0;
+  hasGuardianRole = false;
   isSidebarCollapsed = false;
   schoolName = 'Om Pushpanjali English School';
   currentUserName = 'User';
@@ -22,17 +31,25 @@ export class HomeComponent implements OnInit {
   currentAcademicYearName = '';
   userInitials = 'U';
   userAvatarImage = 'assets/Om Pushpanjali logo.png';
+  private subscriptions = new Subscription();
 
   constructor(
     private _router: Router,
     private _authService: AuthService,
-    private _lookupService: LookupService
+    private _lookupService: LookupService,
+    private _notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
     this.loadCurrentUser();
     this.buildSidebar();
     this.buildAvatarMenu();
+    this.initializeNotifications();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this._notificationService.disconnectSignalR();
   }
 
   loadCurrentUser(): void {
@@ -40,6 +57,7 @@ export class HomeComponent implements OnInit {
     this.currentUserName = decodedToken?.name || decodedToken?.username || 'User';
     this.currentUserEmail = decodedToken?.email || '';
     this.currentUserRole = this._authService.getRoles().join(', ') || 'Staff';
+    this.hasGuardianRole = this._authService.hasRole('Guardian');
     const academicYearId = this._authService.getCurrentAcademicYearId();
 
     this.userInitials = this.currentUserName
@@ -67,7 +85,74 @@ export class HomeComponent implements OnInit {
   }
 
   logout(): void {
+    this._notificationService.disconnectSignalR();
     this._authService.logout();
+  }
+
+  markNotificationAsRead(notification: AppNotification): void {
+    if (notification.notificationType === 'Notice') {
+      this.openNoticeLetter(notification);
+    }
+
+    this._notificationService.markAsRead(notification);
+  }
+
+  markAllNotificationsAsRead(): void {
+    this._notificationService.markAllAsRead();
+  }
+
+  getVisibleNotifications(): AppNotification[] {
+    return this.notifications.slice(0, 8);
+  }
+
+  openNoticeLetter(notification: AppNotification): void {
+    const noticeId = notification.noticeId || notification.referenceId;
+    if (!noticeId) {
+      return;
+    }
+
+    this.isNoticeLetterVisible = true;
+    this.isNoticeLetterLoading = true;
+    this.selectedNoticeLetter = undefined;
+
+    this._notificationService.getNoticeLetter(noticeId).subscribe({
+      next: noticeLetter => {
+        this.selectedNoticeLetter = noticeLetter;
+        this.isNoticeLetterLoading = false;
+      },
+      error: () => {
+        this.isNoticeLetterVisible = false;
+        this.isNoticeLetterLoading = false;
+      }
+    });
+  }
+
+  private initializeNotifications(): void {
+    if (!this.hasGuardianRole) {
+      return;
+    }
+
+    this.subscriptions.add(
+      this._notificationService.notifications$.subscribe(notifications => {
+        this.notifications = notifications;
+      })
+    );
+
+    this.subscriptions.add(
+      this._notificationService.unreadCount$.subscribe(count => {
+        this.unreadNotificationCount = count;
+      })
+    );
+
+    this.subscriptions.add(
+      this._notificationService.realtimeNotification$.subscribe(notification => {
+        if (notification.notificationType === 'Notice') {
+          this.openNoticeLetter(notification);
+        }
+      })
+    );
+
+    this._notificationService.initializeGuardianNotifications();
   }
 
   onAvatarActionClick(item: MenuItem): void {
@@ -202,6 +287,13 @@ export class HomeComponent implements OnInit {
           { label: 'Class Fee Setup', icon: 'pi pi-credit-card', routerLink: ['/home/fees/manage-fees'], data: { permissions: [PermissionNames.FeeCreate] } },
           { label: 'Fee Payment', icon: 'pi pi-money-bill', routerLink: ['/home/fees/fee-payment'], data: { permissions: [PermissionNames.FeeCreate] } },
           { label: 'Fee Reports', icon: 'pi pi-file', routerLink: ['/home/fees/reports'], data: { permissions: [PermissionNames.FeeView] } }
+        ]
+      },
+      {
+        label: 'Communication',
+        icon: 'pi pi-send',
+        items: [
+          { label: 'School Notices', icon: 'pi pi-megaphone', routerLink: ['/home/notices/manage'], data: { permissions: [PermissionNames.NoticeManage] } }
         ]
       },
       {

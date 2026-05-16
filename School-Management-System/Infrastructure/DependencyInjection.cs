@@ -29,6 +29,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Application.Exams.Interfaces;
 using Infrastructure.Services.Attendance;
+using Application.Notifications.Interfaces;
+using Infrastructure.Services.Notifications;
 
 namespace Infrastructure
 {
@@ -62,6 +64,9 @@ namespace Infrastructure
             services.AddScoped<ITeacherService, TeacherService>();
             services.AddScoped<IStudentAttendanceService, StudentAttendanceService>();
             services.AddScoped<ITeacherAttendanceService, TeacherAttendanceService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INoticeService, NoticeService>();
+            services.AddScoped<IPushNotificationService, FirebasePushNotificationService>();
             return services;
         }
     }
