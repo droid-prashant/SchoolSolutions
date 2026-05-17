@@ -44,6 +44,34 @@
   gap: 0.85rem;
 }
 
+.notice-grid-filters {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) minmax(12rem, 16rem) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.notice-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.notice-search-box i {
+  position: absolute;
+  left: 0.75rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.notice-search-box input {
+  width: 100%;
+  padding-left: 2.25rem;
+}
+
 .field {
   display: grid;
   gap: 0.35rem;
@@ -93,9 +121,18 @@ td small {
   width: 100%;
 }
 
+:host ::ng-deep .notice-audience-filter,
+:host ::ng-deep .notice-audience-filter .p-dropdown {
+  width: 100%;
+}
+
 @media screen and (max-width: 980px) {
   .notice-layout {
     grid-template-columns: 1fr;
     overflow: auto;
+  }
+
+  .notice-grid-filters {
+    grid-template-columns: 1fr;
   }
 }

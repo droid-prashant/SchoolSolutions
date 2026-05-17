@@ -29,6 +29,12 @@ export class ManageNoticesComponent implements OnInit {
     { label: 'Section Wise', value: 'SectionWise' },
     { label: 'Student Wise', value: 'StudentWise' }
   ];
+  audienceFilterOptions: NoticeAudienceOption[] = [
+    { label: 'All Audiences', value: '' },
+    ...this.targetAudiences
+  ];
+  noticeSearchTerm = '';
+  selectedAudienceFilter = '';
 
   isSaving = false;
   isLoading = false;
@@ -67,6 +73,22 @@ export class ManageNoticesComponent implements OnInit {
 
   get selectedTargetAudience(): string {
     return this.noticeForm.get('targetAudience')?.value;
+  }
+
+  get filteredNotices(): NoticeViewModel[] {
+    const searchTerm = this.noticeSearchTerm.trim().toLowerCase();
+    return this.notices.filter(notice => {
+      const matchesAudience = !this.selectedAudienceFilter || notice.targetAudience === this.selectedAudienceFilter;
+      if (!matchesAudience) {
+        return false;
+      }
+
+      if (!searchTerm) {
+        return true;
+      }
+
+      return this.buildNoticeSearchText(notice).includes(searchTerm);
+    });
   }
 
   showClassSelector(): boolean {
@@ -253,6 +275,11 @@ export class ManageNoticesComponent implements OnInit {
     });
   }
 
+  clearGridFilters(): void {
+    this.noticeSearchTerm = '';
+    this.selectedAudienceFilter = '';
+  }
+
   private loadLookups(): void {
     this.lookupService.getClassRooms().subscribe({
       next: classRooms => {
@@ -334,5 +361,20 @@ export class ManageNoticesComponent implements OnInit {
     const name = `${student.firstName || ''} ${student.lastName || ''}`.trim();
     const classSection = [student.classRoomName, student.sectionName].filter(x => !!x).join(' - ');
     return classSection ? `${name} (${classSection})` : name;
+  }
+
+  private buildNoticeSearchText(notice: NoticeViewModel): string {
+    return [
+      notice.title,
+      notice.description,
+      notice.targetAudience,
+      notice.noticeDateNp,
+      notice.className,
+      notice.sectionName,
+      ...(notice.studentNames ?? [])
+    ]
+      .filter(x => !!x)
+      .join(' ')
+      .toLowerCase();
   }
 }

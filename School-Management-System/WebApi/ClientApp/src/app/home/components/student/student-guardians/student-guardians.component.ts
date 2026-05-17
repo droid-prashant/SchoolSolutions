@@ -21,6 +21,9 @@ export class StudentGuardiansComponent implements OnChanges {
   isLoading = false;
   isSaving = false;
   isSearching = false;
+  isCreateSubmitted = false;
+  isLinkSubmitted = false;
+  private shouldHydrateCreateFormFromLinkedGuardian = false;
 
   constructor(
     private _fb: FormBuilder,
@@ -55,6 +58,8 @@ export class StudentGuardiansComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['student'] && this.student?.id) {
+      this.guardians = [];
+      this.shouldHydrateCreateFormFromLinkedGuardian = true;
       this.resetCreateGuardianForm();
       this.loadGuardians();
       this.searchGuardians();
@@ -70,8 +75,14 @@ export class StudentGuardiansComponent implements OnChanges {
     this._apiService.getStudentGuardians(this.student.id).subscribe({
       next: guardians => {
         this.guardians = guardians;
-        if (this.createGuardianForm.pristine) {
-          this.createGuardianForm.patchValue({ isPrimaryGuardian: guardians.length === 0 });
+        if (this.shouldHydrateCreateFormFromLinkedGuardian) {
+          const linkedGuardian = guardians[0];
+          if (linkedGuardian) {
+            this.patchCreateGuardianFormFromLinkedGuardian(linkedGuardian);
+          } else if (this.createGuardianForm.pristine) {
+            this.createGuardianForm.patchValue({ isPrimaryGuardian: true });
+          }
+          this.shouldHydrateCreateFormFromLinkedGuardian = false;
         }
       },
       error: err => this.showError(err?.error?.message ?? 'Failed to load guardians.'),
@@ -90,16 +101,18 @@ export class StudentGuardiansComponent implements OnChanges {
   }
 
   createGuardian(): void {
+    this.isCreateSubmitted = true;
+
     if (!this.student?.id || this.createGuardianForm.invalid) {
-      this.createGuardianForm.markAllAsTouched();
       return;
     }
 
     this.isSaving = true;
     this._apiService.createGuardianForStudent(this.student.id, this.createGuardianForm.value).subscribe({
-      next: () => {
+      next: guardian => {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Guardian created and linked.' });
-        this.resetCreateGuardianForm();
+        this.shouldHydrateCreateFormFromLinkedGuardian = false;
+        this.patchCreateGuardianFormFromLinkedGuardian(guardian);
         this.loadGuardians();
         this.searchGuardians();
       },
@@ -109,8 +122,9 @@ export class StudentGuardiansComponent implements OnChanges {
   }
 
   linkGuardian(): void {
+    this.isLinkSubmitted = true;
+
     if (!this.student?.id || this.linkGuardianForm.invalid) {
-      this.linkGuardianForm.markAllAsTouched();
       return;
     }
 
@@ -128,6 +142,7 @@ export class StudentGuardiansComponent implements OnChanges {
       next: () => {
         this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Guardian linked to student.' });
         this.linkGuardianForm.patchValue({ guardianId: '' });
+        this.isLinkSubmitted = false;
         this.loadGuardians();
       },
       error: err => this.showError(err?.error?.message ?? 'Failed to link guardian.'),
@@ -174,6 +189,16 @@ export class StudentGuardiansComponent implements OnChanges {
     return this.student ? `${this.student.firstName} ${this.student.lastName}`.trim() : '';
   }
 
+  isCreateControlInvalid(controlName: string): boolean {
+    const control = this.createGuardianForm.get(controlName);
+    return !!(control && control.invalid && this.isCreateSubmitted);
+  }
+
+  isLinkControlInvalid(controlName: string): boolean {
+    const control = this.linkGuardianForm.get(controlName);
+    return !!(control && control.invalid && this.isLinkSubmitted);
+  }
+
   private resetCreateGuardianForm(): void {
     const parentName = this.getPreferredParentName();
     this.createGuardianForm.reset({
@@ -192,6 +217,27 @@ export class StudentGuardiansComponent implements OnChanges {
     this.createGuardianForm.markAsPristine();
     this.createGuardianForm.markAsUntouched();
     this.createGuardianForm.updateValueAndValidity();
+    this.isCreateSubmitted = false;
+  }
+
+  private patchCreateGuardianFormFromLinkedGuardian(guardian: StudentGuardianViewModel): void {
+    this.createGuardianForm.reset({
+      fullName: guardian.fullName,
+      contactNumber: guardian.contactNumber,
+      email: guardian.email ?? '',
+      relationType: guardian.relationType,
+      userName: guardian.userName,
+      password: '',
+      isPrimaryGuardian: guardian.isPrimaryGuardian,
+      canViewFees: guardian.canViewFees,
+      canViewResults: guardian.canViewResults,
+      canViewAttendance: guardian.canViewAttendance,
+      canPayFees: guardian.canPayFees
+    });
+    this.createGuardianForm.markAsPristine();
+    this.createGuardianForm.markAsUntouched();
+    this.createGuardianForm.updateValueAndValidity();
+    this.isCreateSubmitted = false;
   }
 
   private getPreferredParentName(): string {

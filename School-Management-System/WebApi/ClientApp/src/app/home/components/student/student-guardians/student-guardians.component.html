@@ -12,10 +12,11 @@
 
   <div class="guardian-section">
     <h4>Linked Guardians</h4>
-    <p-table [value]="guardians" [loading]="isLoading" styleClass="app-grid-table" [tableStyle]="{ 'min-width': '52rem' }">
+    <p-table [value]="guardians" [loading]="isLoading" styleClass="app-grid-table" [tableStyle]="{ 'min-width': '60rem' }">
       <ng-template pTemplate="header">
         <tr>
           <th>Name</th>
+          <th>Username</th>
           <th>Contact</th>
           <th>Relation</th>
           <th>Access</th>
@@ -27,7 +28,9 @@
         <tr>
           <td>
             <div class="guardian-name">{{ guardian.fullName }}</div>
-            <small>{{ guardian.userName }}</small>
+          </td>
+          <td>
+            <span>{{ guardian.userName || '-' }}</span>
           </td>
           <td>
             <div>{{ guardian.contactNumber }}</div>
@@ -58,7 +61,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="text-center">No guardians linked yet.</td>
+          <td colspan="7" class="text-center">No guardians linked yet.</td>
         </tr>
       </ng-template>
     </p-table>
@@ -68,12 +71,17 @@
     <div class="guardian-panel">
       <h4>Create New Guardian</h4>
       <form [formGroup]="createGuardianForm" class="form-grid" (ngSubmit)="createGuardian()">
-        <input pInputText formControlName="fullName" placeholder="Full name" />
-        <input pInputText formControlName="contactNumber" placeholder="Contact number" />
+        <input pInputText formControlName="fullName" placeholder="Full name"
+          [ngClass]="{ 'ng-invalid ng-dirty': isCreateControlInvalid('fullName') }" />
+        <input pInputText formControlName="contactNumber" placeholder="Contact number"
+          [ngClass]="{ 'ng-invalid ng-dirty': isCreateControlInvalid('contactNumber') }" />
         <input pInputText formControlName="email" placeholder="Email" />
-        <input pInputText formControlName="relationType" placeholder="Relation" />
-        <input pInputText formControlName="userName" placeholder="Username" />
-        <p-password formControlName="password" placeholder="Password" [feedback]="false" [toggleMask]="true"></p-password>
+        <input pInputText formControlName="relationType" placeholder="Relation"
+          [ngClass]="{ 'ng-invalid ng-dirty': isCreateControlInvalid('relationType') }" />
+        <input pInputText formControlName="userName" placeholder="Username"
+          [ngClass]="{ 'ng-invalid ng-dirty': isCreateControlInvalid('userName') }" />
+        <p-password formControlName="password" placeholder="Password" [feedback]="false" [toggleMask]="true"
+          [inputStyleClass]="isCreateControlInvalid('password') ? 'ng-invalid ng-dirty' : ''"></p-password>
 
         <div class="access-grid wide">
           <label><p-checkbox formControlName="isPrimaryGuardian" [binary]="true"></p-checkbox> Primary</label>
@@ -102,9 +110,13 @@
           optionValue="id"
           placeholder="Select guardian"
           [filter]="true"
-          filterBy="fullName,contactNumber,email">
+          filterBy="fullName,userName,contactNumber,email"
+          [ngClass]="{ 'ng-invalid ng-dirty': isLinkControlInvalid('guardianId') }">
           <ng-template pTemplate="item" let-guardian>
-            <div>{{ guardian.fullName }} - {{ guardian.contactNumber }}</div>
+            <div>{{ guardian.fullName }} - {{ guardian.userName }} - {{ guardian.contactNumber }}</div>
+          </ng-template>
+          <ng-template pTemplate="selectedItem" let-guardian>
+            <div *ngIf="guardian">{{ guardian.fullName }} - {{ guardian.userName }}</div>
           </ng-template>
         </p-dropdown>
 

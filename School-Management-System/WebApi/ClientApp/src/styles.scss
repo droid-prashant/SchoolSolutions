@@ -715,8 +715,10 @@ body .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-
 }
 
 body .p-invalid,
-body .ng-invalid.ng-dirty > .p-inputtext,
-body .ng-invalid.ng-touched > .p-inputtext {
+body .p-inputtext.ng-invalid.ng-dirty,
+body .p-inputtext.ng-invalid.ng-touched,
+body .p-dropdown.ng-invalid.ng-dirty,
+body .p-dropdown.ng-invalid.ng-touched {
   border-color: var(--app-danger) !important;
 }
 

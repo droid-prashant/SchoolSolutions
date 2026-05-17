@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  API_BASE_URL: "https://localhost:7089/",
+  API_BASE_URL: "https://192.168.101.3:7089/",
   firebase: {
     apiKey: "",
     authDomain: "",

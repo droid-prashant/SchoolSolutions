@@ -120,8 +120,40 @@
         </button>
       </div>
 
+      <div class="notice-grid-filters">
+        <span class="notice-search-box">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            placeholder="Search notices"
+            [(ngModel)]="noticeSearchTerm"
+            [ngModelOptions]="{ standalone: true }" />
+        </span>
+
+        <p-dropdown
+          class="notice-audience-filter"
+          [options]="audienceFilterOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Target audience"
+          [(ngModel)]="selectedAudienceFilter"
+          [ngModelOptions]="{ standalone: true }">
+        </p-dropdown>
+
+        <button
+          pButton
+          type="button"
+          icon="pi pi-filter-slash"
+          class="p-button-text p-button-sm"
+          [disabled]="!noticeSearchTerm && !selectedAudienceFilter"
+          (click)="clearGridFilters()"
+          aria-label="Clear notice filters">
+        </button>
+      </div>
+
       <p-table
-        [value]="notices"
+        [value]="filteredNotices"
         [loading]="isLoading"
         [paginator]="true"
         [rows]="8"
