@@ -1,59 +1,228 @@
-<app-page-header
-    section="Dashboard"
-    page="Dashboard"
-    subtitle="Track key school metrics and activity at a glance.">
-</app-page-header>
-<div class="grid">
-    <div class="col-12 md:col-3">
-        <div class="surface-card shadow-2 p-4 border-round">
-            <span class="text-xl font-bold">Students</span>
-            <div class="text-3xl mt-2 font-bold text-primary">{{studentsCount}}</div>
-        </div>
+<ng-container *ngIf="loading; else dashboardContent">
+    <div class="dashboard-page">
+        <section class="kpi-grid">
+            <article class="kpi-card" *ngFor="let item of [1,2,3,4,5,6]; trackBy: trackByIndex">
+                <p-skeleton width="3.6rem" height="3.6rem"></p-skeleton>
+                <div class="kpi-copy">
+                    <p-skeleton width="8rem" height="0.9rem"></p-skeleton>
+                    <p-skeleton width="5rem" height="1.5rem" styleClass="mt-2"></p-skeleton>
+                    <p-skeleton width="7rem" height="0.8rem" styleClass="mt-2"></p-skeleton>
+                </div>
+            </article>
+        </section>
     </div>
+</ng-container>
 
-    <div class="col-12 md:col-3">
-        <div class="surface-card shadow-2 p-4 border-round">
-            <span class="text-xl font-bold">Teachers</span>
-            <div class="text-3xl mt-2 font-bold text-primary">{{teachersCount}}</div>
+<ng-template #dashboardContent>
+    <section class="error-panel" *ngIf="errorMessage; else loadedDashboard">
+        <i class="pi pi-cloud"></i>
+        <div>
+            <h3>Unable to load dashboard</h3>
+            <p>{{ errorMessage }}</p>
         </div>
-    </div>
+        <button pButton pRipple type="button" icon="pi pi-refresh" label="Retry" (click)="loadDashboard()"></button>
+    </section>
+</ng-template>
 
-    <div class="col-12 md:col-3">
-        <div class="surface-card shadow-2 p-4 border-round">
-            <span class="text-xl font-bold">Courses</span>
-            <div class="text-3xl mt-2 font-bold text-primary">{{courseCount}}</div>
-        </div>
-    </div>
+<ng-template #loadedDashboard>
+    <div class="dashboard-page">
+        <section class="empty-panel" *ngIf="!hasAnyInsight">
+            <i class="pi pi-lock"></i>
+            <div>
+                <h3>No dashboard sections available</h3>
+                <p>Your current role does not have access to dashboard metrics yet.</p>
+            </div>
+        </section>
 
-    <div class="col-12 md:col-3">
-        <div class="surface-card shadow-2 p-4 p-4 border-round">
-            <span class="text-xl font-bold">Fee Collected Today</span>
-            <div class="text-3xl mt-2 font-bold text-primary">{{feeCollectedToday | number:'1.0-2'}}</div>
-        </div>
-    </div>
-</div>
-<div class="grid mt-3">
-    <div class="col-12 md:col-4">
-        <div class="surface-card shadow-2 p-4 border-round">
-            <span class="text-xl font-bold">Fee Pending Overall</span>
-            <div class="text-3xl mt-2 font-bold text-orange-500">{{feePendingOverall | number:'1.0-2'}}</div>
-        </div>
-    </div>
+        <section class="kpi-grid" *ngIf="kpiCards.length > 0">
+            <article class="kpi-card" [ngClass]="'tone-' + card.tone" *ngFor="let card of kpiCards; trackBy: trackByIndex">
+                <span class="kpi-icon">
+                    <i [class]="card.icon"></i>
+                </span>
+                <div class="kpi-copy">
+                    <span class="kpi-label">{{ card.label }}</span>
+                    <strong>{{ card.value }}</strong>
+                    <span class="kpi-subtext" *ngIf="card.subtext">{{ card.subtext }}</span>
+                    <span class="kpi-trend" *ngIf="card.trend">
+                        <i class="pi pi-arrow-up"></i>
+                        {{ card.trend }}
+                    </span>
+                </div>
+            </article>
+        </section>
 
-    <div class="col-12 md:col-4">
-        <div class="surface-card shadow-2 p-4 border-round">
-            <span class="text-xl font-bold">Fee Collected Overall</span>
-            <div class="text-3xl mt-2 font-bold text-green-600">{{feeCollectedOverall | number:'1.0-2'}}</div>
-        </div>
-    </div>
+        <section class="analytics-grid">
+            <article class="dashboard-card attendance-card" *ngIf="overview?.permissions?.canViewAttendance">
+                <header class="card-header">
+                    <h2>Attendance Overview (Today)</h2>
+                </header>
 
-    <div class="col-12 md:col-4">
-        <div class="surface-card shadow-2 p-4 border-round">
-            <span class="text-xl font-bold">Students With Due Fees</span>
-            <div class="text-3xl mt-2 font-bold text-primary">{{pendingFeeStudents}}</div>
-        </div>
+                <div class="attendance-layout" *ngIf="attendanceChartData; else attendanceEmpty">
+                    <div class="donut-chart">
+                        <p-chart type="doughnut" [data]="attendanceChartData" [options]="attendanceChartOptions"></p-chart>
+                    </div>
+
+                    <div class="attendance-legend">
+                        <div class="legend-row" *ngFor="let item of attendanceLegend; trackBy: trackByIndex">
+                            <span class="legend-dot" [style.background]="item.color"></span>
+                            <div>
+                                <strong>{{ item.label }}</strong>
+                                <span>{{ item.value | number:'1.0-0' }} ({{ item.percent | number:'1.0-2' }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <ng-template #attendanceEmpty>
+                    <div class="panel-empty">
+                        <i class="pi pi-calendar-times"></i>
+                        <span>No student attendance submitted today.</span>
+                    </div>
+                </ng-template>
+
+                <footer class="attendance-alert" *ngIf="overview && overview.summary.classSectionsWithoutAttendance > 0">
+                    <span>
+                        <i class="pi pi-info-circle"></i>
+                        Attendance not taken for {{ overview.summary.classSectionsWithoutAttendance }} classes
+                    </span>
+                    <a routerLink="/home/attendance/student-report">View Details</a>
+                </footer>
+            </article>
+
+            <article class="dashboard-card fee-card" *ngIf="overview?.permissions?.canViewFees">
+                <header class="card-header">
+                    <h2>Fee Collection Summary (This Month)</h2>
+                </header>
+
+                <div class="fee-summary" *ngIf="overview as dashboard">
+                    <div>
+                        <strong class="success">Rs. {{ dashboard.fees.collectedThisMonth | number:'1.0-0' }}</strong>
+                        <span>Collected</span>
+                    </div>
+                    <div>
+                        <strong class="danger">Rs. {{ dashboard.fees.pendingAmount | number:'1.0-0' }}</strong>
+                        <span>Pending</span>
+                    </div>
+                </div>
+
+                <div class="chart-wrap" *ngIf="feeTrendChartData; else feeEmpty">
+                    <p-chart type="line" [data]="feeTrendChartData" [options]="feeTrendChartOptions"></p-chart>
+                </div>
+
+                <ng-template #feeEmpty>
+                    <div class="panel-empty">
+                        <i class="pi pi-wallet"></i>
+                        <span>No fee payments found for the recent months.</span>
+                    </div>
+                </ng-template>
+            </article>
+
+            <article class="dashboard-card students-card" *ngIf="overview?.permissions?.canViewStudents">
+                <header class="card-header">
+                    <h2>Students by Class</h2>
+                </header>
+
+                <div class="chart-wrap" *ngIf="classDistributionChartData; else studentsEmpty">
+                    <p-chart type="bar" [data]="classDistributionChartData" [options]="classDistributionChartOptions"></p-chart>
+                </div>
+
+                <ng-template #studentsEmpty>
+                    <div class="panel-empty">
+                        <i class="pi pi-users"></i>
+                        <span>No active student enrollments found for this academic year.</span>
+                    </div>
+                </ng-template>
+            </article>
+        </section>
+
+        <section class="info-grid">
+            <article class="dashboard-card">
+                <header class="card-header with-link">
+                    <h2>Upcoming Exams</h2>
+                    <a routerLink="/home/exam/student-setup">View All</a>
+                </header>
+
+                <div class="exam-list">
+                    <div class="exam-row" *ngFor="let exam of upcomingExams; trackBy: trackByIndex">
+                        <span class="exam-date">
+                            <strong>{{ exam.day }}</strong>
+                            <small>{{ exam.month }}</small>
+                        </span>
+                        <div class="exam-copy">
+                            <strong>{{ exam.title }}</strong>
+                            <span>{{ exam.scope }}</span>
+                        </div>
+                        <span class="exam-badge" [ngClass]="'exam-' + exam.tone">{{ exam.badge }}</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
+                <header class="card-header with-link">
+                    <h2>Recent Activities</h2>
+                    <a routerLink="/home/dashboard">View All</a>
+                </header>
+
+                <div class="activity-list" *ngIf="activityItems.length > 0; else activityEmpty">
+                    <div class="activity-row" [ngClass]="'tone-' + item.tone" *ngFor="let item of activityItems; trackBy: trackByIndex">
+                        <span class="timeline-dot"></span>
+                        <div>
+                            <strong>{{ item.title }}</strong>
+                            <span>{{ item.description }}</span>
+                        </div>
+                        <time>{{ item.time }}</time>
+                    </div>
+                </div>
+
+                <ng-template #activityEmpty>
+                    <div class="panel-empty compact">
+                        <span>No recent activities available.</span>
+                    </div>
+                </ng-template>
+            </article>
+
+            <article class="dashboard-card">
+                <header class="card-header with-link">
+                    <h2>Recent Notices</h2>
+                    <a routerLink="/home/notices/manage">View All</a>
+                </header>
+
+                <div class="notice-list" *ngIf="noticeItems.length > 0; else noticesEmpty">
+                    <div class="notice-row" *ngFor="let notice of noticeItems; trackBy: trackByIndex">
+                        <span class="notice-icon">
+                            <i class="pi pi-megaphone"></i>
+                        </span>
+                        <div>
+                            <span class="notice-badge" [class.notice-important]="notice.important">{{ notice.badge }}</span>
+                            <strong>{{ notice.title }}</strong>
+                        </div>
+                        <time>{{ notice.date }}</time>
+                    </div>
+                </div>
+
+                <ng-template #noticesEmpty>
+                    <div class="panel-empty compact">
+                        <span>No notices available.</span>
+                    </div>
+                </ng-template>
+            </article>
+        </section>
+
+        <section class="quick-actions-card">
+            <header class="card-header">
+                <h2>Quick Actions</h2>
+            </header>
+
+            <div class="quick-actions-grid">
+                <ng-container *ngFor="let action of quickActions; trackBy: trackByIndex">
+                    <a class="quick-action" [ngClass]="'tone-' + action.tone" [routerLink]="action.route" *appHasAnyPermission="action.permissions">
+                        <span>
+                            <i [class]="action.icon"></i>
+                        </span>
+                        <strong>{{ action.label }}</strong>
+                    </a>
+                </ng-container>
+            </div>
+        </section>
     </div>
-</div>
-<div class="grid mt-5">
-    <p-chart type="bar" [data]="data" [options]="options" style="width:50%; height:400px;" />
-</div>
+</ng-template>

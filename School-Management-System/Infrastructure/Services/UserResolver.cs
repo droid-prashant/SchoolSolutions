@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
+using Infrastructure.Identity;
 using System.Linq;
 using System.Security.Claims;
 
@@ -11,6 +12,7 @@ public class UserResolver
     public readonly string Email;
     public readonly string AcademicYearId;
     public readonly string Role;
+    public readonly IReadOnlyList<string> Permissions = Array.Empty<string>();
     public readonly bool IsSuperAdmin;
     public UserResolver(IHttpContextAccessor httpCtx)
     {
@@ -31,6 +33,10 @@ public class UserResolver
             x.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase) ||
             x.Equals("Super Admin", StringComparison.OrdinalIgnoreCase));
 
+        Permissions = user.FindAll(CustomClaimType.Permission)
+            .Select(x => x.Value)
+            .ToList();
+
         UserName = user.FindFirst("name")?.Value ?? string.Empty;
         AcademicYearId = user.FindFirst("academicYear")?.Value ?? string.Empty;
     }
@@ -43,5 +49,17 @@ public class UserResolver
         }
 
         return academicYearGuid;
+    }
+
+    public bool HasAnyPermission(params string[] permissions)
+    {
+        if (IsSuperAdmin || permissions.Length == 0)
+        {
+            return true;
+        }
+
+        return permissions.Any(permission =>
+            Permissions.Any(grantedPermission =>
+                grantedPermission.Equals(permission, StringComparison.OrdinalIgnoreCase)));
     }
 }

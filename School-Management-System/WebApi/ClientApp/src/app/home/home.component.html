@@ -1,221 +1,13 @@
-<header class="app-topbar">
-    <div class="topbar-left">
-        <button
-            pButton
-            pRipple
-            type="button"
-            class="topbar-icon-btn"
-            [icon]="isSidebarCollapsed ? 'pi pi-bars' : 'pi pi-align-left'"
-            [attr.aria-label]="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-            (click)="toggleSidebar()">
-        </button>
-
-        <div class="topbar-brand">
-            <img src="assets/Om Pushpanjali logo.png" alt="School Logo" class="topbar-logo" />
-            <div class="topbar-brand-copy">
-                <h1>{{ schoolName }}</h1>
-                <span>School Management System</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="topbar-actions">
-        <div class="academic-pill" *ngIf="currentAcademicYearName">
-            <i class="pi pi-calendar"></i>
-            <span>{{ currentAcademicYearName }}</span>
-        </div>
-
-        <button
-            *ngIf="hasGuardianRole"
-            type="button"
-            class="notification-trigger topbar-icon-btn"
-            (click)="notificationPanel.toggle($event)"
-            aria-label="Open notifications">
-            <i class="pi pi-bell"></i>
-            <span class="notification-badge" *ngIf="unreadNotificationCount > 0">
-                {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
-            </span>
-        </button>
-
-        <p-overlayPanel #notificationPanel [dismissable]="true" styleClass="notification-overlay">
-            <div class="notification-panel">
-                <div class="notification-panel-head">
-                    <div>
-                        <h4>Notifications</h4>
-                        <span>{{ unreadNotificationCount }} unread</span>
-                    </div>
-                    <button
-                        pButton
-                        type="button"
-                        class="p-button-text p-button-sm"
-                        label="Mark all read"
-                        [disabled]="unreadNotificationCount === 0"
-                        (click)="markAllNotificationsAsRead()">
-                    </button>
-                </div>
-
-                <div class="notification-list" *ngIf="notifications.length; else noNotifications">
-                    <button
-                        type="button"
-                        class="notification-item"
-                        *ngFor="let notification of getVisibleNotifications()"
-                        [class.notification-unread]="!notification.isRead"
-                        (click)="markNotificationAsRead(notification)">
-                        <span class="notification-icon">
-                            <i [class]="notification.notificationType === 'Attendance' ? 'pi pi-calendar-clock' : 'pi pi-megaphone'"></i>
-                        </span>
-                        <span class="notification-copy">
-                            <strong>{{ notification.title }}</strong>
-                            <small>{{ notification.message }}</small>
-                            <em>
-                                {{ notification.notificationType }}
-                                <ng-container *ngIf="notification.studentName"> &middot; {{ notification.studentName }}</ng-container>
-                                &middot; {{ notification.notificationDateTimeNp || (notification.createdAt | date:'medium') }}
-                            </em>
-                        </span>
-                    </button>
-                </div>
-
-                <ng-template #noNotifications>
-                    <div class="notification-empty">
-                        <i class="pi pi-inbox"></i>
-                        <span>No notifications yet</span>
-                    </div>
-                </ng-template>
-            </div>
-        </p-overlayPanel>
-
-        <p-dialog
-            header="School Notice"
-            [(visible)]="isNoticeLetterVisible"
-            [modal]="true"
-            [draggable]="false"
-            [resizable]="false"
-            appendTo="body"
-            [baseZIndex]="10000"
-            [style]="{ width: 'min(52rem, 94vw)', maxHeight: 'calc(100vh - 2rem)' }"
-            [contentStyle]="{ maxHeight: 'calc(100vh - 8rem)', overflow: 'auto' }"
-            styleClass="notice-letter-dialog">
-            <div class="notice-letter-loading" *ngIf="isNoticeLetterLoading">
-                <i class="pi pi-spin pi-spinner"></i>
-            </div>
-
-            <article class="notice-letter" *ngIf="!isNoticeLetterLoading && selectedNoticeLetter">
-                <header class="notice-letter-head">
-                    <img src="assets/Om Pushpanjali logo.png" alt="School Logo" />
-                    <div>
-                        <h2>{{ selectedNoticeLetter.schoolName }}</h2>
-                        <p *ngIf="selectedNoticeLetter.schoolAddress">{{ selectedNoticeLetter.schoolAddress }}</p>
-                        <p>
-                            <ng-container *ngIf="selectedNoticeLetter.schoolPhoneNumber">{{ selectedNoticeLetter.schoolPhoneNumber }}</ng-container>
-                            <ng-container *ngIf="selectedNoticeLetter.schoolPhoneNumber && selectedNoticeLetter.schoolEmail"> | </ng-container>
-                            <ng-container *ngIf="selectedNoticeLetter.schoolEmail">{{ selectedNoticeLetter.schoolEmail }}</ng-container>
-                        </p>
-                    </div>
-                </header>
-
-                <section class="notice-letter-meta">
-                    <span>Notice No: {{ selectedNoticeLetter.noticeNumber || '-' }}</span>
-                    <span>Date: {{ selectedNoticeLetter.noticeDateNp || selectedNoticeLetter.publishedDateTimeNp }}</span>
-                </section>
-
-                <h3>Subject: {{ selectedNoticeLetter.subject }}</h3>
-                <div class="notice-letter-body">{{ selectedNoticeLetter.body }}</div>
-
-                <footer class="notice-letter-footer">
-                    <span>Issued By</span>
-                    <strong>{{ selectedNoticeLetter.issuedBy }}</strong>
-                </footer>
-            </article>
-        </p-dialog>
-
-        <button
-            type="button"
-            class="avatar-trigger"
-            (click)="avatarPanel.toggle($event)"
-            aria-label="Open profile menu">
-            <ng-container *ngIf="userAvatarImage; else topbarInitialAvatar">
-                <p-avatar
-                    [image]="userAvatarImage"
-                    shape="circle"
-                    (imageError)="onAvatarImageError()"
-                    styleClass="topbar-avatar topbar-avatar-image">
-                </p-avatar>
-            </ng-container>
-            <ng-template #topbarInitialAvatar>
-                <p-avatar
-                    [label]="userInitials"
-                    shape="circle"
-                    styleClass="topbar-avatar">
-                </p-avatar>
-            </ng-template>
-            <span class="topbar-user">
-                <strong>{{ currentUserName }}</strong>
-                <small>{{ currentUserRole }}</small>
-            </span>
-        </button>
-
-        <button
-            pButton
-            pRipple
-            type="button"
-            icon="pi pi-sign-out"
-            class="topbar-icon-btn logout-btn"
-            aria-label="Logout"
-            (click)="logout()">
-        </button>
-
-        <p-overlayPanel #avatarPanel [dismissable]="true" styleClass="account-overlay">
-            <div class="account-panel">
-                <div class="account-summary">
-                    <ng-container *ngIf="userAvatarImage; else accountInitialAvatar">
-                        <p-avatar
-                            [image]="userAvatarImage"
-                            shape="circle"
-                            size="large"
-                            (imageError)="onAvatarImageError()"
-                            styleClass="account-avatar account-avatar-image">
-                        </p-avatar>
-                    </ng-container>
-                    <ng-template #accountInitialAvatar>
-                        <p-avatar
-                            [label]="userInitials"
-                            shape="circle"
-                            size="large"
-                            styleClass="account-avatar">
-                        </p-avatar>
-                    </ng-template>
-
-                    <div class="account-meta">
-                        <h4>{{ currentUserName }}</h4>
-                        <p *ngIf="currentUserEmail">{{ currentUserEmail }}</p>
-                        <span>{{ currentUserRole }}</span>
-                        <span *ngIf="currentAcademicYearName">{{ currentAcademicYearName }}</span>
-                    </div>
-                </div>
-
-                <div class="account-actions">
-                    <button
-                        *ngFor="let item of avatarMenuItems"
-                        pButton
-                        pRipple
-                        type="button"
-                        [icon]="item.icon || ''"
-                        [label]="item.label || ''"
-                        class="p-button-text account-action-btn account-action-logout"
-                        (click)="onAvatarActionClick(item); avatarPanel.hide()">
-                    </button>
-                </div>
-            </div>
-        </p-overlayPanel>
-    </div>
-</header>
-
 <div class="app-shell" [class.sidebar-collapsed]="isSidebarCollapsed">
     <aside class="sidebar-panel" aria-label="Application navigation">
-        <div class="sidebar-rail-head">
-            <span class="sidebar-nav-label">Navigation</span>
-            <span class="sidebar-collapsed-mark">SMS</span>
+        <div class="sidebar-brand">
+            <div class="brand-logo">
+                <img src="assets/Om Pushpanjali logo.png" alt="School Logo" />
+            </div>
+            <div class="brand-copy">
+                <strong>{{ schoolName }}</strong>
+                <span>School Management System</span>
+            </div>
         </div>
 
         <nav class="sidebar-menu-wrap">
@@ -228,22 +20,27 @@
                     routerLinkActive="active-route"
                     [routerLinkActiveOptions]="{ exact: false }"
                     [attr.title]="isSidebarCollapsed ? item.label : null">
-                    <i [class]="item.icon"></i>
+                    <i class="menu-icon" [class]="item.icon"></i>
                     <span class="menu-label">{{ item.label }}</span>
+                    <i class="pi pi-angle-right menu-chevron"></i>
                 </a>
 
                 <section
                     *ngIf="item.items?.length"
                     class="sidebar-group"
                     [class.sidebar-group-active]="isGroupActive(item)">
-                    <div
+                    <button
+                        type="button"
                         class="sidebar-group-heading"
-                        [attr.title]="isSidebarCollapsed ? item.label : null">
-                        <i [class]="item.icon"></i>
+                        [attr.title]="isSidebarCollapsed ? item.label : null"
+                        [attr.aria-expanded]="isGroupExpanded(item)"
+                        (click)="toggleSidebarGroup(item)">
+                        <i class="menu-icon" [class]="item.icon"></i>
                         <span class="menu-label">{{ item.label }}</span>
-                    </div>
+                        <i class="pi menu-chevron" [ngClass]="isGroupExpanded(item) ? 'pi-angle-down' : 'pi-angle-right'"></i>
+                    </button>
 
-                    <div class="sidebar-submenu">
+                    <div class="sidebar-submenu" *ngIf="isGroupExpanded(item)">
                         <a
                             *ngFor="let child of item.items"
                             pRipple
@@ -252,23 +49,239 @@
                             routerLinkActive="active-route"
                             [routerLinkActiveOptions]="{ exact: false }"
                             [attr.title]="isSidebarCollapsed ? child.label : null">
-                            <i [class]="child.icon"></i>
+                            <i class="menu-icon" [class]="child.icon"></i>
                             <span class="menu-label">{{ child.label }}</span>
                         </a>
                     </div>
                 </section>
             </ng-container>
         </nav>
+
     </aside>
 
-    <main class="content-panel">
-        <div class="content-body">
-            <router-outlet></router-outlet>
-        </div>
+    <div class="main-shell">
+        <header class="app-topbar">
+            <div class="topbar-left">
+                <button
+                    pButton
+                    pRipple
+                    type="button"
+                    class="topbar-icon-btn"
+                    [icon]="isSidebarCollapsed ? 'pi pi-bars' : 'pi pi-align-left'"
+                    [attr.aria-label]="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                    (click)="toggleSidebar()">
+                </button>
 
-        <footer class="app-footer">
-            <span>Developed by IntelliSync-360</span>
-            <span>Copyright &copy; 2026. All rights reserved.</span>
-        </footer>
-    </main>
+                <div class="topbar-greeting">
+                    <strong>{{ greeting }}, {{ currentUserName }}!</strong>
+                    <span>Welcome back to your school dashboard.</span>
+                </div>
+            </div>
+
+            <div class="topbar-actions">
+                <div class="topbar-academic-year" *ngIf="currentAcademicYearName">
+                    <i class="pi pi-calendar"></i>
+                    <span>Academic Year: {{ currentAcademicYearName }}</span>
+                </div>
+
+                <span class="country-flag" aria-label="Nepal"></span>
+
+                <ng-container *ngIf="hasGuardianRole; else staticNotificationButton">
+                    <button
+                        type="button"
+                        class="notification-trigger topbar-icon-btn"
+                        (click)="notificationPanel.toggle($event)"
+                        aria-label="Open notifications">
+                        <i class="pi pi-bell"></i>
+                        <span class="notification-badge" *ngIf="unreadNotificationCount > 0">
+                            {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+                        </span>
+                    </button>
+                </ng-container>
+
+                <ng-template #staticNotificationButton>
+                    <button
+                        type="button"
+                        class="notification-trigger topbar-icon-btn"
+                        aria-label="Notifications">
+                        <i class="pi pi-bell"></i>
+                    </button>
+                </ng-template>
+
+                <p-overlayPanel #notificationPanel [dismissable]="true" styleClass="notification-overlay">
+                    <div class="notification-panel">
+                        <div class="notification-panel-head">
+                            <div>
+                                <h4>Notifications</h4>
+                                <span>{{ unreadNotificationCount }} unread</span>
+                            </div>
+                            <button
+                                pButton
+                                type="button"
+                                class="p-button-text p-button-sm"
+                                label="Mark all read"
+                                [disabled]="unreadNotificationCount === 0"
+                                (click)="markAllNotificationsAsRead()">
+                            </button>
+                        </div>
+
+                        <div class="notification-list" *ngIf="notifications.length; else noNotifications">
+                            <button
+                                type="button"
+                                class="notification-item"
+                                *ngFor="let notification of getVisibleNotifications()"
+                                [class.notification-unread]="!notification.isRead"
+                                (click)="markNotificationAsRead(notification)">
+                                <span class="notification-icon">
+                                    <i [class]="notification.notificationType === 'Attendance' ? 'pi pi-calendar-clock' : 'pi pi-megaphone'"></i>
+                                </span>
+                                <span class="notification-copy">
+                                    <strong>{{ notification.title }}</strong>
+                                    <small>{{ notification.message }}</small>
+                                    <em>
+                                        {{ notification.notificationType }}
+                                        <ng-container *ngIf="notification.studentName"> &middot; {{ notification.studentName }}</ng-container>
+                                        &middot; {{ notification.notificationDateTimeNp || (notification.createdAt | date:'medium') }}
+                                    </em>
+                                </span>
+                            </button>
+                        </div>
+
+                        <ng-template #noNotifications>
+                            <div class="notification-empty">
+                                <i class="pi pi-inbox"></i>
+                                <span>No notifications yet</span>
+                            </div>
+                        </ng-template>
+                    </div>
+                </p-overlayPanel>
+
+                <button
+                    type="button"
+                    class="avatar-trigger"
+                    (click)="avatarPanel.toggle($event)"
+                    aria-label="Open profile menu">
+                    <ng-container *ngIf="userAvatarImage; else topbarInitialAvatar">
+                        <p-avatar
+                            [image]="userAvatarImage"
+                            shape="circle"
+                            (imageError)="onAvatarImageError()"
+                            styleClass="topbar-avatar topbar-avatar-image">
+                        </p-avatar>
+                    </ng-container>
+                    <ng-template #topbarInitialAvatar>
+                        <p-avatar
+                            [label]="userInitials"
+                            shape="circle"
+                            styleClass="topbar-avatar">
+                        </p-avatar>
+                    </ng-template>
+                    <span class="topbar-user">
+                        <strong>{{ currentUserName }}</strong>
+                        <small>{{ currentUserRole || 'Super Admin' }}</small>
+                    </span>
+                    <i class="pi pi-angle-down avatar-chevron"></i>
+                </button>
+
+                <p-overlayPanel #avatarPanel [dismissable]="true" styleClass="account-overlay">
+                    <div class="account-panel">
+                        <div class="account-summary">
+                            <ng-container *ngIf="userAvatarImage; else accountInitialAvatar">
+                                <p-avatar
+                                    [image]="userAvatarImage"
+                                    shape="circle"
+                                    size="large"
+                                    (imageError)="onAvatarImageError()"
+                                    styleClass="account-avatar account-avatar-image">
+                                </p-avatar>
+                            </ng-container>
+                            <ng-template #accountInitialAvatar>
+                                <p-avatar
+                                    [label]="userInitials"
+                                    shape="circle"
+                                    size="large"
+                                    styleClass="account-avatar">
+                                </p-avatar>
+                            </ng-template>
+
+                            <div class="account-meta">
+                                <h4>{{ currentUserName }}</h4>
+                                <p *ngIf="currentUserEmail">{{ currentUserEmail }}</p>
+                                <span>{{ currentUserRole || 'Super Admin' }}</span>
+                                <span *ngIf="currentAcademicYearName">{{ currentAcademicYearName }}</span>
+                            </div>
+                        </div>
+
+                        <div class="account-actions">
+                            <button
+                                *ngFor="let item of avatarMenuItems"
+                                pButton
+                                pRipple
+                                type="button"
+                                [icon]="item.icon || ''"
+                                [label]="item.label || ''"
+                                class="p-button-text account-action-btn account-action-logout"
+                                (click)="onAvatarActionClick(item); avatarPanel.hide()">
+                            </button>
+                        </div>
+                    </div>
+                </p-overlayPanel>
+            </div>
+        </header>
+
+        <main class="content-panel">
+            <div class="content-body">
+                <router-outlet></router-outlet>
+            </div>
+
+            <footer class="app-footer">
+                <span>&copy; 2081 School Solutions. All rights reserved.</span>
+                <span>Made with love in Nepal <span class="footer-flag" aria-hidden="true"></span></span>
+            </footer>
+        </main>
+    </div>
 </div>
+
+<p-dialog
+    header="School Notice"
+    [(visible)]="isNoticeLetterVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    appendTo="body"
+    [baseZIndex]="10000"
+    [style]="{ width: 'min(52rem, 94vw)', maxHeight: 'calc(100vh - 2rem)' }"
+    [contentStyle]="{ maxHeight: 'calc(100vh - 8rem)', overflow: 'auto' }"
+    styleClass="notice-letter-dialog">
+    <div class="notice-letter-loading" *ngIf="isNoticeLetterLoading">
+        <i class="pi pi-spin pi-spinner"></i>
+    </div>
+
+    <article class="notice-letter" *ngIf="!isNoticeLetterLoading && selectedNoticeLetter">
+        <header class="notice-letter-head">
+            <img src="assets/Om Pushpanjali logo.png" alt="School Logo" />
+            <div>
+                <h2>{{ selectedNoticeLetter.schoolName }}</h2>
+                <p *ngIf="selectedNoticeLetter.schoolAddress">{{ selectedNoticeLetter.schoolAddress }}</p>
+                <p>
+                    <ng-container *ngIf="selectedNoticeLetter.schoolPhoneNumber">{{ selectedNoticeLetter.schoolPhoneNumber }}</ng-container>
+                    <ng-container *ngIf="selectedNoticeLetter.schoolPhoneNumber && selectedNoticeLetter.schoolEmail"> | </ng-container>
+                    <ng-container *ngIf="selectedNoticeLetter.schoolEmail">{{ selectedNoticeLetter.schoolEmail }}</ng-container>
+                </p>
+            </div>
+        </header>
+
+        <section class="notice-letter-meta">
+            <span>Notice No: {{ selectedNoticeLetter.noticeNumber || '-' }}</span>
+            <span>Date: {{ selectedNoticeLetter.noticeDateNp || selectedNoticeLetter.publishedDateTimeNp }}</span>
+        </section>
+
+        <h3>Subject: {{ selectedNoticeLetter.subject }}</h3>
+        <div class="notice-letter-body">{{ selectedNoticeLetter.body }}</div>
+
+        <footer class="notice-letter-footer">
+            <span>Issued By</span>
+            <strong>{{ selectedNoticeLetter.issuedBy }}</strong>
+        </footer>
+    </article>
+</p-dialog>

@@ -50,6 +50,14 @@ namespace WebApi.Controllers
             return await _dashboardService.GetDashboardSummary(cancellationToken);
         }
 
+        [HttpGet("overview")]
+        [HttpGet("GetOverview")]
+        [HasPermission]
+        public async Task<DashboardOverviewViewModel> GetOverview(CancellationToken cancellationToken)
+        {
+            return await _dashboardService.GetOverview(cancellationToken);
+        }
+
         [HttpGet]
         [Route("GetStudentsByClass")]
         [HasPermission(PermissionNames.StudentView)]

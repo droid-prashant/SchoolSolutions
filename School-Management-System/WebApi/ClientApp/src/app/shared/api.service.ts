@@ -45,6 +45,7 @@ import { TeacherMarksAssignmentViewModel, TeacherSubjectStudentMarksViewModel } 
 import { DashboardSummaryViewModel } from '../home/components/dashboard/model/dashboardSummary.viewModel';
 import { PermissionViewModel, RoleDto, RolePermissionsDto, RoleViewModel, UserRolesDto, UserRolesViewModel, UserViewModel } from './common/models/security/role-permission.models';
 import { GuardianCreateDto, GuardianLinkedStudentViewModel, GuardianStudentAccessDto, GuardianStudentLinkDto, GuardianViewModel, StudentGuardianViewModel } from '../home/components/student/shared/models/guardian.models';
+import { DashboardOverviewViewModel } from '../home/components/dashboard/model/dashboardOverview.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -67,6 +68,10 @@ export class ApiService {
 
   getDashboardSummary(): Observable<DashboardSummaryViewModel> {
     return this._httpClient.get<DashboardSummaryViewModel>(this.baseUrl + "api/Dashboard/GetDashboardSummary");
+  }
+
+  getDashboardOverview(): Observable<DashboardOverviewViewModel> {
+    return this._httpClient.get<DashboardOverviewViewModel>(this.baseUrl + "api/Dashboard/overview");
   }
 
   getRoles(): Observable<RoleViewModel[]> {

@@ -24,7 +24,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   unreadNotificationCount = 0;
   hasGuardianRole = false;
   isSidebarCollapsed = false;
-  schoolName = 'Om Pushpanjali English School';
+  expandedMenuKeys = new Set<string>();
+  schoolName = 'School Solutions';
+  greeting = 'Good Morning';
   currentUserName = 'User';
   currentUserEmail = '';
   currentUserRole = '';
@@ -41,6 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.setGreeting();
     this.loadCurrentUser();
     this.buildSidebar();
     this.buildAvatarMenu();
@@ -169,6 +172,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     return (item.items ?? []).some(child => this.isItemActive(child));
   }
 
+  isGroupExpanded(item: MenuItem): boolean {
+    return this.expandedMenuKeys.has(this.getMenuKey(item)) || this.isGroupActive(item);
+  }
+
+  toggleSidebarGroup(item: MenuItem): void {
+    const key = this.getMenuKey(item);
+
+    if (this.expandedMenuKeys.has(key)) {
+      this.expandedMenuKeys.delete(key);
+      return;
+    }
+
+    this.expandedMenuKeys.add(key);
+  }
+
   isItemActive(item: MenuItem): boolean {
     const routerLink = this.getRouterLink(item);
     if (!routerLink) {
@@ -193,14 +211,23 @@ export class HomeComponent implements OnInit, OnDestroy {
         routerLink: ['/home/dashboard']
       },
       {
-        label: 'Setup',
-        icon: 'pi pi-cog',
+        label: 'Student',
+        icon: 'pi pi-users',
         items: [
-          { label: 'Academic Year', icon: 'pi pi-calendar-plus', routerLink: ['/home/master-entry/add-academic-year'], data: { permissions: [PermissionNames.AcademicYearManage] } }
+          { label: 'Add Student', icon: 'pi pi-user-plus', routerLink: ['/home/student/add-student'], data: { permissions: [PermissionNames.StudentCreate] } },
+          { label: 'Promotion Preview', icon: 'pi pi-arrow-right-arrow-left', routerLink: ['/home/student/promotion-preview'], data: { permissions: [PermissionNames.StudentUpdate] } }
         ]
       },
       {
-        label: 'Classes',
+        label: 'Teacher',
+        icon: 'pi pi-user',
+        items: [
+          { label: 'All Teachers', icon: 'pi pi-id-card', routerLink: ['/home/teacher/list-teacher'], data: { permissions: [PermissionNames.TeacherView] } },
+          { label: 'Subject Marks Entry', icon: 'pi pi-pencil', routerLink: ['/home/teacher/marks-entry'], data: { permissions: [PermissionNames.SubjectMarksEntry] } }
+        ]
+      },
+      {
+        label: 'Class',
         icon: 'pi pi-sitemap',
         items: [
           { label: 'Class Entry', icon: 'pi pi-plus-circle', routerLink: ['/home/master-entry/add-class'], data: { permissions: [PermissionNames.ClassManage] } },
@@ -209,7 +236,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         ]
       },
       {
-        label: 'Subjects & Courses',
+        label: 'Course',
         icon: 'pi pi-book',
         items: [
           { label: 'Course Entry', icon: 'pi pi-bookmark', routerLink: ['/home/master-entry/add-course'], data: { permissions: [PermissionNames.CourseManage] } },
@@ -217,29 +244,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         ]
       },
       {
-        label: 'Students',
-        icon: 'pi pi-users',
-        items: [
-          { label: 'All Students', icon: 'pi pi-users', routerLink: ['/home/student/list-student'], data: { permissions: [PermissionNames.StudentView] } },
-          { label: 'Add Student', icon: 'pi pi-user-plus', routerLink: ['/home/student/add-student'], data: { permissions: [PermissionNames.StudentCreate] } },
-          { label: 'Promotion Preview', icon: 'pi pi-arrow-right-arrow-left', routerLink: ['/home/student/promotion-preview'], data: { permissions: [PermissionNames.StudentUpdate] } }
-        ]
-      },
-      {
-        label: 'Teachers',
-        icon: 'pi pi-user-edit',
-        items: [
-          { label: 'All Teachers', icon: 'pi pi-id-card', routerLink: ['/home/teacher/list-teacher'], data: { permissions: [PermissionNames.TeacherView] } },
-          { label: 'Subject Marks Entry', icon: 'pi pi-pencil', routerLink: ['/home/teacher/marks-entry'], data: { permissions: [PermissionNames.SubjectMarksEntry] } }
-        ]
-      },
-      {
         label: 'Attendance',
-        icon: 'pi pi-calendar-clock',
+        icon: 'pi pi-calendar',
         items: [
           {
             label: 'Student Entry',
-            icon: 'pi pi-user-check',
+            icon: 'pi pi-check-square',
             routerLink: ['/home/attendance/student-entry'],
             data: { permissions: [PermissionNames.StudentAttendanceView, PermissionNames.StudentAttendanceTake, PermissionNames.StudentAttendanceEdit] }
           },
@@ -264,24 +274,8 @@ export class HomeComponent implements OnInit, OnDestroy {
         ]
       },
       {
-        label: 'Exams & Results',
-        icon: 'pi pi-chart-bar',
-        items: [
-          { label: 'Student Exam Setup', icon: 'pi pi-sliders-h', routerLink: ['/home/exam/student-setup'], data: { permissions: [PermissionNames.ExamMarksEntry] } },
-          { label: 'Exam Marks Entry', icon: 'pi pi-file-edit', routerLink: ['/home/exam/exam-marks-entry'], data: { permissions: [PermissionNames.ExamMarksEntry] } },
-          { label: 'Results', icon: 'pi pi-chart-line', routerLink: ['/home/exam/exam-results'], data: { permissions: [PermissionNames.ResultView] } }
-        ]
-      },
-      {
-        label: 'Certificates',
-        icon: 'pi pi-verified',
-        items: [
-          { label: 'Certificates', icon: 'pi pi-id-card', routerLink: ['/home/certificate/certificate'], data: { permissions: [PermissionNames.StudentView] } }
-        ]
-      },
-      {
-        label: 'Fees & Payments',
-        icon: 'pi pi-wallet',
+        label: 'Fees',
+        icon: 'pi pi-dollar',
         items: [
           { label: 'Fee Types', icon: 'pi pi-tags', routerLink: ['/home/master-entry/fee-type'], data: { permissions: [PermissionNames.FeeCreate] } },
           { label: 'Class Fee Setup', icon: 'pi pi-credit-card', routerLink: ['/home/fees/manage-fees'], data: { permissions: [PermissionNames.FeeCreate] } },
@@ -290,21 +284,57 @@ export class HomeComponent implements OnInit, OnDestroy {
         ]
       },
       {
-        label: 'Communication',
-        icon: 'pi pi-send',
+        label: 'Exam',
+        icon: 'pi pi-file-edit',
         items: [
-          { label: 'School Notices', icon: 'pi pi-megaphone', routerLink: ['/home/notices/manage'], data: { permissions: [PermissionNames.NoticeManage] } }
+          { label: 'Student Exam Setup', icon: 'pi pi-sliders-h', routerLink: ['/home/exam/student-setup'], data: { permissions: [PermissionNames.ExamMarksEntry] } },
+          { label: 'Exam Marks Entry', icon: 'pi pi-file-edit', routerLink: ['/home/exam/exam-marks-entry'], data: { permissions: [PermissionNames.ExamMarksEntry] } },
+          { label: 'Results', icon: 'pi pi-chart-line', routerLink: ['/home/exam/exam-results'], data: { permissions: [PermissionNames.ResultView] } }
         ]
       },
       {
-        label: 'Users & Permissions',
+        label: 'Certificate',
+        icon: 'pi pi-verified',
+        items: [
+          { label: 'Certificates', icon: 'pi pi-id-card', routerLink: ['/home/certificate/certificate'], data: { permissions: [PermissionNames.StudentView] } }
+        ]
+      },
+      {
+        label: 'Communication',
+        icon: 'pi pi-comments',
+        items: [
+          { label: 'School Notices', icon: 'pi pi-send', routerLink: ['/home/notices/manage'], data: { permissions: [PermissionNames.NoticeManage] } }
+        ]
+      },
+      {
+        label: 'Reports',
+        icon: 'pi pi-chart-bar',
+        items: [
+          { label: 'Fee Reports', icon: 'pi pi-file', routerLink: ['/home/fees/reports'], data: { permissions: [PermissionNames.FeeView] } },
+          { label: 'Student Attendance', icon: 'pi pi-chart-bar', routerLink: ['/home/attendance/student-report'], data: { permissions: [PermissionNames.StudentAttendanceReport] } },
+          { label: 'Teacher Attendance', icon: 'pi pi-chart-line', routerLink: ['/home/attendance/teacher-report'], data: { permissions: [PermissionNames.TeacherAttendanceReport] } }
+        ]
+      },
+      {
+        label: 'Security',
         icon: 'pi pi-shield',
         items: [
           { label: 'User Roles', icon: 'pi pi-user', routerLink: ['/home/security/user-roles'], data: { permissions: [PermissionNames.UserManage] } },
           { label: 'Role Management', icon: 'pi pi-lock', routerLink: ['/home/security/roles'], data: { permissions: [PermissionNames.RoleManage] } }
         ]
+      },
+      {
+        label: 'Settings',
+        icon: 'pi pi-cog',
+        items: [
+          { label: 'Academic Year', icon: 'pi pi-calendar', routerLink: ['/home/master-entry/add-academic-year'], data: { permissions: [PermissionNames.AcademicYearManage] } }
+        ]
       }
     ]);
+  }
+
+  private getMenuKey(item: MenuItem): string {
+    return item.label || '';
   }
 
   private buildAvatarMenu(): void {
@@ -315,6 +345,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         command: () => this.logout()
       }
     ];
+  }
+
+  private setGreeting(): void {
+    const hour = new Date().getHours();
+    this.greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
   }
 
   private filterMenuByPermissions(items: MenuItem[]): MenuItem[] {
