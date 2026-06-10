@@ -24,12 +24,55 @@
 .kpi-card,
 .dashboard-card,
 .quick-actions-card,
+.dashboard-toolbar,
 .empty-panel,
 .error-panel {
   border: 1px solid #dfe8f5;
   border-radius: 0.5rem;
   background: #ffffff;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.dashboard-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.period-copy {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.period-copy span {
+  color: #667b95;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.period-copy strong {
+  overflow: hidden;
+  color: #10213a;
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.period-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+:host ::ng-deep .period-controls .p-dropdown {
+  min-width: 12rem;
+}
+
+:host ::ng-deep .period-controls .np-datepicker-wrapper {
+  width: 10.6rem;
 }
 
 .kpi-card {
@@ -129,6 +172,14 @@
   font-weight: 800;
 }
 
+.card-header span {
+  display: block;
+  margin-top: 0.18rem;
+  color: #667b95;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .card-header a {
   color: #2563eb;
   font-size: 0.76rem;
@@ -152,6 +203,36 @@
 .attendance-legend {
   display: grid;
   gap: 0.78rem;
+}
+
+.period-attendance {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.period-attendance div {
+  padding: 0.48rem;
+  border-radius: 0.42rem;
+  background: #f7faff;
+}
+
+.period-attendance span,
+.period-attendance strong {
+  display: block;
+}
+
+.period-attendance span {
+  color: #667b95;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.period-attendance strong {
+  margin-top: 0.18rem;
+  color: #142845;
+  font-size: 0.86rem;
 }
 
 .legend-row {
@@ -544,6 +625,12 @@
 }
 
 @media (max-width: 760px) {
+  .dashboard-toolbar,
+  .period-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .kpi-grid,
   .quick-actions-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -551,6 +638,10 @@
 
   .attendance-layout {
     grid-template-columns: 1fr;
+  }
+
+  .period-attendance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .notice-row,

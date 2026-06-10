@@ -4,13 +4,15 @@ import { PaginatorModule } from 'primeng/paginator';
 import { finalize, Subject, takeUntil } from 'rxjs';
 
 import { ApiService } from '../../../../shared/api.service';
+import { DateConverterService } from '../../../../shared/calender/date-convertor.service';
+import { NpDatepickerComponent } from '../../../../shared/calender/np-datepicker/np-datepicker.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { DashboardActivityViewModel } from '../model/dashboardOverview.viewModel';
 
 @Component({
   selector: 'app-activity-log',
   standalone: true,
-  imports: [SharedModule, RouterModule, PaginatorModule],
+  imports: [SharedModule, RouterModule, PaginatorModule, NpDatepickerComponent],
   templateUrl: './activity-log.component.html',
   styleUrl: './activity-log.component.scss'
 })
@@ -26,8 +28,10 @@ export class ActivityLogComponent implements OnInit, OnDestroy {
 
   activities: DashboardActivityViewModel[] = [];
   selectedType = '';
-  fromDate: Date | null = null;
-  toDate: Date | null = null;
+  fromDateBs = '';
+  toDateBs = '';
+  private fromDateAd = '';
+  private toDateAd = '';
   loading = false;
   errorMessage = '';
   totalRecords = 0;
@@ -36,7 +40,10 @@ export class ActivityLogComponent implements OnInit, OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) { }
+  constructor(
+    private apiService: ApiService,
+    private dateConverter: DateConverterService
+  ) { }
 
   ngOnInit(): void {
     this.loadActivities();
@@ -54,10 +61,22 @@ export class ActivityLogComponent implements OnInit, OnDestroy {
 
   resetFilters(): void {
     this.selectedType = '';
-    this.fromDate = null;
-    this.toDate = null;
+    this.fromDateBs = '';
+    this.toDateBs = '';
+    this.fromDateAd = '';
+    this.toDateAd = '';
     this.page = 1;
     this.loadActivities();
+  }
+
+  onFromDateChange(value: { bs: string; ad: string }): void {
+    this.fromDateBs = value.bs;
+    this.fromDateAd = value.ad;
+  }
+
+  onToDateChange(value: { bs: string; ad: string }): void {
+    this.toDateBs = value.bs;
+    this.toDateAd = value.ad;
   }
 
   onPageChange(event: any): void {
@@ -78,8 +97,8 @@ export class ActivityLogComponent implements OnInit, OnDestroy {
       page: this.page,
       pageSize: this.pageSize,
       type: this.selectedType || undefined,
-      fromDate: this.formatDateParam(this.fromDate),
-      toDate: this.formatDateParam(this.toDate)
+      fromDate: this.fromDateAd || undefined,
+      toDate: this.toDateAd || undefined
     })
       .pipe(
         takeUntil(this.destroy$),
@@ -135,14 +154,17 @@ export class ActivityLogComponent implements OnInit, OnDestroy {
     return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
   }
 
-  private formatDateParam(value: Date | null): string | undefined {
-    if (!value) {
-      return undefined;
+  getNepaliDateTime(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '-';
     }
 
-    const year = value.getFullYear();
-    const month = `${value.getMonth() + 1}`.padStart(2, '0');
-    const day = `${value.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const adDate = `${date.getFullYear()}-${this.pad(date.getMonth() + 1)}-${this.pad(date.getDate())}`;
+    return `${this.dateConverter.adToBs(adDate)} ${this.pad(date.getHours())}:${this.pad(date.getMinutes())}`;
+  }
+
+  private pad(value: number): string {
+    return `${value}`.padStart(2, '0');
   }
 }

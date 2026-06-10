@@ -53,9 +53,9 @@ namespace WebApi.Controllers
         [HttpGet("overview")]
         [HttpGet("GetOverview")]
         [HasPermission]
-        public async Task<DashboardOverviewViewModel> GetOverview(CancellationToken cancellationToken)
+        public async Task<DashboardOverviewViewModel> GetOverview([FromQuery] DashboardOverviewQueryViewModel query, CancellationToken cancellationToken)
         {
-            return await _dashboardService.GetOverview(cancellationToken);
+            return await _dashboardService.GetOverview(query, cancellationToken);
         }
 
         [HttpGet("activities")]

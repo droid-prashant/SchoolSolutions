@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { finalize, Subject, takeUntil } from 'rxjs';
 
@@ -9,9 +10,12 @@ import { ProvinceViewModel } from '../../../shared/common/models/master/master.V
 import { SharedModule } from '../../../shared/shared.module';
 import { MasterApiService } from '../../../shared/master-api.service';
 import { ClassRoomViewModel } from '../class-room/shared/models/viewModels/classRoom.viewModel';
-import { DashboardActivityViewModel, DashboardNoticeViewModel, DashboardOverviewViewModel } from './model/dashboardOverview.viewModel';
+import { DateConverterService, BsDateParts } from '../../../shared/calender/date-convertor.service';
+import { NpDatepickerComponent } from '../../../shared/calender/np-datepicker/np-datepicker.component';
+import { DashboardActivityViewModel, DashboardNoticeViewModel, DashboardOverviewQuery, DashboardOverviewViewModel } from './model/dashboardOverview.viewModel';
 
 type DashboardTone = 'blue' | 'green' | 'orange' | 'pink' | 'teal' | 'purple' | 'yellow' | 'indigo';
+type DashboardPeriodKey = 'today' | 'this-week' | 'this-month' | 'this-academic-year' | 'custom';
 
 interface DashboardKpiCard {
   label: string;
@@ -60,15 +64,38 @@ interface NoticeItem {
   important: boolean;
 }
 
+interface DashboardPeriodOption {
+  label: string;
+  value: DashboardPeriodKey;
+}
+
+interface DashboardResolvedPeriod {
+  key: DashboardPeriodKey;
+  label: string;
+  fromDate: string;
+  toDate: string;
+  fromDateNp: string;
+  toDateNp: string;
+  monthBuckets: string[];
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [SharedModule, RouterModule],
+  imports: [SharedModule, RouterModule, FormsModule, NpDatepickerComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   readonly permissions = PermissionNames;
+  readonly periodOptions: DashboardPeriodOption[] = [
+    { label: 'Today', value: 'today' },
+    { label: 'This Week', value: 'this-week' },
+    { label: 'This Month', value: 'this-month' },
+    { label: 'This Academic Year', value: 'this-academic-year' },
+    { label: 'Custom Range', value: 'custom' }
+  ];
+
   readonly quickActions: DashboardQuickAction[] = [
     {
       label: 'Add Student',
@@ -178,6 +205,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   errorMessage = '';
   hasAnyInsight = false;
   displayName = 'Admin Developer';
+  selectedPeriodKey: DashboardPeriodKey = 'this-month';
+  periodLabel = 'This Month';
+  periodSummary = '';
+  periodTrendLabel = 'in this month';
+  customFromBs = '';
+  customToBs = '';
+  private customFromAd = '';
+  private customToAd = '';
 
   attendanceChartData: any;
   attendanceChartOptions: any;
@@ -191,11 +226,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
   private readonly numberFormatter = new Intl.NumberFormat('en-IN');
+  private readonly bsMonthNames = [
+    'Baisakh',
+    'Jestha',
+    'Asar',
+    'Shrawan',
+    'Bhadra',
+    'Ashwin',
+    'Kartik',
+    'Mangsir',
+    'Poush',
+    'Magh',
+    'Falgun',
+    'Chaitra'
+  ];
 
   constructor(
     private apiService: ApiService,
     private masterApiService: MasterApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private dateConverter: DateConverterService
   ) { }
 
   ngOnInit(): void {
@@ -212,8 +262,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadDashboard(): void {
     this.loading = true;
     this.errorMessage = '';
+    const period = this.resolveDashboardPeriod();
+    this.periodLabel = period.label;
+    this.periodSummary = this.formatPeriodSummary(period);
+    this.periodTrendLabel = this.getPeriodTrendLabel(period.key);
 
-    this.apiService.getDashboardOverview()
+    this.apiService.getDashboardOverview(this.toDashboardQuery(period))
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.loading = false)
@@ -236,6 +290,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return index;
   }
 
+  onPeriodChange(): void {
+    if (this.selectedPeriodKey === 'custom') {
+      this.ensureCustomRange();
+    }
+
+    this.loadDashboard();
+  }
+
+  onCustomFromDateChange(value: { bs: string; ad: string }): void {
+    this.customFromBs = value.bs;
+    this.customFromAd = value.ad;
+  }
+
+  onCustomToDateChange(value: { bs: string; ad: string }): void {
+    this.customToBs = value.bs;
+    this.customToAd = value.ad;
+  }
+
+  applyCustomPeriod(): void {
+    this.ensureCustomRange();
+    this.loadDashboard();
+  }
+
   private buildDashboardView(overview: DashboardOverviewViewModel): void {
     const summary = overview.summary;
     const attendanceTotal = overview.attendance.totalMarked ||
@@ -247,7 +324,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         label: 'Total Students',
         value: this.formatNumber(summary.totalStudents),
         subtext: `Active: ${this.formatNumber(summary.activeStudents)}`,
-        trend: `${this.formatNumber(summary.newAdmissionsThisMonth)} this month`,
+        trend: `${this.formatNumber(summary.newAdmissionsThisMonth)} ${this.periodTrendLabel}`,
         icon: 'pi pi-user-plus',
         tone: 'blue'
       });
@@ -462,6 +539,200 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.attendanceChartData = null;
     this.feeTrendChartData = null;
     this.classDistributionChartData = null;
+  }
+
+  private resolveDashboardPeriod(): DashboardResolvedPeriod {
+    const todayAd = this.dateConverter.formatAd(new Date());
+    const todayBs = this.dateConverter.adToBs(todayAd);
+    const todayBsParts = this.parseBs(todayBs);
+
+    switch (this.selectedPeriodKey) {
+      case 'today':
+        return this.createResolvedPeriod('today', `Today (${this.formatBsLabel(todayBs)})`, todayAd, todayAd, todayBs, todayBs);
+      case 'this-week':
+        return this.resolveCurrentWeek(todayAd);
+      case 'this-academic-year':
+        return this.resolveAcademicYearPeriod(todayBsParts);
+      case 'custom':
+        this.ensureCustomRange();
+        return this.createResolvedPeriod('custom', 'Custom Range', this.customFromAd, this.customToAd, this.customFromBs, this.customToBs);
+      case 'this-month':
+      default:
+        return this.resolveCurrentMonth(todayBsParts);
+    }
+  }
+
+  private resolveCurrentWeek(todayAd: string): DashboardResolvedPeriod {
+    const today = this.parseAdDate(todayAd);
+    const weekStart = this.addAdDays(today, -today.getDay());
+    const weekEnd = this.addAdDays(weekStart, 6);
+    const fromDate = this.formatAdDateParts(weekStart);
+    const toDate = this.formatAdDateParts(weekEnd);
+    const fromDateNp = this.dateConverter.adToBs(fromDate);
+    const toDateNp = this.dateConverter.adToBs(toDate);
+
+    return this.createResolvedPeriod('this-week', 'This Week', fromDate, toDate, fromDateNp, toDateNp);
+  }
+
+  private resolveCurrentMonth(todayBsParts: BsDateParts): DashboardResolvedPeriod {
+    const startBs = this.formatBsDate({ ...todayBsParts, day: 1 });
+    const endBs = this.formatBsDate(this.getBsMonthEnd(todayBsParts.year, todayBsParts.month));
+    const label = `${this.bsMonthNames[todayBsParts.month - 1]} ${todayBsParts.year}`;
+
+    return this.createResolvedPeriod('this-month', label, this.dateConverter.bsToAd(startBs), this.dateConverter.bsToAd(endBs), startBs, endBs);
+  }
+
+  private resolveAcademicYearPeriod(todayBsParts: BsDateParts): DashboardResolvedPeriod {
+    const fallbackStartBs = `${todayBsParts.year}-01-01`;
+    const fallbackEndBs = this.formatBsDate(this.getBsMonthEnd(todayBsParts.year, 12));
+    const fromDateNp = this.overview?.academicYearStartDateNp || fallbackStartBs;
+    const toDateNp = this.overview?.academicYearEndDateNp || fallbackEndBs;
+    const fromDate = this.overview?.academicYearStartDateEn || this.dateConverter.bsToAd(fromDateNp);
+    const toDate = this.overview?.academicYearEndDateEn || this.dateConverter.bsToAd(toDateNp);
+    const label = this.overview?.academicYearName ? `Academic Year ${this.overview.academicYearName}` : 'This Academic Year';
+
+    return this.createResolvedPeriod('this-academic-year', label, fromDate, toDate, fromDateNp, toDateNp);
+  }
+
+  private createResolvedPeriod(
+    key: DashboardPeriodKey,
+    label: string,
+    fromDate: string,
+    toDate: string,
+    fromDateNp: string,
+    toDateNp: string
+  ): DashboardResolvedPeriod {
+    if (this.compareAdDates(fromDate, toDate) > 0) {
+      [fromDate, toDate] = [toDate, fromDate];
+      [fromDateNp, toDateNp] = [toDateNp, fromDateNp];
+    }
+
+    return {
+      key,
+      label,
+      fromDate,
+      toDate,
+      fromDateNp,
+      toDateNp,
+      monthBuckets: this.buildNepaliMonthBuckets(this.parseBs(toDateNp))
+    };
+  }
+
+  private toDashboardQuery(period: DashboardResolvedPeriod): DashboardOverviewQuery {
+    return {
+      periodKey: period.key,
+      periodLabel: period.label,
+      fromDate: period.fromDate,
+      toDate: period.toDate,
+      fromDateNp: period.fromDateNp,
+      toDateNp: period.toDateNp,
+      monthBuckets: period.monthBuckets
+    };
+  }
+
+  private ensureCustomRange(): void {
+    if (this.customFromBs && this.customToBs && this.customFromAd && this.customToAd) {
+      return;
+    }
+
+    const currentMonth = this.resolveCurrentMonth(this.dateConverter.adToBsParts(new Date()));
+    this.customFromBs = currentMonth.fromDateNp;
+    this.customToBs = currentMonth.toDateNp;
+    this.customFromAd = currentMonth.fromDate;
+    this.customToAd = currentMonth.toDate;
+  }
+
+  private buildNepaliMonthBuckets(endBs: BsDateParts): string[] {
+    return Array.from({ length: 6 }, (_, index) => {
+      const month = this.addBsMonths(endBs.year, endBs.month, index - 5);
+      const startBs = this.formatBsDate({ ...month, day: 1 });
+      const endMonth = this.getBsMonthEnd(month.year, month.month);
+      const endBsString = this.formatBsDate(endMonth);
+      const label = `${this.bsMonthNames[month.month - 1]} ${month.year}`;
+
+      return `${label}|${this.dateConverter.bsToAd(startBs)}|${this.dateConverter.bsToAd(endBsString)}`;
+    });
+  }
+
+  private getBsMonthEnd(year: number, month: number): BsDateParts {
+    const firstDayAd = this.dateConverter.bsToAdParts({ year, month, day: 1 });
+    const nextMonth = this.addBsMonths(year, month, 1);
+    const nextMonthAd = this.dateConverter.bsToAdParts({ year: nextMonth.year, month: nextMonth.month, day: 1 });
+    const firstDay = new Date(firstDayAd.year, firstDayAd.month - 1, firstDayAd.day);
+    const nextFirstDay = new Date(nextMonthAd.year, nextMonthAd.month - 1, nextMonthAd.day);
+    const daysInMonth = Math.round((nextFirstDay.getTime() - firstDay.getTime()) / 86400000);
+
+    return { year, month, day: daysInMonth >= 28 && daysInMonth <= 32 ? daysInMonth : 30 };
+  }
+
+  private addBsMonths(year: number, month: number, offset: number): BsDateParts {
+    const zeroBasedMonth = year * 12 + (month - 1) + offset;
+    return {
+      year: Math.floor(zeroBasedMonth / 12),
+      month: (zeroBasedMonth % 12) + 1,
+      day: 1
+    };
+  }
+
+  private parseBs(value: string): BsDateParts {
+    const [year, month, day] = value.split('-').map(Number);
+    return { year, month, day };
+  }
+
+  private parseAdDate(value: string): Date {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private addAdDays(value: Date, days: number): Date {
+    const date = new Date(value);
+    date.setDate(date.getDate() + days);
+    return date;
+  }
+
+  private formatAdDateParts(value: Date): string {
+    return `${value.getFullYear()}-${this.pad(value.getMonth() + 1)}-${this.pad(value.getDate())}`;
+  }
+
+  private formatBsDate(value: BsDateParts): string {
+    return `${value.year}-${this.pad(value.month)}-${this.pad(value.day)}`;
+  }
+
+  private formatBsLabel(value: string): string {
+    const bs = this.parseBs(value);
+    return `${this.bsMonthNames[bs.month - 1]} ${bs.day}, ${bs.year}`;
+  }
+
+  private formatPeriodSummary(period: DashboardResolvedPeriod): string {
+    if (period.fromDateNp === period.toDateNp) {
+      return this.formatBsLabel(period.fromDateNp);
+    }
+
+    return `${this.formatBsLabel(period.fromDateNp)} - ${this.formatBsLabel(period.toDateNp)}`;
+  }
+
+  private getPeriodTrendLabel(key: DashboardPeriodKey): string {
+    switch (key) {
+      case 'today':
+        return 'today';
+      case 'this-week':
+        return 'this week';
+      case 'this-academic-year':
+        return 'this academic year';
+      case 'custom':
+        return 'in selected range';
+      case 'this-month':
+      default:
+        return 'this month';
+    }
+  }
+
+  private compareAdDates(first: string, second: string): number {
+    return first.localeCompare(second);
+  }
+
+  private pad(value: number): string {
+    return `${value}`.padStart(2, '0');
   }
 
   private warmLookupCaches(): void {

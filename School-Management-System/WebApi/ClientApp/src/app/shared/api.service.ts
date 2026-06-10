@@ -45,7 +45,7 @@ import { TeacherMarksAssignmentViewModel, TeacherSubjectStudentMarksViewModel } 
 import { DashboardSummaryViewModel } from '../home/components/dashboard/model/dashboardSummary.viewModel';
 import { PermissionViewModel, RoleDto, RolePermissionsDto, RoleViewModel, UserRolesDto, UserRolesViewModel, UserViewModel } from './common/models/security/role-permission.models';
 import { GuardianCreateDto, GuardianLinkedStudentViewModel, GuardianStudentAccessDto, GuardianStudentLinkDto, GuardianViewModel, StudentGuardianViewModel } from '../home/components/student/shared/models/guardian.models';
-import { DashboardOverviewViewModel } from '../home/components/dashboard/model/dashboardOverview.viewModel';
+import { DashboardOverviewQuery, DashboardOverviewViewModel } from '../home/components/dashboard/model/dashboardOverview.viewModel';
 import { DashboardActivityLogViewModel, DashboardActivityQuery } from '../home/components/dashboard/model/activityLog.viewModel';
 
 @Injectable({
@@ -71,8 +71,38 @@ export class ApiService {
     return this._httpClient.get<DashboardSummaryViewModel>(this.baseUrl + "api/Dashboard/GetDashboardSummary");
   }
 
-  getDashboardOverview(): Observable<DashboardOverviewViewModel> {
-    return this._httpClient.get<DashboardOverviewViewModel>(this.baseUrl + "api/Dashboard/overview");
+  getDashboardOverview(query?: DashboardOverviewQuery): Observable<DashboardOverviewViewModel> {
+    let params = new HttpParams();
+
+    if (query?.periodKey) {
+      params = params.set('periodKey', query.periodKey);
+    }
+
+    if (query?.periodLabel) {
+      params = params.set('periodLabel', query.periodLabel);
+    }
+
+    if (query?.fromDate) {
+      params = params.set('fromDate', query.fromDate);
+    }
+
+    if (query?.toDate) {
+      params = params.set('toDate', query.toDate);
+    }
+
+    if (query?.fromDateNp) {
+      params = params.set('fromDateNp', query.fromDateNp);
+    }
+
+    if (query?.toDateNp) {
+      params = params.set('toDateNp', query.toDateNp);
+    }
+
+    query?.monthBuckets?.forEach(bucket => {
+      params = params.append('monthBuckets', bucket);
+    });
+
+    return this._httpClient.get<DashboardOverviewViewModel>(this.baseUrl + "api/Dashboard/overview", { params });
   }
 
   getDashboardActivities(query: DashboardActivityQuery): Observable<DashboardActivityLogViewModel> {

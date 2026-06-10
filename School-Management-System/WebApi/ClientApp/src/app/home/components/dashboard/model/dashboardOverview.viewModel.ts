@@ -2,9 +2,14 @@ export interface DashboardOverviewViewModel {
   userName: string;
   academicYearId: string;
   academicYearName: string;
+  academicYearStartDateNp: string;
+  academicYearEndDateNp: string;
+  academicYearStartDateEn: string;
+  academicYearEndDateEn: string;
   schoolName: string;
   schoolLogoUrl: string;
   serverDate: string;
+  period: DashboardPeriodViewModel;
   permissions: DashboardPermissionViewModel;
   summary: DashboardOverviewSummaryViewModel;
   attendance: DashboardAttendanceOverviewViewModel;
@@ -13,6 +18,25 @@ export interface DashboardOverviewViewModel {
   exams: DashboardExamOverviewViewModel;
   notices: DashboardNoticeOverviewViewModel;
   activities: DashboardActivityViewModel[];
+}
+
+export interface DashboardPeriodViewModel {
+  key: string;
+  label: string;
+  fromDate: string;
+  toDate: string;
+  fromDateNp: string;
+  toDateNp: string;
+}
+
+export interface DashboardOverviewQuery {
+  periodKey?: string;
+  periodLabel?: string;
+  fromDate?: string;
+  toDate?: string;
+  fromDateNp?: string;
+  toDateNp?: string;
+  monthBuckets?: string[];
 }
 
 export interface DashboardPermissionViewModel {
@@ -57,6 +81,13 @@ export interface DashboardAttendanceOverviewViewModel {
   halfDay: number;
   totalMarked: number;
   attendancePercentage: number;
+  periodPresent: number;
+  periodAbsent: number;
+  periodLate: number;
+  periodLeave: number;
+  periodHalfDay: number;
+  periodTotalMarked: number;
+  periodAttendancePercentage: number;
   classWise: DashboardClassAttendanceViewModel[];
   recentSubmissions: DashboardRecentAttendanceViewModel[];
 }

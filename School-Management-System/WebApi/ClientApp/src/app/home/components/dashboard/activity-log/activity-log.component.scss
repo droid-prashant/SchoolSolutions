@@ -43,7 +43,8 @@
 
 :host ::ng-deep .filter-field .p-dropdown,
 :host ::ng-deep .filter-field .p-calendar,
-:host ::ng-deep .filter-field .p-inputtext {
+:host ::ng-deep .filter-field .p-inputtext,
+:host ::ng-deep .filter-field .np-datepicker-wrapper {
   width: 100%;
 }
 

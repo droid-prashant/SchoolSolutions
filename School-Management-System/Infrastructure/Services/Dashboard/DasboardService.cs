@@ -105,10 +105,10 @@ namespace Infrastructure.Services.Dashboard
                 .ToList();
         }
 
-        public async Task<DashboardOverviewViewModel> GetOverview(CancellationToken cancellationToken)
+        public async Task<DashboardOverviewViewModel> GetOverview(DashboardOverviewQueryViewModel query, CancellationToken cancellationToken)
         {
             var currentAcademicYearId = GetCurrentAcademicYearId();
-            var periods = GetDatePeriods();
+            var periods = GetDatePeriods(query);
             var permissions = BuildPermissions();
 
             var overview = new DashboardOverviewViewModel
@@ -116,6 +116,15 @@ namespace Infrastructure.Services.Dashboard
                 AcademicYearId = currentAcademicYearId.ToString(),
                 UserName = _userResolver.UserName,
                 ServerDate = DateTime.UtcNow,
+                Period = new DashboardPeriodViewModel
+                {
+                    Key = periods.PeriodKey,
+                    Label = periods.PeriodLabel,
+                    FromDate = periods.RangeStartLocal.ToString("yyyy-MM-dd"),
+                    ToDate = periods.RangeEndLocalInclusive.ToString("yyyy-MM-dd"),
+                    FromDateNp = periods.FromDateNp,
+                    ToDateNp = periods.ToDateNp
+                },
                 Permissions = permissions
             };
 
@@ -155,7 +164,7 @@ namespace Infrastructure.Services.Dashboard
 
             if (permissions.CanViewExams)
             {
-                await FillExamOverviewAsync(overview, currentAcademicYearId, cancellationToken);
+                await FillExamOverviewAsync(overview, currentAcademicYearId, periods, cancellationToken);
             }
 
             if (permissions.CanViewNotices)
@@ -414,7 +423,7 @@ namespace Infrastructure.Services.Dashboard
             var academicYear = await _context.AcademicYears
                 .AsNoTracking()
                 .Where(x => x.Id == academicYearId)
-                .Select(x => new { x.YearName })
+                .Select(x => new { x.YearName, x.StartDateNp, x.EndDateNp, x.StartDateEn, x.EndDateEn })
                 .FirstOrDefaultAsync(cancellationToken);
 
             var school = await _context.Schools
@@ -426,6 +435,10 @@ namespace Infrastructure.Services.Dashboard
                 .FirstOrDefaultAsync(cancellationToken);
 
             overview.AcademicYearName = academicYear?.YearName ?? string.Empty;
+            overview.AcademicYearStartDateNp = academicYear?.StartDateNp ?? string.Empty;
+            overview.AcademicYearEndDateNp = academicYear?.EndDateNp ?? string.Empty;
+            overview.AcademicYearStartDateEn = academicYear?.StartDateEn ?? string.Empty;
+            overview.AcademicYearEndDateEn = academicYear?.EndDateEn ?? string.Empty;
             overview.SchoolName = school?.Name ?? string.Empty;
             overview.SchoolLogoUrl = school?.LogoUrl ?? string.Empty;
         }
@@ -444,7 +457,7 @@ namespace Infrastructure.Services.Dashboard
 
             overview.Summary.ActiveStudents = await activeEnrollmentQuery.CountAsync(cancellationToken);
             overview.Summary.NewAdmissionsThisMonth = await activeEnrollmentQuery
-                .CountAsync(x => x.EnrollmentDate >= periods.MonthStartUtc && x.EnrollmentDate < periods.NextMonthStartUtc, cancellationToken);
+                .CountAsync(x => x.EnrollmentDate >= periods.RangeStartUtc && x.EnrollmentDate < periods.RangeEndUtc, cancellationToken);
             overview.Summary.BusRequiredStudents = await activeEnrollmentQuery
                 .CountAsync(x => x.IsBusRequired, cancellationToken);
 
@@ -535,6 +548,7 @@ namespace Infrastructure.Services.Dashboard
                 .ToList();
 
             overview.Students.RecentAdmissions = await activeEnrollmentQuery
+                .Where(x => x.EnrollmentDate >= periods.RangeStartUtc && x.EnrollmentDate < periods.RangeEndUtc)
                 .OrderByDescending(x => x.EnrollmentDate)
                 .ThenByDescending(x => x.CreatedDate)
                 .Take(6)
@@ -595,6 +609,25 @@ namespace Infrastructure.Services.Dashboard
             overview.Attendance.TotalMarked = todayRows.Count;
             overview.Attendance.AttendancePercentage = CalculateAttendancePercentage(todayRows.Select(x => x.Status).ToList());
 
+            var periodStartEn = DateOnly.FromDateTime(periods.RangeStartLocal);
+            var periodEndEn = DateOnly.FromDateTime(periods.RangeEndLocalInclusive);
+            var periodRows = await _context.StudentAttendances
+                .AsNoTracking()
+                .Where(x => x.AcademicYearId == academicYearId &&
+                            x.AttendanceDateEn >= periodStartEn &&
+                            x.AttendanceDateEn <= periodEndEn &&
+                            !x.IsDeleted)
+                .Select(x => x.Status)
+                .ToListAsync(cancellationToken);
+
+            overview.Attendance.PeriodPresent = periodRows.Count(x => x == StudentAttendanceStatus.Present);
+            overview.Attendance.PeriodAbsent = periodRows.Count(x => x == StudentAttendanceStatus.Absent);
+            overview.Attendance.PeriodLate = periodRows.Count(x => x == StudentAttendanceStatus.Late);
+            overview.Attendance.PeriodLeave = periodRows.Count(x => x == StudentAttendanceStatus.Leave);
+            overview.Attendance.PeriodHalfDay = periodRows.Count(x => x == StudentAttendanceStatus.HalfDay);
+            overview.Attendance.PeriodTotalMarked = periodRows.Count;
+            overview.Attendance.PeriodAttendancePercentage = CalculateAttendancePercentage(periodRows);
+
             var attendedClassSectionIds = todayRows.Select(x => x.ClassSectionId).Distinct().ToHashSet();
             overview.Summary.AttendanceTakenToday = attendedClassSectionIds.Count;
             overview.Summary.ClassSectionsWithoutAttendance = Math.Max(activeClassSections.Count - attendedClassSectionIds.Count, 0);
@@ -633,7 +666,10 @@ namespace Infrastructure.Services.Dashboard
 
             overview.Attendance.RecentSubmissions = await _context.StudentAttendances
                 .AsNoTracking()
-                .Where(x => x.AcademicYearId == academicYearId && !x.IsDeleted)
+                .Where(x => x.AcademicYearId == academicYearId &&
+                            !x.IsDeleted &&
+                            x.AttendanceDateEn >= periodStartEn &&
+                            x.AttendanceDateEn <= periodEndEn)
                 .GroupBy(x => new
                 {
                     x.ClassSectionId,
@@ -676,7 +712,7 @@ namespace Infrastructure.Services.Dashboard
                 .SumAsync(x => x.AmountPaid, cancellationToken);
 
             overview.Fees.CollectedThisMonth = await CurrentPayments(academicYearId)
-                .Where(x => x.PaymentDate >= periods.MonthStartUtc && x.PaymentDate < periods.NextMonthStartUtc)
+                .Where(x => x.PaymentDate >= periods.RangeStartUtc && x.PaymentDate < periods.RangeEndUtc)
                 .SumAsync(x => x.AmountPaid, cancellationToken);
 
             overview.Summary.FeesCollectedToday = overview.Fees.CollectedToday;
@@ -685,22 +721,23 @@ namespace Infrastructure.Services.Dashboard
             overview.Summary.PendingFeeStudents = overview.Fees.PendingStudents;
 
             var monthlyPayments = await CurrentPayments(academicYearId)
-                .Where(x => x.PaymentDate >= periods.SixMonthStartUtc && x.PaymentDate < periods.NextMonthStartUtc)
+                .Where(x => x.PaymentDate >= periods.MonthBuckets.First().StartUtc &&
+                            x.PaymentDate < periods.MonthBuckets.Last().EndUtc)
                 .Select(x => new { x.PaymentDate, x.AmountPaid })
                 .ToListAsync(cancellationToken);
 
-            overview.Fees.MonthlyCollection = Enumerable.Range(0, 6)
-                .Select(x => periods.SixMonthStartNepal.AddMonths(x))
-                .Select(month => new DashboardMonthlyAmountViewModel
+            overview.Fees.MonthlyCollection = periods.MonthBuckets
+                .Select(bucket => new DashboardMonthlyAmountViewModel
                 {
-                    Month = month.ToString("MMM yyyy", CultureInfo.InvariantCulture),
+                    Month = bucket.Label,
                     Amount = monthlyPayments
-                        .Where(payment => IsInNepalMonth(payment.PaymentDate, month))
+                        .Where(payment => payment.PaymentDate >= bucket.StartUtc && payment.PaymentDate < bucket.EndUtc)
                         .Sum(payment => payment.AmountPaid)
                 })
                 .ToList();
 
             overview.Fees.RecentPayments = await CurrentPayments(academicYearId)
+                .Where(x => x.PaymentDate >= periods.RangeStartUtc && x.PaymentDate < periods.RangeEndUtc)
                 .OrderByDescending(x => x.PaymentDate)
                 .Take(6)
                 .Select(x => new DashboardRecentPaymentViewModel
@@ -728,14 +765,20 @@ namespace Infrastructure.Services.Dashboard
                 .ToList();
         }
 
-        private async Task FillExamOverviewAsync(DashboardOverviewViewModel overview, Guid academicYearId, CancellationToken cancellationToken)
+        private async Task FillExamOverviewAsync(
+            DashboardOverviewViewModel overview,
+            Guid academicYearId,
+            DashboardDatePeriods periods,
+            CancellationToken cancellationToken)
         {
             var resultQuery = _context.ExamResults
                 .AsNoTracking()
                 .Where(x => x.StudentEnrollment.AcademicYearId == academicYearId &&
                             !x.IsDeleted &&
                             !x.StudentEnrollment.IsDeleted &&
-                            !x.StudentEnrollment.Student.IsDeleted);
+                            !x.StudentEnrollment.Student.IsDeleted &&
+                            x.CreatedDate >= periods.RangeStartUtc &&
+                            x.CreatedDate < periods.RangeEndUtc);
 
             overview.Exams.RecentResultCount = await resultQuery.CountAsync(cancellationToken);
             overview.Exams.AverageGpa = Math.Round(
@@ -779,14 +822,16 @@ namespace Infrastructure.Services.Dashboard
             overview.Notices.NoticesThisMonth = await _context.Notices
                 .AsNoTracking()
                 .CountAsync(x => !x.IsDeleted &&
-                                 x.NoticeDate >= periods.MonthStartUtc &&
-                                 x.NoticeDate < periods.NextMonthStartUtc, cancellationToken);
+                                 x.NoticeDate >= periods.RangeStartUtc &&
+                                 x.NoticeDate < periods.RangeEndUtc, cancellationToken);
 
             overview.Summary.NoticesThisMonth = overview.Notices.NoticesThisMonth;
 
             overview.Notices.Recent = await _context.Notices
                 .AsNoTracking()
-                .Where(x => !x.IsDeleted)
+                .Where(x => !x.IsDeleted &&
+                            x.NoticeDate >= periods.RangeStartUtc &&
+                            x.NoticeDate < periods.RangeEndUtc)
                 .OrderByDescending(x => x.NoticeDate)
                 .Take(6)
                 .Select(x => new DashboardNoticeViewModel
@@ -959,22 +1004,38 @@ namespace Infrastructure.Services.Dashboard
             return _userResolver.GetAcademicYearGuidOrThrow();
         }
 
-        private static DashboardDatePeriods GetDatePeriods()
+        private static DashboardDatePeriods GetDatePeriods(DashboardOverviewQueryViewModel? query = null)
         {
             var nepalNow = DateTime.UtcNow.Add(NepalOffset);
             var todayStartNepal = new DateTime(nepalNow.Year, nepalNow.Month, nepalNow.Day);
             var monthStartNepal = new DateTime(nepalNow.Year, nepalNow.Month, 1);
-            var sixMonthStartNepal = monthStartNepal.AddMonths(-5);
+            var rangeStartLocal = query?.FromDate?.Date ?? monthStartNepal;
+            var rangeEndLocalInclusive = query?.ToDate?.Date ?? monthStartNepal.AddMonths(1).AddDays(-1);
+
+            if (rangeEndLocalInclusive < rangeStartLocal)
+            {
+                rangeStartLocal = monthStartNepal;
+                rangeEndLocalInclusive = monthStartNepal.AddMonths(1).AddDays(-1);
+            }
+
+            var monthBuckets = ParseMonthBuckets(query?.MonthBuckets);
 
             return new DashboardDatePeriods
             {
+                PeriodKey = string.IsNullOrWhiteSpace(query?.PeriodKey) ? "this-month" : query.PeriodKey,
+                PeriodLabel = string.IsNullOrWhiteSpace(query?.PeriodLabel) ? "This Month" : query.PeriodLabel,
+                FromDateNp = query?.FromDateNp ?? string.Empty,
+                ToDateNp = query?.ToDateNp ?? string.Empty,
                 TodayEn = DateOnly.FromDateTime(nepalNow),
                 TodayStartUtc = NepalLocalDateToUtc(todayStartNepal),
                 TomorrowStartUtc = NepalLocalDateToUtc(todayStartNepal.AddDays(1)),
-                MonthStartUtc = NepalLocalDateToUtc(monthStartNepal),
-                NextMonthStartUtc = NepalLocalDateToUtc(monthStartNepal.AddMonths(1)),
-                SixMonthStartUtc = NepalLocalDateToUtc(sixMonthStartNepal),
-                SixMonthStartNepal = sixMonthStartNepal
+                RangeStartLocal = rangeStartLocal,
+                RangeEndLocalInclusive = rangeEndLocalInclusive,
+                RangeStartUtc = NepalLocalDateToUtc(rangeStartLocal),
+                RangeEndUtc = NepalLocalDateToUtc(rangeEndLocalInclusive.AddDays(1)),
+                MonthBuckets = monthBuckets.Count > 0
+                    ? monthBuckets
+                    : BuildFallbackMonthBuckets(monthStartNepal.AddMonths(-5), 6)
             };
         }
 
@@ -983,10 +1044,57 @@ namespace Infrastructure.Services.Dashboard
             return DateTime.SpecifyKind(nepalLocalDate.Date.Subtract(NepalOffset), DateTimeKind.Utc);
         }
 
-        private static bool IsInNepalMonth(DateTime utcDateTime, DateTime nepalMonth)
+        private static List<DashboardMonthBucket> ParseMonthBuckets(List<string>? rawBuckets)
         {
-            var nepalDateTime = utcDateTime.Add(NepalOffset);
-            return nepalDateTime.Year == nepalMonth.Year && nepalDateTime.Month == nepalMonth.Month;
+            if (rawBuckets is null || rawBuckets.Count == 0)
+            {
+                return [];
+            }
+
+            return rawBuckets
+                .Select(ParseMonthBucket)
+                .Where(x => x is not null)
+                .Select(x => x!)
+                .OrderBy(x => x.StartUtc)
+                .ToList();
+        }
+
+        private static DashboardMonthBucket? ParseMonthBucket(string rawBucket)
+        {
+            var parts = rawBucket.Split('|', StringSplitOptions.TrimEntries);
+            if (parts.Length != 3 ||
+                string.IsNullOrWhiteSpace(parts[0]) ||
+                !DateTime.TryParseExact(parts[1], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDate) ||
+                !DateTime.TryParseExact(parts[2], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var endDate) ||
+                endDate < startDate)
+            {
+                return null;
+            }
+
+            return new DashboardMonthBucket
+            {
+                Label = parts[0],
+                StartUtc = NepalLocalDateToUtc(startDate),
+                EndUtc = NepalLocalDateToUtc(endDate.Date.AddDays(1))
+            };
+        }
+
+        private static List<DashboardMonthBucket> BuildFallbackMonthBuckets(DateTime firstMonthLocal, int count)
+        {
+            return Enumerable.Range(0, count)
+                .Select(index =>
+                {
+                    var monthStart = firstMonthLocal.AddMonths(index);
+                    var nextMonthStart = monthStart.AddMonths(1);
+
+                    return new DashboardMonthBucket
+                    {
+                        Label = monthStart.ToString("MMM yyyy", CultureInfo.InvariantCulture),
+                        StartUtc = NepalLocalDateToUtc(monthStart),
+                        EndUtc = NepalLocalDateToUtc(nextMonthStart)
+                    };
+                })
+                .ToList();
         }
 
         private static bool MatchesActivityType(string? selectedType, string activityType)
@@ -1039,13 +1147,25 @@ namespace Infrastructure.Services.Dashboard
 
         private sealed class DashboardDatePeriods
         {
+            public string PeriodKey { get; set; } = "this-month";
+            public string PeriodLabel { get; set; } = "This Month";
+            public string FromDateNp { get; set; } = string.Empty;
+            public string ToDateNp { get; set; } = string.Empty;
             public DateOnly TodayEn { get; set; }
             public DateTime TodayStartUtc { get; set; }
             public DateTime TomorrowStartUtc { get; set; }
-            public DateTime MonthStartUtc { get; set; }
-            public DateTime NextMonthStartUtc { get; set; }
-            public DateTime SixMonthStartUtc { get; set; }
-            public DateTime SixMonthStartNepal { get; set; }
+            public DateTime RangeStartLocal { get; set; }
+            public DateTime RangeEndLocalInclusive { get; set; }
+            public DateTime RangeStartUtc { get; set; }
+            public DateTime RangeEndUtc { get; set; }
+            public List<DashboardMonthBucket> MonthBuckets { get; set; } = new();
+        }
+
+        private sealed class DashboardMonthBucket
+        {
+            public string Label { get; set; } = string.Empty;
+            public DateTime StartUtc { get; set; }
+            public DateTime EndUtc { get; set; }
         }
 
         private sealed class ActiveClassSectionRow

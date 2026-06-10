@@ -5,9 +5,14 @@ namespace Application.Dashboard.ViewModels
         public string UserName { get; set; } = string.Empty;
         public string AcademicYearId { get; set; } = string.Empty;
         public string AcademicYearName { get; set; } = string.Empty;
+        public string AcademicYearStartDateNp { get; set; } = string.Empty;
+        public string AcademicYearEndDateNp { get; set; } = string.Empty;
+        public string AcademicYearStartDateEn { get; set; } = string.Empty;
+        public string AcademicYearEndDateEn { get; set; } = string.Empty;
         public string SchoolName { get; set; } = string.Empty;
         public string SchoolLogoUrl { get; set; } = string.Empty;
         public DateTime ServerDate { get; set; }
+        public DashboardPeriodViewModel Period { get; set; } = new();
         public DashboardPermissionViewModel Permissions { get; set; } = new();
         public DashboardOverviewSummaryViewModel Summary { get; set; } = new();
         public DashboardAttendanceOverviewViewModel Attendance { get; set; } = new();
@@ -16,6 +21,16 @@ namespace Application.Dashboard.ViewModels
         public DashboardExamOverviewViewModel Exams { get; set; } = new();
         public DashboardNoticeOverviewViewModel Notices { get; set; } = new();
         public List<DashboardActivityViewModel> Activities { get; set; } = new();
+    }
+
+    public class DashboardPeriodViewModel
+    {
+        public string Key { get; set; } = "this-month";
+        public string Label { get; set; } = "This Month";
+        public string FromDate { get; set; } = string.Empty;
+        public string ToDate { get; set; } = string.Empty;
+        public string FromDateNp { get; set; } = string.Empty;
+        public string ToDateNp { get; set; } = string.Empty;
     }
 
     public class DashboardPermissionViewModel
@@ -63,6 +78,13 @@ namespace Application.Dashboard.ViewModels
         public int HalfDay { get; set; }
         public int TotalMarked { get; set; }
         public decimal AttendancePercentage { get; set; }
+        public int PeriodPresent { get; set; }
+        public int PeriodAbsent { get; set; }
+        public int PeriodLate { get; set; }
+        public int PeriodLeave { get; set; }
+        public int PeriodHalfDay { get; set; }
+        public int PeriodTotalMarked { get; set; }
+        public decimal PeriodAttendancePercentage { get; set; }
         public List<DashboardClassAttendanceViewModel> ClassWise { get; set; } = new();
         public List<DashboardRecentAttendanceViewModel> RecentSubmissions { get; set; } = new();
     }
@@ -219,6 +241,17 @@ namespace Application.Dashboard.ViewModels
         public string? Type { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+    }
+
+    public class DashboardOverviewQueryViewModel
+    {
+        public string? PeriodKey { get; set; }
+        public string? PeriodLabel { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public string? FromDateNp { get; set; }
+        public string? ToDateNp { get; set; }
+        public List<string> MonthBuckets { get; set; } = new();
     }
 
     public class DashboardActivityLogViewModel

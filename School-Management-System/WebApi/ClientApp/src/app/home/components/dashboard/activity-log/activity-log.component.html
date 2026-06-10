@@ -18,23 +18,29 @@
         </div>
 
         <div class="filter-field">
-            <label>From Date</label>
-            <p-calendar
-                [(ngModel)]="fromDate"
-                dateFormat="yy-mm-dd"
-                [showIcon]="true"
-                appendTo="body">
-            </p-calendar>
+            <label>From Date (BS)</label>
+            <app-np-datepicker
+                placeholder="From BS date"
+                [selectedDate]="fromDateBs"
+                selectedDateType="bs"
+                calendarVariant="bs"
+                [unicodeDate]="false"
+                [selectTodayOnInit]="false"
+                (dateChange)="onFromDateChange($event)">
+            </app-np-datepicker>
         </div>
 
         <div class="filter-field">
-            <label>To Date</label>
-            <p-calendar
-                [(ngModel)]="toDate"
-                dateFormat="yy-mm-dd"
-                [showIcon]="true"
-                appendTo="body">
-            </p-calendar>
+            <label>To Date (BS)</label>
+            <app-np-datepicker
+                placeholder="To BS date"
+                [selectedDate]="toDateBs"
+                selectedDateType="bs"
+                calendarVariant="bs"
+                [unicodeDate]="false"
+                [selectTodayOnInit]="false"
+                (dateChange)="onToDateChange($event)">
+            </app-np-datepicker>
         </div>
 
         <div class="filter-actions">
@@ -77,7 +83,7 @@
 
                 <time>
                     <strong>{{ getRelativeTime(activity.occurredAt) }}</strong>
-                    <span>{{ activity.occurredAt | date:'medium' }}</span>
+                    <span>{{ getNepaliDateTime(activity.occurredAt) }}</span>
                 </time>
             </article>
         </div>

@@ -26,6 +26,48 @@
 
 <ng-template #loadedDashboard>
     <div class="dashboard-page">
+        <section class="dashboard-toolbar">
+            <div class="period-copy">
+                <span>Dashboard Period</span>
+                <strong>{{ periodSummary || periodLabel }}</strong>
+            </div>
+
+            <div class="period-controls">
+                <p-dropdown
+                    [options]="periodOptions"
+                    [(ngModel)]="selectedPeriodKey"
+                    optionLabel="label"
+                    optionValue="value"
+                    appendTo="body"
+                    (onChange)="onPeriodChange()">
+                </p-dropdown>
+
+                <ng-container *ngIf="selectedPeriodKey === 'custom'">
+                    <app-np-datepicker
+                        placeholder="From BS"
+                        [selectedDate]="customFromBs"
+                        selectedDateType="bs"
+                        calendarVariant="bs"
+                        [unicodeDate]="false"
+                        [selectTodayOnInit]="false"
+                        (dateChange)="onCustomFromDateChange($event)">
+                    </app-np-datepicker>
+
+                    <app-np-datepicker
+                        placeholder="To BS"
+                        [selectedDate]="customToBs"
+                        selectedDateType="bs"
+                        calendarVariant="bs"
+                        [unicodeDate]="false"
+                        [selectTodayOnInit]="false"
+                        (dateChange)="onCustomToDateChange($event)">
+                    </app-np-datepicker>
+
+                    <button pButton pRipple type="button" icon="pi pi-check" label="Apply" (click)="applyCustomPeriod()"></button>
+                </ng-container>
+            </div>
+        </section>
+
         <section class="empty-panel" *ngIf="!hasAnyInsight">
             <i class="pi pi-lock"></i>
             <div>
@@ -54,7 +96,10 @@
         <section class="analytics-grid">
             <article class="dashboard-card attendance-card" *ngIf="overview?.permissions?.canViewAttendance">
                 <header class="card-header">
-                    <h2>Attendance Overview (Today)</h2>
+                    <div>
+                        <h2>Attendance Overview</h2>
+                        <span>Today snapshot + {{ periodLabel }}</span>
+                    </div>
                 </header>
 
                 <div class="attendance-layout" *ngIf="attendanceChartData; else attendanceEmpty">
@@ -80,6 +125,25 @@
                     </div>
                 </ng-template>
 
+                <div class="period-attendance" *ngIf="overview as dashboard">
+                    <div>
+                        <span>Period Avg</span>
+                        <strong>{{ dashboard.attendance.periodAttendancePercentage | number:'1.0-2' }}%</strong>
+                    </div>
+                    <div>
+                        <span>Present</span>
+                        <strong>{{ dashboard.attendance.periodPresent | number:'1.0-0' }}</strong>
+                    </div>
+                    <div>
+                        <span>Absent</span>
+                        <strong>{{ dashboard.attendance.periodAbsent | number:'1.0-0' }}</strong>
+                    </div>
+                    <div>
+                        <span>Marked</span>
+                        <strong>{{ dashboard.attendance.periodTotalMarked | number:'1.0-0' }}</strong>
+                    </div>
+                </div>
+
                 <footer class="attendance-alert" *ngIf="overview && overview.summary.classSectionsWithoutAttendance > 0">
                     <span>
                         <i class="pi pi-info-circle"></i>
@@ -91,7 +155,7 @@
 
             <article class="dashboard-card fee-card" *ngIf="overview?.permissions?.canViewFees">
                 <header class="card-header">
-                    <h2>Fee Collection Summary (This Month)</h2>
+                    <h2>Fee Collection Summary ({{ periodLabel }})</h2>
                 </header>
 
                 <div class="fee-summary" *ngIf="overview as dashboard">
@@ -112,7 +176,7 @@
                 <ng-template #feeEmpty>
                     <div class="panel-empty">
                         <i class="pi pi-wallet"></i>
-                        <span>No fee payments found for the recent months.</span>
+                        <span>No fee payments found for the selected Nepali period.</span>
                     </div>
                 </ng-template>
             </article>

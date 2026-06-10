@@ -14,7 +14,7 @@ namespace Application.Dashboard.Interfaces
         Task<int> GetTeachersCount(CancellationToken cancellationToken);
         Task<DashboardSummaryViewModel> GetDashboardSummary(CancellationToken cancellationToken);
         Task<List<StudentsByClassViewModel>> GetStudentsByClass(CancellationToken cancellationToken);
-        Task<DashboardOverviewViewModel> GetOverview(CancellationToken cancellationToken);
+        Task<DashboardOverviewViewModel> GetOverview(DashboardOverviewQueryViewModel query, CancellationToken cancellationToken);
         Task<DashboardActivityLogViewModel> GetActivities(DashboardActivityQueryViewModel query, CancellationToken cancellationToken);
     }
 }
