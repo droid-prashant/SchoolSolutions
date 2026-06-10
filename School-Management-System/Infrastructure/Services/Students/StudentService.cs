@@ -475,6 +475,10 @@ namespace Infrastructure.Services.Students
                     .ThenInclude(x => x.StudentEnrollments)
                         .ThenInclude(x => x.ClassSection)
                             .ThenInclude(x => x.ClassRoom)
+                .Include(x => x.Student)
+                    .ThenInclude(x => x.StudentEnrollments)
+                        .ThenInclude(x => x.ClassSection)
+                            .ThenInclude(x => x.Section)
                 .Include(x => x.ClassSection)
                     .ThenInclude(x => x.ClassRoom)
                 .Include(x => x.ClassSection)
@@ -500,14 +504,15 @@ namespace Infrastructure.Services.Students
                     .FirstOrDefault();
 
                 var evaluation = EvaluatePromotionStatus(latestResult);
-                var targetClassName = nextClassSection?.ClassRoom?.Name ?? nextClass?.Name ?? string.Empty;
-                var targetSectionName = nextClassSection?.Section?.Name ?? string.Empty;
                 var hasTarget = nextClassSection != null;
-                var isAlreadyPromoted = targetAcademicYearGuid.HasValue &&
-                    enrollment.Student.StudentEnrollments.Any(x =>
-                        x.Id != enrollment.Id &&
-                        x.AcademicYearId == targetAcademicYearGuid.Value &&
-                        !x.IsDeleted);
+                var promotedEnrollment = ResolvePromotedEnrollment(
+                    enrollment,
+                    currentAcademicYearId,
+                    targetAcademicYearGuid,
+                    currentClassSection.ClassRoom.OrderNumber);
+                var isAlreadyPromoted = promotedEnrollment != null || enrollment.IsPromoted;
+                var targetClassName = promotedEnrollment?.ClassSection?.ClassRoom?.Name ?? string.Empty;
+                var targetSectionName = promotedEnrollment?.ClassSection?.Section?.Name ?? string.Empty;
                 var isPromotable = evaluation.IsPassed && hasTarget && !isAlreadyPromoted;
                 var resultStatus = isAlreadyPromoted ? "Promoted" : evaluation.Status;
 
@@ -730,7 +735,11 @@ namespace Infrastructure.Services.Students
                     }
 
                     var alreadyEnrolled = await _context.StudentEnrollments
-                        .AnyAsync(x => x.StudentId == enrollment.StudentId && x.AcademicYearId == targetAcademicYear.Id, cancellationToken);
+                        .AnyAsync(x =>
+                            x.StudentId == enrollment.StudentId &&
+                            x.AcademicYearId == targetAcademicYear.Id &&
+                            !x.IsDeleted,
+                            cancellationToken);
 
                     if (alreadyEnrolled)
                     {
@@ -805,11 +814,36 @@ namespace Infrastructure.Services.Students
             return ("Passed", true);
         }
 
+        private static StudentEnrollment? ResolvePromotedEnrollment(
+            StudentEnrollment enrollment,
+            Guid currentAcademicYearId,
+            Guid? targetAcademicYearGuid,
+            int currentClassOrderNumber)
+        {
+            var promotedEnrollments = enrollment.Student.StudentEnrollments
+                .Where(x =>
+                    x.Id != enrollment.Id &&
+                    !x.IsDeleted &&
+                    x.ClassSection?.ClassRoom != null);
+
+            promotedEnrollments = targetAcademicYearGuid.HasValue
+                ? promotedEnrollments.Where(x => x.AcademicYearId == targetAcademicYearGuid.Value)
+                : promotedEnrollments.Where(x =>
+                    x.AcademicYearId != currentAcademicYearId &&
+                    x.ClassSection.ClassRoom.OrderNumber > currentClassOrderNumber);
+
+            return promotedEnrollments
+                .OrderByDescending(x => x.IsActive)
+                .ThenByDescending(x => x.ClassSection.ClassRoom.OrderNumber)
+                .ThenByDescending(x => x.CreatedDate)
+                .FirstOrDefault();
+        }
+
         private static string GetPromotionRemarks(string status, bool hasTarget, ClassRoom? nextClass, bool alreadyPromoted)
         {
             if (alreadyPromoted)
             {
-                return "Student already has an enrollment in the selected target academic year.";
+                return "Student has already been promoted.";
             }
 
             if (status == "No Result")

@@ -8,6 +8,7 @@ import { AcademicViewModel } from '../../master-entry/model/viewModels/academicY
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ClassRoomViewModel } from '../../class-room/shared/models/viewModels/classRoom.viewModel';
 import { SectionViewModel } from '../../class-room/shared/models/viewModels/section.viewModel';
+import { PromotionExecutionResultViewModel } from '../shared/models/viewModels/promotionExecutionResult.viewModel';
 
 @Component({
   selector: 'app-promotion-preview',
@@ -34,6 +35,7 @@ export class PromotionPreviewComponent implements OnInit {
   manualTargetClassId: string | null = null;
   manualTargetClassSectionId: string | null = null;
   lastFilter: FilterSelection | null = null;
+  tableFirst: number = 0;
 
   constructor(
     private _apiService: ApiService,
@@ -66,12 +68,17 @@ export class PromotionPreviewComponent implements OnInit {
     });
   }
 
-  onLoadCandidates(filter: FilterSelection) {
+  onLoadCandidates(filter: FilterSelection, preserveSelection: boolean = false) {
+    const selectedEnrollmentIds = preserveSelection
+      ? new Set(this.selectedCandidates.map(x => x.studentEnrollmentId))
+      : new Set<string>();
+
     this.lastFilter = filter;
     this.candidates = [];
     this.selectedCandidates = [];
     this.hasLoadedCandidates = false;
     this.visibilityFilter = 'all';
+    this.tableFirst = 0;
     this.resetManualTarget();
 
     if (!filter.classSectionId || !filter.examType) {
@@ -81,6 +88,7 @@ export class PromotionPreviewComponent implements OnInit {
     this._apiService.getPromotionCandidates(filter.classSectionId, filter.examType, this.targetAcademicYearId).subscribe({
       next: (response) => {
         this.candidates = response;
+        this.restoreSelectedCandidates(selectedEnrollmentIds);
         this.hasLoadedCandidates = true;
       },
       error: (err) => {
@@ -155,8 +163,18 @@ export class PromotionPreviewComponent implements OnInit {
 
   setVisibilityFilter(filter: 'all' | 'promotable' | 'notPromotable'): void {
     this.visibilityFilter = filter;
+    this.tableFirst = 0;
     const visibleIds = new Set(this.visibleCandidates.map(x => x.studentEnrollmentId));
-    this.selectedCandidates = this.selectedCandidates.filter(x => visibleIds.has(x.studentEnrollmentId));
+    this.selectedCandidates = this.selectedCandidates.filter(x => visibleIds.has(x.studentEnrollmentId) && !x.isAlreadyPromoted);
+  }
+
+  onTablePage(event: { first?: number }): void {
+    this.tableFirst = event.first ?? 0;
+  }
+
+  onSelectionChange(selection: PromotionCandidateViewModel[] | PromotionCandidateViewModel | null): void {
+    const selectedCandidates = Array.isArray(selection) ? selection : selection ? [selection] : [];
+    this.selectedCandidates = this.getSelectableCandidates(selectedCandidates);
   }
 
   sustainSelected(): void {
@@ -190,9 +208,8 @@ export class PromotionPreviewComponent implements OnInit {
   }
 
   onTargetAcademicYearChange(): void {
-    this.selectedCandidates = [];
     if (this.hasLoadedCandidates && this.lastFilter?.classSectionId && this.lastFilter.examType) {
-      this.onLoadCandidates(this.lastFilter);
+      this.onLoadCandidates(this.lastFilter, true);
     }
   }
 
@@ -299,7 +316,7 @@ export class PromotionPreviewComponent implements OnInit {
             this._messageService.add({
               severity: 'success',
               summary: 'Promotion Completed',
-              detail: `${response.promotedCount} student${response.promotedCount === 1 ? '' : 's'} promoted to ${response.targetAcademicYearName}. ${response.skippedCount} skipped.`
+              detail: `${response.promotedCount} student${response.promotedCount === 1 ? '' : 's'} promoted to ${response.targetAcademicYearName}. ${this.getPromotionSkipSummary(response)}`
             });
             this.selectedCandidates = [];
             if (this.lastFilter) {
@@ -362,7 +379,7 @@ export class PromotionPreviewComponent implements OnInit {
             this._messageService.add({
               severity: 'success',
               summary: 'Sustain Completed',
-              detail: `${response.promotedCount} student${response.promotedCount === 1 ? '' : 's'} sustained in ${response.targetAcademicYearName}. ${response.skippedCount} skipped.`
+              detail: `${response.promotedCount} student${response.promotedCount === 1 ? '' : 's'} sustained in ${response.targetAcademicYearName}. ${this.getPromotionSkipSummary(response)}`
             });
             this.selectedCandidates = [];
             if (this.lastFilter) {
@@ -412,7 +429,7 @@ export class PromotionPreviewComponent implements OnInit {
             this._messageService.add({
               severity: 'success',
               summary: 'Manual Promotion Completed',
-              detail: `${response.promotedCount} student${response.promotedCount === 1 ? '' : 's'} manually promoted to ${response.targetAcademicYearName}. ${response.skippedCount} skipped.`
+              detail: `${response.promotedCount} student${response.promotedCount === 1 ? '' : 's'} manually promoted to ${response.targetAcademicYearName}. ${this.getPromotionSkipSummary(response)}`
             });
             this.selectedCandidates = [];
             if (this.lastFilter) {
@@ -444,5 +461,49 @@ export class PromotionPreviewComponent implements OnInit {
     this.selectedCandidates = [];
     this.hasLoadedCandidates = false;
     this.visibilityFilter = 'all';
+    this.tableFirst = 0;
+  }
+
+  private restoreSelectedCandidates(selectedEnrollmentIds: Set<string>): void {
+    if (selectedEnrollmentIds.size === 0) {
+      return;
+    }
+
+    this.selectedCandidates = this.getSelectableCandidates(
+      this.candidates.filter(candidate => selectedEnrollmentIds.has(candidate.studentEnrollmentId))
+    );
+  }
+
+  private getSelectableCandidates(selection: PromotionCandidateViewModel[]): PromotionCandidateViewModel[] {
+    if (selection.length === 0) {
+      return [];
+    }
+
+    const selectedEnrollmentIds = new Set(selection.map(x => x.studentEnrollmentId));
+    const visibleIds = new Set(this.visibleCandidates.map(x => x.studentEnrollmentId));
+    return this.candidates.filter(candidate =>
+      selectedEnrollmentIds.has(candidate.studentEnrollmentId) &&
+      visibleIds.has(candidate.studentEnrollmentId) &&
+      !candidate.isAlreadyPromoted
+    );
+  }
+
+  private getPromotionSkipSummary(response: PromotionExecutionResultViewModel): string {
+    if (response.skippedCount === 0) {
+      return 'No students skipped.';
+    }
+
+    const reasons: string[] = [];
+    if (response.alreadyEnrolledCount > 0) {
+      reasons.push(`${response.alreadyEnrolledCount} already enrolled`);
+    }
+    if (response.notEligibleCount > 0) {
+      reasons.push(`${response.notEligibleCount} not eligible`);
+    }
+    if (response.missingTargetCount > 0) {
+      reasons.push(`${response.missingTargetCount} missing target`);
+    }
+
+    return `${response.skippedCount} skipped${reasons.length ? ` (${reasons.join(', ')})` : ''}.`;
   }
 }

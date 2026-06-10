@@ -166,10 +166,13 @@
       #promotionTable
       *ngIf="hasLoadedCandidates"
       [value]="visibleCandidates"
-      [(selection)]="selectedCandidates"
+      [selection]="selectedCandidates"
+      (selectionChange)="onSelectionChange($event)"
       dataKey="studentEnrollmentId"
       styleClass="app-grid-table"
       [paginator]="true"
+      [first]="tableFirst"
+      (onPage)="onTablePage($event)"
       [rows]="20"
       [rowsPerPageOptions]="[20, 50, 100]"
       [scrollable]="true"
@@ -191,25 +194,28 @@
 
       <ng-template pTemplate="header">
         <tr>
-          <th style="width: 4rem;">
+          <th class="promotion-selection-column">
             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
           </th>
-          <th pSortableColumn="rollNumber">Roll <p-sortIcon field="rollNumber"></p-sortIcon></th>
+          <th class="promotion-roll-column" pSortableColumn="rollNumber">Roll <p-sortIcon field="rollNumber"></p-sortIcon></th>
           <th pSortableColumn="studentName">Student <p-sortIcon field="studentName"></p-sortIcon></th>
           <th>Current</th>
           <th pSortableColumn="resultStatus">Result <p-sortIcon field="resultStatus"></p-sortIcon></th>
           <th>Promotion</th>
-          <th>Target</th>
+          <th>Promoted To</th>
           <th>Remarks</th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-candidate>
         <tr>
-          <td>
-            <p-tableCheckbox [value]="candidate" [disabled]="candidate.isAlreadyPromoted"></p-tableCheckbox>
+          <td class="promotion-selection-column">
+            <p-tableCheckbox
+              [value]="candidate"
+              [disabled]="candidate.isAlreadyPromoted">
+            </p-tableCheckbox>
           </td>
-          <td class="promotion-cell-center">{{ candidate.rollNumber ?? '-' }}</td>
+          <td class="promotion-cell-center promotion-roll-column">{{ candidate.rollNumber ?? '-' }}</td>
           <td class="promotion-student-cell">{{ candidate.studentName }}</td>
           <td>{{ candidate.currentClassName }} - {{ candidate.currentSectionName }}</td>
           <td>
