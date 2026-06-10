@@ -167,6 +167,248 @@ namespace Infrastructure.Services.Dashboard
             return overview;
         }
 
+        public async Task<DashboardActivityLogViewModel> GetActivities(DashboardActivityQueryViewModel query, CancellationToken cancellationToken)
+        {
+            var currentAcademicYearId = GetCurrentAcademicYearId();
+            var permissions = BuildPermissions();
+            var page = Math.Max(query.Page, 1);
+            var pageSize = Math.Clamp(query.PageSize <= 0 ? 20 : query.PageSize, 1, 100);
+            var skip = (page - 1) * pageSize;
+            var fetchCount = skip + pageSize;
+            var fromUtc = query.FromDate.HasValue ? NepalLocalDateToUtc(query.FromDate.Value.Date) : (DateTime?)null;
+            var toUtc = query.ToDate.HasValue ? NepalLocalDateToUtc(query.ToDate.Value.Date.AddDays(1)) : (DateTime?)null;
+            var totalCount = 0;
+            var activities = new List<DashboardActivityViewModel>();
+
+            if (permissions.CanViewStudents && MatchesActivityType(query.Type, "Student"))
+            {
+                var admissionsQuery = CurrentActiveEnrollments(currentAcademicYearId);
+                if (fromUtc.HasValue)
+                {
+                    admissionsQuery = admissionsQuery.Where(x => x.EnrollmentDate >= fromUtc.Value);
+                }
+
+                if (toUtc.HasValue)
+                {
+                    admissionsQuery = admissionsQuery.Where(x => x.EnrollmentDate < toUtc.Value);
+                }
+
+                totalCount += await admissionsQuery.CountAsync(cancellationToken);
+
+                var admissions = await admissionsQuery
+                    .OrderByDescending(x => x.EnrollmentDate)
+                    .Take(fetchCount)
+                    .Select(x => new
+                    {
+                        StudentName = (x.Student.FirstName + " " + x.Student.LastName).Trim(),
+                        ClassName = x.ClassSection.ClassRoom.Name,
+                        SectionName = x.ClassSection.Section.Name,
+                        x.EnrollmentDate
+                    })
+                    .ToListAsync(cancellationToken);
+
+                activities.AddRange(admissions.Select(x => new DashboardActivityViewModel
+                {
+                    Type = "Student",
+                    Title = "New student admitted",
+                    Description = $"{x.StudentName} in {x.ClassName} - {x.SectionName}",
+                    Icon = "pi pi-user-plus",
+                    Severity = "success",
+                    OccurredAt = x.EnrollmentDate
+                }));
+            }
+
+            if (permissions.CanViewAttendance && MatchesActivityType(query.Type, "Attendance"))
+            {
+                var attendanceQuery = _context.StudentAttendances
+                    .AsNoTracking()
+                    .Where(x => x.AcademicYearId == currentAcademicYearId && !x.IsDeleted)
+                    .GroupBy(x => new
+                    {
+                        x.ClassSectionId,
+                        ClassName = x.ClassSection.ClassRoom.Name,
+                        SectionName = x.ClassSection.Section.Name,
+                        x.AttendanceDateEn,
+                        x.AttendanceDateNp
+                    })
+                    .Select(g => new
+                    {
+                        g.Key.ClassName,
+                        g.Key.SectionName,
+                        g.Key.AttendanceDateEn,
+                        g.Key.AttendanceDateNp,
+                        RecordedCount = g.Count(),
+                        SubmittedAt = g.Max(x => x.CreatedDate)
+                    });
+
+                if (fromUtc.HasValue)
+                {
+                    attendanceQuery = attendanceQuery.Where(x => x.SubmittedAt >= fromUtc.Value);
+                }
+
+                if (toUtc.HasValue)
+                {
+                    attendanceQuery = attendanceQuery.Where(x => x.SubmittedAt < toUtc.Value);
+                }
+
+                totalCount += await attendanceQuery.CountAsync(cancellationToken);
+
+                var attendanceRows = await attendanceQuery
+                    .OrderByDescending(x => x.SubmittedAt)
+                    .Take(fetchCount)
+                    .ToListAsync(cancellationToken);
+
+                activities.AddRange(attendanceRows.Select(x => new DashboardActivityViewModel
+                {
+                    Type = "Attendance",
+                    Title = "Attendance submitted",
+                    Description = $"{x.ClassName} - {x.SectionName}: {x.RecordedCount} attendance records",
+                    Icon = "pi pi-check-square",
+                    Severity = "primary",
+                    OccurredAt = x.SubmittedAt
+                }));
+            }
+
+            if (permissions.CanViewFees && MatchesActivityType(query.Type, "Fee"))
+            {
+                var paymentsQuery = CurrentPayments(currentAcademicYearId);
+                if (fromUtc.HasValue)
+                {
+                    paymentsQuery = paymentsQuery.Where(x => x.PaymentDate >= fromUtc.Value);
+                }
+
+                if (toUtc.HasValue)
+                {
+                    paymentsQuery = paymentsQuery.Where(x => x.PaymentDate < toUtc.Value);
+                }
+
+                totalCount += await paymentsQuery.CountAsync(cancellationToken);
+
+                var payments = await paymentsQuery
+                    .OrderByDescending(x => x.PaymentDate)
+                    .Take(fetchCount)
+                    .Select(x => new
+                    {
+                        StudentName = (x.StudentFee.StudentEnrollment.Student.FirstName + " " + x.StudentFee.StudentEnrollment.Student.LastName).Trim(),
+                        ClassName = x.StudentFee.StudentEnrollment.ClassSection.ClassRoom.Name,
+                        SectionName = x.StudentFee.StudentEnrollment.ClassSection.Section.Name,
+                        Amount = x.AmountPaid,
+                        x.Method,
+                        x.PaymentDate
+                    })
+                    .ToListAsync(cancellationToken);
+
+                activities.AddRange(payments.Select(x => new DashboardActivityViewModel
+                {
+                    Type = "Fee",
+                    Title = "Fee payment received",
+                    Description = $"Rs {x.Amount:N0} from {x.StudentName} ({x.ClassName} - {x.SectionName}) through {x.Method}",
+                    Icon = "pi pi-wallet",
+                    Severity = "info",
+                    OccurredAt = x.PaymentDate
+                }));
+            }
+
+            if (permissions.CanViewExams && MatchesActivityType(query.Type, "Exam"))
+            {
+                var resultsQuery = _context.ExamResults
+                    .AsNoTracking()
+                    .Where(x => x.StudentEnrollment.AcademicYearId == currentAcademicYearId &&
+                                !x.IsDeleted &&
+                                !x.StudentEnrollment.IsDeleted &&
+                                !x.StudentEnrollment.Student.IsDeleted);
+
+                if (fromUtc.HasValue)
+                {
+                    resultsQuery = resultsQuery.Where(x => x.CreatedDate >= fromUtc.Value);
+                }
+
+                if (toUtc.HasValue)
+                {
+                    resultsQuery = resultsQuery.Where(x => x.CreatedDate < toUtc.Value);
+                }
+
+                totalCount += await resultsQuery.CountAsync(cancellationToken);
+
+                var results = await resultsQuery
+                    .OrderByDescending(x => x.CreatedDate)
+                    .Take(fetchCount)
+                    .Select(x => new
+                    {
+                        StudentName = (x.StudentEnrollment.Student.FirstName + " " + x.StudentEnrollment.Student.LastName).Trim(),
+                        ClassName = x.StudentEnrollment.ClassSection.ClassRoom.Name,
+                        SectionName = x.StudentEnrollment.ClassSection.Section.Name,
+                        x.ExamType,
+                        x.GPA,
+                        x.CreatedDate
+                    })
+                    .ToListAsync(cancellationToken);
+
+                activities.AddRange(results.Select(x => new DashboardActivityViewModel
+                {
+                    Type = "Exam",
+                    Title = "Marks entered",
+                    Description = $"{GetExamTypeName(x.ExamType)} result for {x.StudentName} ({x.ClassName} - {x.SectionName}), GPA {x.GPA:N2}",
+                    Icon = "pi pi-chart-line",
+                    Severity = "warning",
+                    OccurredAt = x.CreatedDate
+                }));
+            }
+
+            if (permissions.CanViewNotices && MatchesActivityType(query.Type, "Notice"))
+            {
+                var noticesQuery = _context.Notices
+                    .AsNoTracking()
+                    .Where(x => !x.IsDeleted);
+
+                if (fromUtc.HasValue)
+                {
+                    noticesQuery = noticesQuery.Where(x => x.NoticeDate >= fromUtc.Value);
+                }
+
+                if (toUtc.HasValue)
+                {
+                    noticesQuery = noticesQuery.Where(x => x.NoticeDate < toUtc.Value);
+                }
+
+                totalCount += await noticesQuery.CountAsync(cancellationToken);
+
+                var notices = await noticesQuery
+                    .OrderByDescending(x => x.NoticeDate)
+                    .Take(fetchCount)
+                    .Select(x => new
+                    {
+                        x.Title,
+                        x.IsPublished,
+                        x.NoticeDate
+                    })
+                    .ToListAsync(cancellationToken);
+
+                activities.AddRange(notices.Select(x => new DashboardActivityViewModel
+                {
+                    Type = "Notice",
+                    Title = x.IsPublished ? "Notice published" : "Notice drafted",
+                    Description = x.Title,
+                    Icon = "pi pi-send",
+                    Severity = x.IsPublished ? "success" : "warning",
+                    OccurredAt = x.NoticeDate
+                }));
+            }
+
+            return new DashboardActivityLogViewModel
+            {
+                Items = activities
+                    .Where(x => x.OccurredAt != default)
+                    .OrderByDescending(x => x.OccurredAt)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         private async Task FillHeaderAsync(DashboardOverviewViewModel overview, Guid academicYearId, CancellationToken cancellationToken)
         {
             var academicYear = await _context.AcademicYears
@@ -745,6 +987,17 @@ namespace Infrastructure.Services.Dashboard
         {
             var nepalDateTime = utcDateTime.Add(NepalOffset);
             return nepalDateTime.Year == nepalMonth.Year && nepalDateTime.Month == nepalMonth.Month;
+        }
+
+        private static bool MatchesActivityType(string? selectedType, string activityType)
+        {
+            if (string.IsNullOrWhiteSpace(selectedType) ||
+                selectedType.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return selectedType.Equals(activityType, StringComparison.OrdinalIgnoreCase);
         }
 
         private static decimal CalculateAttendancePercentage(List<StudentAttendanceStatus> statuses)

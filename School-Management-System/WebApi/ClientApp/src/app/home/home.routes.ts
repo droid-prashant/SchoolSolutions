@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { ActivityLogComponent } from './components/dashboard/activity-log/activity-log.component';
 import { AuthGuardService } from '../shared/authGuard.service';
 
 const routes: Routes = [
@@ -10,6 +11,7 @@ const routes: Routes = [
             [
                 { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
                 { path: "dashboard", component: DashboardComponent},
+                { path: "activity-log", component: ActivityLogComponent },
                 { path: "master-entry", loadChildren:()=>import('./components/master-entry/master-entry.module').then(m=>m.MasterEntryModule)},
                 { path: "student", loadChildren:()=>import('./components/student/student.module').then(m=>m.StudentModule)},
                 { path: "teacher", loadChildren:()=>import('./components/teacher/teacher.module').then(m=>m.TeacherModule)},

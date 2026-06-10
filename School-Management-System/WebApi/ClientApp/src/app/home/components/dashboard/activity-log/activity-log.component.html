@@ -1,0 +1,99 @@
+<div class="activity-log-page">
+    <app-page-header
+        section="Dashboard"
+        page="Activity Log"
+        subtitle="Review recent student, attendance, fee, notice, and exam activity.">
+    </app-page-header>
+
+    <section class="filter-card">
+        <div class="filter-field">
+            <label>Activity Type</label>
+            <p-dropdown
+                [options]="activityTypes"
+                [(ngModel)]="selectedType"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="All Activities">
+            </p-dropdown>
+        </div>
+
+        <div class="filter-field">
+            <label>From Date</label>
+            <p-calendar
+                [(ngModel)]="fromDate"
+                dateFormat="yy-mm-dd"
+                [showIcon]="true"
+                appendTo="body">
+            </p-calendar>
+        </div>
+
+        <div class="filter-field">
+            <label>To Date</label>
+            <p-calendar
+                [(ngModel)]="toDate"
+                dateFormat="yy-mm-dd"
+                [showIcon]="true"
+                appendTo="body">
+            </p-calendar>
+        </div>
+
+        <div class="filter-actions">
+            <button pButton pRipple type="button" icon="pi pi-search" label="Apply" (click)="applyFilters()"></button>
+            <button pButton pRipple type="button" icon="pi pi-refresh" label="Reset" class="p-button-outlined" (click)="resetFilters()"></button>
+        </div>
+    </section>
+
+    <section class="activity-card">
+        <header>
+            <div>
+                <h2>All Activities</h2>
+                <span>{{ totalRecords | number:'1.0-0' }} records found</span>
+            </div>
+            <a routerLink="/home/dashboard">Back to Dashboard</a>
+        </header>
+
+        <div class="error-state" *ngIf="errorMessage">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>{{ errorMessage }}</span>
+        </div>
+
+        <div class="loading-state" *ngIf="loading">
+            <p-skeleton height="4rem" *ngFor="let item of [1,2,3,4,5]; trackBy: trackByIndex"></p-skeleton>
+        </div>
+
+        <div class="activity-list" *ngIf="!loading && !errorMessage && activities.length > 0">
+            <article class="activity-row" [ngClass]="'tone-' + getTone(activity)" *ngFor="let activity of activities; trackBy: trackByIndex">
+                <span class="activity-icon">
+                    <i [class]="activity.icon || 'pi pi-clock'"></i>
+                </span>
+
+                <div class="activity-copy">
+                    <div class="activity-title">
+                        <strong>{{ activity.title }}</strong>
+                        <span>{{ activity.type }}</span>
+                    </div>
+                    <p>{{ activity.description }}</p>
+                </div>
+
+                <time>
+                    <strong>{{ getRelativeTime(activity.occurredAt) }}</strong>
+                    <span>{{ activity.occurredAt | date:'medium' }}</span>
+                </time>
+            </article>
+        </div>
+
+        <div class="empty-state" *ngIf="!loading && !errorMessage && activities.length === 0">
+            <i class="pi pi-inbox"></i>
+            <span>No activities found for the selected filters.</span>
+        </div>
+
+        <p-paginator
+            *ngIf="!loading && totalRecords > pageSize"
+            [first]="(page - 1) * pageSize"
+            [rows]="pageSize"
+            [totalRecords]="totalRecords"
+            [rowsPerPageOptions]="[10, 20, 50, 100]"
+            (onPageChange)="onPageChange($event)">
+        </p-paginator>
+    </section>
+</div>

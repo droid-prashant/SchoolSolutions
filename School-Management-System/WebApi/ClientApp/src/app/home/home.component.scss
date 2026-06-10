@@ -418,6 +418,53 @@
   width: 18rem;
 }
 
+.account-summary {
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 0.6rem 0.95rem;
+  margin-bottom: 0.55rem;
+  border-bottom: 1px solid #e5edf7;
+  text-align: center;
+}
+
+.account-meta {
+  display: grid;
+  gap: 0.3rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.account-meta h4,
+.account-meta p {
+  margin: 0;
+  overflow: hidden;
+  color: #132943;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-meta h4 {
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.account-meta p {
+  color: #667b95;
+  font-size: 0.82rem;
+}
+
+.account-meta span {
+  display: inline-flex;
+  justify-content: center;
+  padding: 0.16rem 0.48rem;
+  border-radius: 999px;
+  color: #2563eb;
+  background: #eef5ff;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
 .account-action-btn {
   justify-content: flex-start;
   width: 100%;
@@ -440,6 +487,16 @@
   color: #1d4ed8;
   background: #eaf1ff;
   font-weight: 800;
+}
+
+:host ::ng-deep .account-avatar {
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+:host ::ng-deep .account-avatar img {
+  object-fit: contain;
+  padding: 0.3rem;
 }
 
 .sidebar-collapsed {

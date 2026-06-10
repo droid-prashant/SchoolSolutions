@@ -211,4 +211,21 @@ namespace Application.Dashboard.ViewModels
         public string Severity { get; set; } = string.Empty;
         public DateTime OccurredAt { get; set; }
     }
+
+    public class DashboardActivityQueryViewModel
+    {
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+        public string? Type { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+    }
+
+    public class DashboardActivityLogViewModel
+    {
+        public List<DashboardActivityViewModel> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+    }
 }

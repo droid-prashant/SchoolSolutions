@@ -1,0 +1,205 @@
+:host {
+  display: block;
+  color: #10213a;
+}
+
+.activity-log-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.filter-card,
+.activity-card {
+  border: 1px solid #dfe8f5;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.filter-card {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr auto;
+  align-items: end;
+  gap: 0.9rem;
+  padding: 1rem;
+}
+
+.filter-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.filter-field label {
+  color: #213852;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep .filter-field .p-dropdown,
+:host ::ng-deep .filter-field .p-calendar,
+:host ::ng-deep .filter-field .p-inputtext {
+  width: 100%;
+}
+
+.activity-card {
+  padding: 1rem;
+}
+
+.activity-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.activity-card h2 {
+  margin: 0;
+  color: #12233d;
+  font-size: 1rem;
+}
+
+.activity-card header span,
+.activity-card a,
+.activity-copy p,
+.activity-title span,
+time span {
+  color: #667b95;
+  font-size: 0.78rem;
+}
+
+.activity-card a {
+  color: #2563eb;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.activity-list,
+.loading-state {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.82rem;
+  border: 1px solid #e8eef7;
+  border-radius: 0.5rem;
+  background: #fbfdff;
+}
+
+.activity-icon {
+  display: grid;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 0.5rem;
+  color: var(--tone);
+  background: var(--tone-bg);
+}
+
+.activity-copy,
+.activity-title strong,
+.activity-copy p {
+  min-width: 0;
+}
+
+.activity-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.activity-title strong,
+.activity-copy p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-title span {
+  flex: 0 0 auto;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  color: var(--tone);
+  background: var(--tone-bg);
+  font-weight: 800;
+}
+
+.activity-copy p {
+  margin: 0.25rem 0 0;
+}
+
+time {
+  display: grid;
+  gap: 0.2rem;
+  color: #12233d;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.empty-state,
+.error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 12rem;
+  color: #667b95;
+  border: 1px dashed #d6e2ef;
+  border-radius: 0.5rem;
+  background: #f8fbff;
+}
+
+.error-state {
+  min-height: 4rem;
+  margin-bottom: 0.8rem;
+  color: #b91c1c;
+  background: #fff5f5;
+}
+
+.tone-green {
+  --tone: #16a34a;
+  --tone-bg: #e8f8ee;
+}
+
+.tone-orange {
+  --tone: #f97316;
+  --tone-bg: #fff3e5;
+}
+
+.tone-red {
+  --tone: #dc2626;
+  --tone-bg: #fee2e2;
+}
+
+.tone-blue {
+  --tone: #2563eb;
+  --tone-bg: #eaf1ff;
+}
+
+.tone-purple {
+  --tone: #7c3aed;
+  --tone-bg: #f1e9ff;
+}
+
+@media (max-width: 980px) {
+  .filter-card,
+  .activity-row {
+    grid-template-columns: 1fr;
+  }
+
+  time {
+    text-align: left;
+  }
+}

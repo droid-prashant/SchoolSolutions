@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StudentDto, StudentStatusDto } from '../home/components/student/shared/models/dtos/student.dto';
 import { StudentViewModel } from '../home/components/student/shared/models/viewModels/student.viewModel';
@@ -46,6 +46,7 @@ import { DashboardSummaryViewModel } from '../home/components/dashboard/model/da
 import { PermissionViewModel, RoleDto, RolePermissionsDto, RoleViewModel, UserRolesDto, UserRolesViewModel, UserViewModel } from './common/models/security/role-permission.models';
 import { GuardianCreateDto, GuardianLinkedStudentViewModel, GuardianStudentAccessDto, GuardianStudentLinkDto, GuardianViewModel, StudentGuardianViewModel } from '../home/components/student/shared/models/guardian.models';
 import { DashboardOverviewViewModel } from '../home/components/dashboard/model/dashboardOverview.viewModel';
+import { DashboardActivityLogViewModel, DashboardActivityQuery } from '../home/components/dashboard/model/activityLog.viewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -72,6 +73,26 @@ export class ApiService {
 
   getDashboardOverview(): Observable<DashboardOverviewViewModel> {
     return this._httpClient.get<DashboardOverviewViewModel>(this.baseUrl + "api/Dashboard/overview");
+  }
+
+  getDashboardActivities(query: DashboardActivityQuery): Observable<DashboardActivityLogViewModel> {
+    let params = new HttpParams()
+      .set('page', query.page)
+      .set('pageSize', query.pageSize);
+
+    if (query.type) {
+      params = params.set('type', query.type);
+    }
+
+    if (query.fromDate) {
+      params = params.set('fromDate', query.fromDate);
+    }
+
+    if (query.toDate) {
+      params = params.set('toDate', query.toDate);
+    }
+
+    return this._httpClient.get<DashboardActivityLogViewModel>(this.baseUrl + "api/Dashboard/activities", { params });
   }
 
   getRoles(): Observable<RoleViewModel[]> {

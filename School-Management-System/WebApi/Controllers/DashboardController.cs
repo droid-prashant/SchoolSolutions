@@ -58,6 +58,14 @@ namespace WebApi.Controllers
             return await _dashboardService.GetOverview(cancellationToken);
         }
 
+        [HttpGet("activities")]
+        [HttpGet("GetActivities")]
+        [HasPermission]
+        public async Task<DashboardActivityLogViewModel> GetActivities([FromQuery] DashboardActivityQueryViewModel query, CancellationToken cancellationToken)
+        {
+            return await _dashboardService.GetActivities(query, cancellationToken);
+        }
+
         [HttpGet]
         [Route("GetStudentsByClass")]
         [HasPermission(PermissionNames.StudentView)]
